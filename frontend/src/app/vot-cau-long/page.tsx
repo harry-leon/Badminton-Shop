@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { queryDb } from '@/lib/db';
+import ProductCatalogGrid, { ProductItem } from './ProductCatalogGrid';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Vợt Cầu Lông Chính Hãng — Yonex, Lining, Victor | Smash Court',
@@ -35,80 +37,53 @@ export default async function RacketCatalogPage() {
      ORDER BY p.name ASC`
   );
 
-  const products = rows.map((p) => ({
+  const products: ProductItem[] = rows.map((p) => ({
     id: p.id,
     name: p.name,
     slug: p.slug,
     brand: p.brand ? p.brand.toUpperCase() : 'YONEX',
     playerType: p.player_type || 'Công thủ toàn diện',
     priceFrom: parseInt(p.price_from as string, 10),
-    imageUrl: p.image_url || 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800',
+    imageUrl: p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
   }));
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6">
-      {/* Breadcrumb */}
-      <nav className="text-xs text-slate-500 mb-6 flex items-center gap-2">
-        <a href="/" className="hover:underline">Trang chủ</a>
-        <span>/</span>
-        <span className="font-semibold text-slate-800">Vợt cầu lông</span>
-      </nav>
+    <div className="min-h-screen bg-[#F7F7F2]">
+      {/* Header Banner */}
+      <section className="bg-[#0F5132] text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-emerald-900/30">
+        <div className="max-w-7xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="text-xs text-emerald-200/70 mb-4 flex items-center gap-2">
+            <a href="/" className="hover:underline hover:text-white">Trang chủ</a>
+            <span>/</span>
+            <span className="font-bold text-white">Vợt cầu lông chính hãng</span>
+          </nav>
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
-        <div>
-          <h1 className="text-3xl font-extrabold text-emerald-950 tracking-tight">Vợt Cầu Lông Chính Hãng</h1>
-          <p className="text-slate-600 text-sm mt-1">
-            Dữ liệu trực tiếp từ PostgreSQL 18 catalog_db. Cam kết 100% chính hãng, bảo hành khung 12 tháng tại toàn bộ chi nhánh.
-          </p>
-        </div>
-        <div className="text-xs text-slate-500 font-medium">
-          Tìm thấy <span className="font-bold text-emerald-900">{products.length}</span> sản phẩm
-        </div>
-      </div>
-
-      {/* Grid sản phẩm */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <a
-            key={product.id}
-            href={`/vot-cau-long/${product.slug}`}
-            className="group bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-emerald-600 transition-all flex flex-col justify-between"
-          >
-            <div>
-              <div className="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-4 relative">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-                <span className="absolute top-2 left-2 bg-[#0F5132] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                  {product.brand}
-                </span>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 bg-[#C8F31D]/15 text-[#C8F31D] text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-[#C8F31D]/30">
+                <ShieldCheck className="w-3.5 h-3.5" /> 100% Chính Hãng Phân Phối
               </div>
-              <div className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider mb-1">
-                {product.playerType}
-              </div>
-              <h2 className="font-bold text-sm text-slate-900 group-hover:text-emerald-800 transition-colors line-clamp-2">
-                {product.name}
-              </h2>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+                Bộ Sưu Tập Vợt Cầu Lông Đỉnh Cao
+              </h1>
+              <p className="text-emerald-100/80 text-sm leading-relaxed">
+                Đầy đủ các dòng vợt thi đấu cao cấp nhất từ Yonex, Li-Ning, Victor. Dữ liệu kho thời gian thực kết nối trực tiếp PostgreSQL 18. Bảo hành khung 12 tháng tại 3 chi nhánh toàn quốc.
+              </p>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-slate-400 block">Giá từ</span>
-                <span className="text-base font-extrabold text-emerald-900">
-                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.priceFrom)}
-                </span>
-              </div>
-              <span className="text-xs font-semibold text-[#0F5132] group-hover:translate-x-1 transition-transform">
-                Xem chi tiết →
-              </span>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/15 self-start md:self-auto text-xs space-y-1">
+              <div className="text-emerald-200">Sẵn sàng phục vụ:</div>
+              <div className="text-[#C8F31D] font-black text-sm">{products.length} Mẫu Vợt Flagship</div>
             </div>
-          </a>
-        ))}
-      </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Catalog Grid with Filters */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <ProductCatalogGrid initialProducts={products} />
+      </main>
     </div>
   );
 }

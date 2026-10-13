@@ -154,7 +154,7 @@ DECLARE
 BEGIN
     -- Yonex Astrox 99 Pro
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ast99, 'yonex', 'cat_racket', 'Yonex Astrox 99 Pro Cherry Sunburst', 'yonex-astrox-99-pro', 'Cây vợt tấn công smash đỉnh cao của Kento Momota với thân đũa Extra Slim Shaft', 'Tấn công uy lực', 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800')
+    VALUES (p_ast99, 'yonex', 'cat_racket', 'Yonex Astrox 99 Pro Cherry Sunburst', 'yonex-astrox-99-pro', 'Cây vợt tấn công smash đỉnh cao của Kento Momota với thân đũa Extra Slim Shaft', 'Tấn công uy lực', '/images/products/yonex-astrox-99-pro.jpg')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-AX99PRO-3UG5', p_ast99, '3U', 'G5', 308, 'Cứng', 29, 4250000),
@@ -163,7 +163,7 @@ BEGIN
 
     -- Yonex Astrox 100ZZ
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ast100, 'yonex', 'cat_racket', 'Yonex Astrox 100ZZ Kurenai', 'yonex-astrox-100zz', 'Vợt thân siêu cứng, đũa Hyper Slim Shaft, sức mạnh huỷ diệt của Viktor Axelsen', 'Tấn công toàn diện', 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800')
+    VALUES (p_ast100, 'yonex', 'cat_racket', 'Yonex Astrox 100ZZ Kurenai', 'yonex-astrox-100zz', 'Vợt thân siêu cứng, đũa Hyper Slim Shaft, sức mạnh huỷ diệt của Viktor Axelsen', 'Tấn công toàn diện', '/images/products/yonex-astrox-100zz.png')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-AX100ZZ-3UG5', p_ast100, '3U', 'G5', 305, 'Rất cứng', 29, 4490000),
@@ -172,7 +172,7 @@ BEGIN
 
     -- Yonex Astrox 88D Pro
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ast88d, 'yonex', 'cat_racket', 'Yonex Astrox 88D Pro Gen 3', 'yonex-astrox-88d-pro', 'Chuyên gia cầu sau đánh đôi với khả năng đập cầu uy lực liên tục', 'Tấn công cầu sau', 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800')
+    VALUES (p_ast88d, 'yonex', 'cat_racket', 'Yonex Astrox 88D Pro Gen 3', 'yonex-astrox-88d-pro', 'Chuyên gia cầu sau đánh đôi với khả năng đập cầu uy lực liên tục', 'Tấn công cầu sau', '/images/products/yonex-astrox-88d-pro.png')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-AX88DPRO-3UG5', p_ast88d, '3U', 'G5', 302, 'Cứng', 29, 4150000),
@@ -181,7 +181,7 @@ BEGIN
 
     -- Yonex Astrox 88S Pro
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ast88s, 'yonex', 'cat_racket', 'Yonex Astrox 88S Pro Gen 3', 'yonex-astrox-88s-pro', 'Vợt bắt lưới và phản tạt cầu trước sắc bén trong đánh đôi', 'Phản tạt cầu trước', 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800')
+    VALUES (p_ast88s, 'yonex', 'cat_racket', 'Yonex Astrox 88S Pro Gen 3', 'yonex-astrox-88s-pro', 'Vợt bắt lưới và phản tạt cầu trước sắc bén trong đánh đôi', 'Phản tạt cầu trước', '/images/products/yonex-astrox-88s-pro.png')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-AX88SPRO-4UG5', p_ast88s, '4U', 'G5', 295, 'Cứng', 28, 4150000)
@@ -189,7 +189,7 @@ BEGIN
 
     -- Yonex Nanoflare 1000Z
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_nf1000, 'yonex', 'cat_racket', 'Yonex Nanoflare 1000Z Lightning Yellow', 'yonex-nanoflare-1000z', 'Cây vợt xác lập kỷ lục thế giới về tốc độ đập cầu với khung AERO Frame siêu tốc', 'Tốc độ phản tạt', 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800')
+    VALUES (p_nf1000, 'yonex', 'cat_racket', 'Yonex Nanoflare 1000Z Lightning Yellow', 'yonex-nanoflare-1000z', 'Cây vợt xác lập kỷ lục thế giới về tốc độ đập cầu với khung AERO Frame siêu tốc', 'Tốc độ phản tạt', '/images/products/yonex-nanoflare-1000z.png')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-NF1000Z-3UG5', p_nf1000, '3U', 'G5', 295, 'Rất cứng', 29, 4390000),
@@ -198,7 +198,7 @@ BEGIN
 
     -- Yonex Arcsaber 11 Pro
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_arc11, 'yonex', 'cat_racket', 'Yonex Arcsaber 11 Pro Grayish Pearl', 'yonex-arcsaber-11-pro', 'Cây vợt kiểm soát và điều cầu số 1 với khả năng giữ cầu lâu trên mặt lưới', 'Điều cầu kiểm soát', 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800')
+    VALUES (p_arc11, 'yonex', 'cat_racket', 'Yonex Arcsaber 11 Pro Grayish Pearl', 'yonex-arcsaber-11-pro', 'Cây vợt kiểm soát và điều cầu số 1 với khả năng giữ cầu lâu trên mặt lưới', 'Điều cầu kiểm soát', '/images/products/yonex-arcsaber-11-pro.png')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('YONEX-ARC11PRO-3UG5', p_arc11, '3U', 'G5', 295, 'Cứng', 29, 4200000),
@@ -207,7 +207,7 @@ BEGIN
 
     -- Lining Axforce 80
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ax80, 'lining', 'cat_racket', 'Lining Axforce 80 Chen Long', 'lining-axforce-80', 'Vũ khí vô địch thế giới của Chen Long với carbon FRTP siêu đàn hồi', 'Tấn công uy lực', 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800')
+    VALUES (p_ax80, 'lining', 'cat_racket', 'Lining Axforce 80 Chen Long', 'lining-axforce-80', 'Vũ khí vô địch thế giới của Chen Long với carbon FRTP siêu đàn hồi', 'Tấn công uy lực', '/images/products/lining-axforce-80.jpg')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('LINING-AX80-3UG5', p_ax80, '3U', 'G5', 305, 'Cứng', 31, 3950000),
@@ -217,7 +217,7 @@ BEGIN
 
     -- Lining Halbertec 8000
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_hal8000, 'lining', 'cat_racket', 'Lining Halbertec 8000 Yuta Watanabe', 'lining-halbertec-8000', 'Vợt công thủ toàn diện với khả năng cắt cầu và thủ lao cực kỳ êm ái', 'Công thủ toàn diện', 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800')
+    VALUES (p_hal8000, 'lining', 'cat_racket', 'Lining Halbertec 8000 Yuta Watanabe', 'lining-halbertec-8000', 'Vợt công thủ toàn diện với khả năng cắt cầu và thủ lao cực kỳ êm ái', 'Công thủ toàn diện', '/images/products/lining-halbertec-8000.jpg')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('LINING-HAL8000-3UG5', p_hal8000, '3U', 'G5', 298, 'Trung bình', 31, 4100000),
@@ -226,7 +226,7 @@ BEGIN
 
     -- Victor Thruster Ryuga II
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ryuga2, 'victor', 'cat_racket', 'Victor Thruster Ryuga II Lee Zii Jia', 'victor-thruster-ryuga-ii', 'Đầu vợt nặng đầm đũa WES 2.0 đem lại những cú gập cổ tay smash cắm sân', 'Tấn công hủy diệt', 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800')
+    VALUES (p_ryuga2, 'victor', 'cat_racket', 'Victor Thruster Ryuga II Lee Zii Jia', 'victor-thruster-ryuga-ii', 'Đầu vợt nặng đầm đũa WES 2.0 đem lại những cú gập cổ tay smash cắm sân', 'Tấn công hủy diệt', '/images/products/victor-thruster-ryuga-ii.webp')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('VICTOR-RYUGA2-3UG5', p_ryuga2, '3U', 'G5', 305, 'Cứng', 32, 3850000),
@@ -235,7 +235,7 @@ BEGIN
 
     -- Victor Auraspeed 100X
     INSERT INTO products (id, brand_id, category_id, name, slug, description, player_type, image_url)
-    VALUES (p_ars100x, 'victor', 'cat_racket', 'Victor Auraspeed 100X Mohammad Ahsan', 'victor-auraspeed-100x', 'Tốc độ vung vợt như chớp mắt, chuyên gia xử lý cầu nhanh tầm trung', 'Tốc độ phản tạt', 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800')
+    VALUES (p_ars100x, 'victor', 'cat_racket', 'Victor Auraspeed 100X Mohammad Ahsan', 'victor-auraspeed-100x', 'Tốc độ vung vợt như chớp mắt, chuyên gia xử lý cầu nhanh tầm trung', 'Tốc độ phản tạt', '/images/products/victor-auraspeed-100x.webp')
     ON CONFLICT (slug) DO NOTHING;
     INSERT INTO skus (id, product_id, weight, grip_size, balance_point_mm, stiffness, max_tension_lbs, price) VALUES
     ('VICTOR-ARS100X-3UG5', p_ars100x, '3U', 'G5', 295, 'Cứng', 30, 3750000),

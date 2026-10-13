@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
           resalePrice,
           warrantyDays,
           `Vợt cũ kiểm định Hạng ${grade}. ${adjustmentReason || ''}`,
-          '["https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500"]',
+          '["/images/secondhand/sh-astrox-88d-pro.png"]',
           'PENDING_RESALE_APPROVAL', // Chờ quản lý duyệt niêm yết
         ]
       );

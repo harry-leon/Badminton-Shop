@@ -114,7 +114,7 @@ INSERT INTO secondhand_units (
     3100000,
     60,
     'Ngoại hình 98-99%, sơn bóng đẹp nguyên bản, chưa qua sửa chữa cấn móp. Tặng kèm quấn cán Yonex xịn.',
-    '["https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500"]',
+    '["/images/secondhand/sh-astrox-88d-pro.png"]',
     'APPROVED_FOR_SALE',
     'ql_nguyen_van_a',
     CURRENT_TIMESTAMP - INTERVAL '2 days'
@@ -129,7 +129,7 @@ INSERT INTO secondhand_units (
     2650000,
     30,
     'Ngoại hình 92-95%, trầy dăm li ti đầu vợt do xúc cầu sân thảm. Khung carbon hoàn hảo chịu lực tốt.',
-    '["https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=500"]',
+    '["/images/secondhand/sh-nanoflare-800-pro.png"]',
     'APPROVED_FOR_SALE',
     'ql_tran_thi_b',
     CURRENT_TIMESTAMP - INTERVAL '1 day'
@@ -144,7 +144,7 @@ INSERT INTO secondhand_units (
     2100000,
     30,
     'Ngoại hình 85%, tróc sơn nhiều điểm nhưng đan lưới 26lbs đánh bình thường, bao test kỹ thuật.',
-    '["https://images.unsplash.com/photo-1599474924187-334a405be655?w=500"]',
+    '["/images/secondhand/sh-astrox-77-pro.png"]',
     'PENDING_RESALE_APPROVAL',
     NULL,
     NULL
