@@ -1,154 +1,166 @@
 import type { Metadata } from 'next';
+import { queryDb } from '@/lib/db';
+import { ShieldCheck, Tag, MapPin, CheckCircle2, ShoppingBag } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Vợt Cầu Lông Cũ Kiểm Định (Second-Hand) — Cấp Hạng A/B/C | Smash Court',
   description: 'Chuyên trang vợt cầu lông cũ chính hãng đã qua kiểm định đa điểm tại cửa hàng. Mỗi chiếc duy nhất 1 sản phẩm có serial, hình ảnh chụp thực tế và bảo hành kết cấu khung.',
 };
 
-export default function SecondHandPage() {
-  const units = [
-    {
-      id: 'SH-2026-001',
-      serial: 'YONEX-AX99-JP-882194',
-      name: 'Yonex Astrox 99 Pro 4UG5 Cherry Sunburst',
-      grade: 'A',
-      gradeLabel: 'Hạng A — Như mới 99%',
-      gradeColor: 'bg-emerald-800 text-white',
-      branch: 'Chi nhánh Quận 1, TP.HCM',
-      price: 2850000,
-      originalPrice: 4250000,
-      warrantyDays: 60,
-      checklist: ['Khung nguyên bản không nứt', 'Đũa thẳng tuyệt đối', 'Gen cước đã thay mới', 'Nước sơn bóng nguyên vẹn'],
-      imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800',
-    },
-    {
-      id: 'SH-2026-002',
-      serial: 'LINING-AX80-CH-110293',
-      name: 'Lining Axforce 80 Chen Long 3UG5',
-      grade: 'B',
-      gradeLabel: 'Hạng B — Tốt, trầy nhẹ sơn',
-      gradeColor: 'bg-emerald-600 text-white',
-      branch: 'Chi nhánh Cầu Giấy, Hà Nội',
-      price: 2100000,
-      originalPrice: 3950000,
-      warrantyDays: 30,
-      checklist: ['Khung cứng cáp chịu cân tốt', 'Trầy nhẹ sơn góc 2h', 'Đũa đàn hồi chuẩn', 'Serial đối soát chính hãng'],
-      imageUrl: 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800',
-    },
-    {
-      id: 'SH-2026-003',
-      serial: 'VICTOR-TK-TW-992014',
-      name: 'Victor Thruster K BXR 4UG5',
-      grade: 'C',
-      gradeLabel: 'Hạng C — Dùng nhiều, khung bền',
-      gradeColor: 'bg-amber-500 text-white',
-      branch: 'Chi nhánh Hải Châu, Đà Nẵng',
-      price: 1450000,
-      originalPrice: 3200000,
-      warrantyDays: 30,
-      checklist: ['Xước xát nhiều quanh vành', 'Khung không rạn nứt', 'Thích hợp đánh phong trào', 'Đã kiểm tra chịu lực 26lbs'],
-      imageUrl: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800',
-    },
-    {
-      id: 'SH-2026-004',
-      serial: 'YONEX-ARC11-SP-551029',
-      name: 'Yonex Arcsaber 11 Pro 3UG5 Grayish Pearl',
-      grade: 'A',
-      gradeLabel: 'Hạng A — Như mới 99%',
-      gradeColor: 'bg-emerald-800 text-white',
-      branch: 'Chi nhánh Quận 1, TP.HCM',
-      price: 2950000,
-      originalPrice: 4200000,
-      warrantyDays: 60,
-      checklist: ['Đánh lướt 2 buổi', 'Không một vết trầy', 'Cước đan BG65Ti 10.5kg', 'Bảo hành khung 60 ngày'],
-      imageUrl: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800',
-    },
-  ];
+export const revalidate = 0; // Luôn lấy dữ liệu thời gian thực từ PostgreSQL
+
+const branchNames: Record<string, string> = {
+  BR_HCM_01: 'Chi nhánh Quận 1 (TP.HCM)',
+  BR_HN_01: 'Chi nhánh Cầu Giấy (Hà Nội)',
+  BR_DN_01: 'Chi nhánh Hải Châu (Đà Nẵng)',
+};
+
+export default async function SecondHandPage() {
+  // R7: Chỉ hiển thị vợt có status = 'APPROVED_FOR_SALE'
+  const units = await queryDb(
+    'secondhand_db',
+    `SELECT * FROM secondhand_units 
+     WHERE status = 'APPROVED_FOR_SALE' 
+     ORDER BY created_at DESC`
+  );
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6">
-      {/* Header */}
-      <div className="mb-10 text-center max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-          Kiểm định 100% tại quầy • Minh bạch lịch sử
+    <div className="max-w-7xl mx-auto py-12 px-6">
+      {/* Header Banner */}
+      <div className="bg-[#0B1210] rounded-3xl p-8 md:p-12 text-white mb-12 border border-emerald-950 relative overflow-hidden">
+        <div className="max-w-2xl relative z-10">
+          <div className="inline-flex items-center gap-2 bg-emerald-900/80 text-[#C8F31D] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 border border-emerald-700/50">
+            <ShieldCheck className="w-4 h-4" /> Kiểm Định Độc Lập 16 Tiêu Chuẩn
+          </div>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-4">
+            Sàn Vợt Cũ Chính Hãng <br />
+            <span className="text-[#C8F31D]">Minh Bạch & An Tâm Tuyệt Đối</span>
+          </h1>
+          <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+            Mỗi chiếc vợt là một đơn vị duy nhất (R2: Unique Unit) với mã serial, hình ảnh thực tế và biên bản kiểm định. Tuyệt đối không thu mua hàng nứt gãy (Hạng D) hoặc không rõ nguồn gốc.
+          </p>
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-950 tracking-tight">
-          Sàn Vợt Cầu Lông Kiểm Định
-        </h1>
-        <p className="text-slate-600 text-sm mt-2">
-          Mỗi cây vợt là <strong>một đơn vị duy nhất</strong> có hồ sơ kiểm định, ảnh chụp góc cạnh thực tế và chính sách bảo hành kết cấu khung riêng biệt.
-        </p>
+
+        {/* Grade Explanation Cards */}
+        <div className="grid grid-cols-3 gap-3 mt-8 pt-8 border-t border-white/10 text-xs">
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+            <span className="inline-block bg-emerald-700 text-white font-bold px-2 py-0.5 rounded text-[11px] mb-1">
+              Hạng A
+            </span>
+            <p className="text-slate-300 text-[11px]">Như mới 98-99%, không cấn trầy, bảo hành kết cấu 60 ngày.</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+            <span className="inline-block bg-emerald-900 text-white font-bold px-2 py-0.5 rounded text-[11px] mb-1">
+              Hạng B
+            </span>
+            <p className="text-slate-300 text-[11px]">Ngoại hình 90-95%, trầy dăm sơn nhẹ, bảo hành kết cấu 30 ngày.</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+            <span className="inline-block bg-amber-600 text-white font-bold px-2 py-0.5 rounded text-[11px] mb-1">
+              Hạng C
+            </span>
+            <p className="text-slate-300 text-[11px]">Xước xát nhiều quanh vành, khung carbon nguyên vẹn, bảo hành 30 ngày.</p>
+          </div>
+        </div>
       </div>
 
-      {/* Grid danh sách vợt second-hand */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-        {units.map((unit) => (
-          <div
-            key={unit.id}
-            className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col sm:flex-row"
-          >
-            <div className="sm:w-2/5 bg-slate-100 relative min-h-[220px]">
-              <img
-                src={unit.imageUrl}
-                alt={unit.name}
-                className="w-full h-full object-cover"
-              />
-              <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm ${unit.gradeColor}`}>
-                {unit.gradeLabel}
-              </span>
-              <span className="absolute bottom-3 left-3 bg-black/70 text-white text-[10px] font-mono px-2 py-0.5 rounded">
-                SN: {unit.serial}
-              </span>
-            </div>
+      {/* Product Grid */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            Danh Sách Vợt Cũ Sẵn Có Tại Chi Nhánh ({units.length})
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Dữ liệu trực tiếp từ PostgreSQL 18 secondhand_db. Mỗi sản phẩm chỉ có duy nhất 1 chiếc tại chi nhánh niêm yết.
+          </p>
+        </div>
+      </div>
 
-            <div className="sm:w-3/5 p-6 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                  <span>{unit.branch}</span>
-                  <span className="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
-                    Chỉ 1 chiếc duy nhất
-                  </span>
+      {units.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
+          Hiện tại các vợt cũ đã được khách hàng đặt giữ chỗ hết. Vui lòng quay lại sau!
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {units.map((unit: any) => {
+            let images: string[] = [];
+            try {
+              images = JSON.parse(unit.images_json || '[]');
+            } catch {
+              images = ['https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600'];
+            }
+            const imgUrl = images[0] || 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600';
+            const price = parseInt(unit.resale_price, 10);
+            const branchName = branchNames[unit.branch_id] || unit.branch_id;
+
+            return (
+              <div
+                key={unit.id}
+                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col group"
+              >
+                {/* Thumbnail */}
+                <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
+                  <img
+                    src={imgUrl}
+                    alt={unit.model_name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="bg-[#0F5132] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+                      Hạng {unit.grade}
+                    </span>
+                    <span className="bg-black/75 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                      Mã: {unit.id}
+                    </span>
+                  </div>
                 </div>
-                <h2 className="font-extrabold text-base text-slate-900 leading-snug">
-                  {unit.name}
-                </h2>
 
-                {/* Checklist kiểm định */}
-                <div className="mt-3 space-y-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Kết quả kiểm định tại quầy:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {unit.checklist.map((c, i) => (
-                      <span key={i} className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        <span className="text-emerald-600 font-bold">✓</span> {c}
-                      </span>
-                    ))}
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>{branchName}</span>
+                    </div>
+
+                    <h3 className="font-extrabold text-slate-900 text-base leading-snug mb-2">
+                      {unit.model_name}
+                    </h3>
+
+                    <div className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 mb-4 space-y-1">
+                      <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Serial: {unit.serial_number || 'Khớp hồ sơ'}</span>
+                      </div>
+                      <p className="text-slate-500 text-[11px] italic">
+                        &quot;{unit.condition_notes}&quot;
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Price & Action */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                        Bảo hành {unit.warranty_days} ngày
+                      </div>
+                      <div className="text-lg font-black text-[#0F5132]">
+                        {price.toLocaleString('vi-VN')}₫
+                      </div>
+                    </div>
+
+                    <button
+                      className="bg-[#0F5132] hover:bg-emerald-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" /> Giữ Chỗ Mua
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-slate-400 line-through block">
-                    Giá mới: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(unit.originalPrice)}
-                  </span>
-                  <span className="text-xl font-black text-emerald-900">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(unit.price)}
-                  </span>
-                  <span className="text-[10px] text-emerald-700 block font-medium">
-                    Bảo hành khung {unit.warrantyDays} ngày
-                  </span>
-                </div>
-
-                <button className="bg-[#C8F31D] text-[#0B1210] font-bold px-4 py-2.5 rounded-xl shadow-sm hover:bg-lime-400 transition-colors text-xs">
-                  Giữ chỗ ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

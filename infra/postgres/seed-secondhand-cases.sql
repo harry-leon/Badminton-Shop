@@ -1,0 +1,152 @@
+\connect secondhand_db;
+
+-- 1. Insert Buyback Cases
+INSERT INTO buyback_cases (
+    id, branch_id, staff_id, seller_name, seller_phone, seller_id_card_masked,
+    racket_model, serial_number, checklist_json, grade, auth_status,
+    base_price_snapshot, adjusted_price, adjustment_reason,
+    manager_approval_required, manager_approved_by, status,
+    payment_method, payment_ref, paid_at
+) VALUES
+(
+    'BB-20261013-001',
+    'BR_HCM_01',
+    'nv_le_van_b',
+    'Phan Thanh Tuấn',
+    '0908111222',
+    '079090***123',
+    'Yonex Astrox 88D Pro',
+    'SN-88DP-2025-010',
+    '{"structuralIntegrity": true, "noCracks": true, "grommetsIntact": true, "coneCodeVerified": true, "shaftStraight": true}',
+    'A',
+    'AUTHENTIC',
+    2400000,
+    2400000,
+    'Vợt lướt giữ gìn như mới, không xước sơn',
+    false,
+    NULL,
+    'PAID',
+    'BANK_TRANSFER',
+    'TXN-BUY-88D-01',
+    CURRENT_TIMESTAMP - INTERVAL '3 days'
+),
+(
+    'BB-20261013-002',
+    'BR_HN_01',
+    'nv_pham_van_e',
+    'Vũ Minh Trí',
+    '0934567890',
+    '001092***456',
+    'Yonex Nanoflare 800 Pro',
+    'SN-NF800P-2025-088',
+    '{"structuralIntegrity": true, "noCracks": true, "grommetsIntact": true, "coneCodeVerified": true, "shaftStraight": true}',
+    'B',
+    'AUTHENTIC',
+    2100000,
+    2000000,
+    'Trầy xước sơn dăm ở góc 12h, trừ 100k theo thang điểm',
+    false,
+    NULL,
+    'PAID',
+    'BANK_TRANSFER',
+    'TXN-BUY-NF800-02',
+    CURRENT_TIMESTAMP - INTERVAL '2 days'
+),
+(
+    'BB-20261013-003',
+    'BR_DN_01',
+    'nv_hoang_van_g',
+    'Đặng Thu Hằng',
+    '0912334455',
+    '048195***789',
+    'Yonex Astrox 77 Pro',
+    'SN-77P-2024-055',
+    '{"structuralIntegrity": true, "noCracks": true, "grommetsIntact": false, "coneCodeVerified": true, "shaftStraight": true}',
+    'C',
+    'AUTHENTIC',
+    1600000,
+    1600000,
+    'Nhiều vết tróc sơn thi đấu phong trào, kết cấu carbon nguyên vẹn',
+    false,
+    NULL,
+    'PAID',
+    'CASH',
+    'RCP-CASH-77P-03',
+    CURRENT_TIMESTAMP - INTERVAL '1 day'
+),
+(
+    'BB-20261013-004',
+    'BR_HCM_01',
+    'nv_le_van_b',
+    'Trương Quốc Huy',
+    '0987654321',
+    '079088***999',
+    'Yonex Duora 10',
+    'SN-DUO10-2022-999',
+    '{"structuralIntegrity": false, "noCracks": false, "grommetsIntact": false, "coneCodeVerified": true, "shaftStraight": false}',
+    'D',
+    'AUTHENTIC',
+    1200000,
+    0,
+    'Khung nứt ngầm lớp carbon tại góc 3h, xếp loại Hạng D không đủ tiêu chuẩn an toàn thu mua',
+    true,
+    NULL,
+    'REJECTED',
+    NULL,
+    NULL,
+    NULL
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. Insert Secondhand Units
+INSERT INTO secondhand_units (
+    id, buyback_case_id, serial_number, model_name, grade, branch_id,
+    resale_price, warranty_days, condition_notes, images_json,
+    status, approved_by, approved_at
+) VALUES
+(
+    'SH-20261013-0001',
+    'BB-20261013-001',
+    'SN-88DP-2025-010',
+    'Yonex Astrox 88D Pro',
+    'A',
+    'BR_HCM_01',
+    3100000,
+    60,
+    'Ngoại hình 98-99%, sơn bóng đẹp nguyên bản, chưa qua sửa chữa cấn móp. Tặng kèm quấn cán Yonex xịn.',
+    '["https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=500"]',
+    'APPROVED_FOR_SALE',
+    'ql_nguyen_van_a',
+    CURRENT_TIMESTAMP - INTERVAL '2 days'
+),
+(
+    'SH-20261013-0002',
+    'BB-20261013-002',
+    'SN-NF800P-2025-088',
+    'Yonex Nanoflare 800 Pro',
+    'B',
+    'BR_HN_01',
+    2650000,
+    30,
+    'Ngoại hình 92-95%, trầy dăm li ti đầu vợt do xúc cầu sân thảm. Khung carbon hoàn hảo chịu lực tốt.',
+    '["https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=500"]',
+    'APPROVED_FOR_SALE',
+    'ql_tran_thi_b',
+    CURRENT_TIMESTAMP - INTERVAL '1 day'
+),
+(
+    'SH-20261013-0003',
+    'BB-20261013-003',
+    'SN-77P-2024-055',
+    'Yonex Astrox 77 Pro',
+    'C',
+    'BR_DN_01',
+    2100000,
+    30,
+    'Ngoại hình 85%, tróc sơn nhiều điểm nhưng đan lưới 26lbs đánh bình thường, bao test kỹ thuật.',
+    '["https://images.unsplash.com/photo-1599474924187-334a405be655?w=500"]',
+    'PENDING_RESALE_APPROVAL',
+    NULL,
+    NULL
+)
+ON CONFLICT (id) DO NOTHING;
