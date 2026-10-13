@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.badminton</groupId>
+    <artifactId>badminton-shop-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>badminton-shop-parent</name>
+    <description>Hệ thống thương mại điện tử cầu lông đa chi nhánh - Parent Monorepo</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2026.0.0</spring-cloud.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
+    </properties>
+
+    <modules>
+        <module>platform-commons</module>
+        <module>services/api-gateway</module>
+        <module>services/identity-service</module>
+        <module>services/catalog-service</module>
+        <module>services/inventory-service</module>
+        <module>services/order-service</module>
+        <module>services/secondhand-service</module>
+        <module>services/warranty-service</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.badminton</groupId>
+                <artifactId>platform-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
