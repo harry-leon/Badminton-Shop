@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, ShieldCheck, Clock, CheckCircle2, AlertTriangle, XCircle, FileText, Wrench, ArrowRight, ShieldAlert, Check } from 'lucide-react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Search, ShieldCheck, Clock, CheckCircle2, AlertTriangle, XCircle, FileText, Wrench, Check } from 'lucide-react';
 
 interface Claim {
   id: string;
@@ -43,34 +44,45 @@ function maskName(name?: string) {
     .join(' ');
 }
 
-export default function WarrantyLookupPage() {
+function WarrantyLookupContent() {
+  const searchParams = useSearchParams();
   const [lookupMode, setLookupMode] = useState<'PHONE_OR_SERIAL' | 'ORDER_CODE'>('PHONE_OR_SERIAL');
-  const [phoneOrSerial, setPhoneOrSerial] = useState('0909123456');
-  const [orderCode, setOrderCode] = useState('DH-20261013-0001');
-  const [orderPhone, setOrderPhone] = useState('0909123456');
+  const [phoneOrSerial, setPhoneOrSerial] = useState('');
+  const [orderCode, setOrderCode] = useState('');
+  const [orderPhone, setOrderPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [purchasedWarranties, setPurchasedWarranties] = useState<PurchasedWarranty[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  // Auto trigger search if query params are present in URL
+  useEffect(() => {
+    const q = searchParams.get('q');
+    const paramOrderCode = searchParams.get('orderCode');
+    const paramPhone = searchParams.get('phone');
 
+    if (paramOrderCode && paramPhone) {
+      setLookupMode('ORDER_CODE');
+      setOrderCode(paramOrderCode);
+      setOrderPhone(paramPhone);
+      executeSearch('ORDER_CODE', paramOrderCode, paramPhone);
+    } else if (q) {
+      setLookupMode('PHONE_OR_SERIAL');
+      setPhoneOrSerial(q);
+      executeSearch('PHONE_OR_SERIAL', q);
+    }
+  }, [searchParams]);
+
+  const executeSearch = async (mode: 'PHONE_OR_SERIAL' | 'ORDER_CODE', queryOrCode: string, phoneAuth?: string) => {
     setLoading(true);
     setErrorMessage('');
     try {
       let url = '';
-      if (lookupMode === 'ORDER_CODE') {
-        if (!orderCode.trim() || !orderPhone.trim()) {
-          throw new Error('Vui lòng nhập cả Mã đơn hàng và Số điện thoại mua hàng để xác thực!');
-        }
-        url = `/api/warranty/lookup?orderCode=${encodeURIComponent(orderCode.trim())}&phone=${encodeURIComponent(orderPhone.trim())}`;
+      if (mode === 'ORDER_CODE') {
+        url = `/api/warranty/lookup?orderCode=${encodeURIComponent(queryOrCode.trim())}&phone=${encodeURIComponent((phoneAuth || '').trim())}`;
       } else {
-        if (!phoneOrSerial.trim()) {
-          throw new Error('Vui lòng nhập số điện thoại hoặc số serial');
-        }
-        url = `/api/warranty/lookup?q=${encodeURIComponent(phoneOrSerial.trim())}`;
+        url = `/api/warranty/lookup?q=${encodeURIComponent(queryOrCode.trim())}`;
       }
 
       const res = await fetch(url);
@@ -85,6 +97,24 @@ export default function WarrantyLookupPage() {
       setErrorMessage(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    if (lookupMode === 'ORDER_CODE') {
+      if (!orderCode.trim() || !orderPhone.trim()) {
+        setErrorMessage('Vui lòng nhập cả Mã đơn hàng và Số điện thoại mua hàng để xác thực!');
+        return;
+      }
+      executeSearch('ORDER_CODE', orderCode, orderPhone);
+    } else {
+      if (!phoneOrSerial.trim()) {
+        setErrorMessage('Vui lòng nhập số điện thoại hoặc số serial');
+        return;
+      }
+      executeSearch('PHONE_OR_SERIAL', phoneOrSerial);
     }
   };
 
@@ -430,5 +460,21 @@ export default function WarrantyLookupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WarrantyLookupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F7F7F2] py-16 px-4 flex items-center justify-center">
+          <div className="text-center text-stone-500 font-bold text-sm">
+            Đang tải dữ liệu tra cứu bảo hành...
+          </div>
+        </div>
+      }
+    >
+      <WarrantyLookupContent />
+    </Suspense>
   );
 }

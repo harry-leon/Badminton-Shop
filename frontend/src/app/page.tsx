@@ -1,6 +1,21 @@
-import { ShieldCheck, Award, MapPin, ArrowRight, Zap, CheckCircle2, QrCode } from 'lucide-react';
+import type { Metadata } from 'next';
+import { queryDb } from '@/lib/db';
+import { ShieldCheck, Award, MapPin, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
 
-export default function HomePage() {
+export const metadata: Metadata = {
+  title: 'Smash Court — Hệ thống cầu lông chính hãng & Sàn kiểm định vợt cũ',
+  description: 'Chuyên cung cấp vợt cầu lông Yonex, Lining, Victor chính hãng và sàn giao dịch vợt cũ second-hand có kiểm định 16 tiêu chuẩn độc lập tại 3 chi nhánh toàn quốc.',
+};
+
+export const revalidate = 0; // Trực tiếp từ PostgreSQL 18 Zero-Mock
+
+const branchLabels: Record<string, string> = {
+  BR_HCM_01: 'Quận 1, TP.HCM',
+  BR_HN_01: 'Cầu Giấy, Hà Nội',
+  BR_DN_01: 'Hải Châu, Đà Nẵng',
+};
+
+export default async function HomePage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SportsStore',
@@ -15,73 +30,59 @@ export default function HomePage() {
     },
   };
 
-  const featuredSecondhand = [
-    {
-      id: 'SH-20261013-0001',
-      modelName: 'Yonex Astrox 88D Pro',
-      grade: 'A',
-      gradeText: 'Như mới 99%',
-      branch: 'Quận 1, TP.HCM',
-      price: 3100000,
-      imageUrl: '/images/secondhand/sh-astrox-88d-pro.png',
-      warranty: '60 ngày',
-    },
-    {
-      id: 'SH-20261013-0002',
-      modelName: 'Yonex Nanoflare 800 Pro',
-      grade: 'B',
-      gradeText: 'Ngoại hình 92-95%',
-      branch: 'Cầu Giấy, Hà Nội',
-      price: 2650000,
-      imageUrl: '/images/secondhand/sh-nanoflare-800-pro.png',
-      warranty: '30 ngày',
-    },
-    {
-      id: 'SH-20261013-0003',
-      modelName: 'Yonex Astrox 77 Pro',
-      grade: 'C',
-      gradeText: 'Khung nguyên bản 85%',
-      branch: 'Hải Châu, Đà Nẵng',
-      price: 2100000,
-      imageUrl: '/images/secondhand/sh-astrox-77-pro.png',
-      warranty: '30 ngày',
-    },
-  ];
+  // 1. Lấy vợt cũ đã duyệt mở bán (R7: APPROVED_FOR_SALE) trực tiếp từ secondhand_db
+  const secondhandRows = await queryDb<any>(
+    'secondhand_db',
+    `SELECT id, model_name, grade, branch_id, resale_price, warranty_days, condition_notes, images_json
+     FROM secondhand_units
+     WHERE status = 'APPROVED_FOR_SALE'
+     ORDER BY created_at DESC
+     LIMIT 3`
+  );
 
-  const flagshipRackets = [
-    {
-      name: 'Yonex Astrox 100ZZ Kurenai',
-      slug: 'yonex-astrox-100zz',
-      brand: 'YONEX',
-      playerType: 'Tấn công toàn diện',
-      priceFrom: 4490000,
-      imageUrl: '/images/products/yonex-astrox-100zz.png',
-    },
-    {
-      name: 'Yonex Nanoflare 1000Z',
-      slug: 'yonex-nanoflare-1000z',
-      brand: 'YONEX',
-      playerType: 'Tốc độ phản tạt',
-      priceFrom: 4390000,
-      imageUrl: '/images/products/yonex-nanoflare-1000z.png',
-    },
-    {
-      name: 'Yonex Arcsaber 11 Pro',
-      slug: 'yonex-arcsaber-11-pro',
-      brand: 'YONEX',
-      playerType: 'Điều cầu kiểm soát',
-      priceFrom: 4200000,
-      imageUrl: '/images/products/yonex-arcsaber-11-pro.png',
-    },
-    {
-      name: 'Victor Thruster Ryuga II',
-      slug: 'victor-thruster-ryuga-ii',
-      brand: 'VICTOR',
-      playerType: 'Tấn công hủy diệt',
-      priceFrom: 3850000,
-      imageUrl: '/images/products/victor-thruster-ryuga-ii.webp',
-    },
-  ];
+  const featuredSecondhand = secondhandRows.map((unit) => {
+    let images: string[] = [];
+    try {
+      images = JSON.parse(unit.images_json || '[]');
+    } catch {
+      images = ['/images/secondhand/sh-nanoflare-800-pro.png'];
+    }
+    const imageUrl = images[0] || '/images/secondhand/sh-nanoflare-800-pro.png';
+    const gradeText = unit.grade === 'A' ? 'Như mới 98-99%' : unit.grade === 'B' ? 'Ngoại hình 92-95%' : 'Khung nguyên bản 85%';
+    return {
+      id: unit.id,
+      modelName: unit.model_name,
+      grade: unit.grade,
+      gradeText,
+      branch: branchLabels[unit.branch_id] || unit.branch_id,
+      price: parseInt(unit.resale_price, 10),
+      imageUrl,
+      warranty: `${unit.warranty_days} ngày`,
+    };
+  });
+
+  // 2. Lấy 4 mẫu vợt mới flagship từ catalog_db
+  const catalogRows = await queryDb<any>(
+    'catalog_db',
+    `SELECT p.id, p.name, p.slug, p.player_type, p.image_url, b.name as brand_name,
+            COALESCE(MIN(s.price), 0) as price_from
+     FROM products p
+     LEFT JOIN brands b ON p.brand_id = b.id
+     LEFT JOIN skus s ON p.id = s.product_id
+     WHERE p.is_active = true
+     GROUP BY p.id, b.name
+     ORDER BY p.name ASC
+     LIMIT 4`
+  );
+
+  const flagshipRackets = catalogRows.map((r) => ({
+    name: r.name,
+    slug: r.slug,
+    brand: r.brand_name || 'YONEX',
+    playerType: r.player_type || 'Công thủ toàn diện',
+    priceFrom: parseInt(r.price_from, 10),
+    imageUrl: r.image_url || '/images/products/yonex-astrox-99-pro.jpg',
+  }));
 
   return (
     <div className="min-h-screen bg-[#F7F7F2]">

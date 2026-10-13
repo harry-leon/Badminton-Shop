@@ -28,6 +28,15 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setErrorMsg('Vui lòng nhập họ tên và số điện thoại!');
+      return;
+    }
+    if (fulfillmentType === 'DELIVERY' && !shippingAddress.trim()) {
+      setErrorMsg('Vui lòng nhập địa chỉ nhận hàng!');
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg('');
 
@@ -136,6 +145,49 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                     />
                   </div>
 
+                  {/* Hình thức nhận hàng */}
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Hình thức nhận hàng:</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFulfillmentType('STORE_PICKUP')}
+                        className={`p-2.5 rounded-xl border text-center font-bold cursor-pointer ${
+                          fulfillmentType === 'STORE_PICKUP'
+                            ? 'border-[#0F5132] bg-emerald-50 text-[#0F5132]'
+                            : 'border-slate-200 text-slate-600'
+                        }`}
+                      >
+                        Nhận tại quầy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFulfillmentType('DELIVERY')}
+                        className={`p-2.5 rounded-xl border text-center font-bold cursor-pointer ${
+                          fulfillmentType === 'DELIVERY'
+                            ? 'border-[#0F5132] bg-emerald-50 text-[#0F5132]'
+                            : 'border-slate-200 text-slate-600'
+                        }`}
+                      >
+                        Giao hàng tận nơi
+                      </button>
+                    </div>
+                  </div>
+
+                  {fulfillmentType === 'DELIVERY' && (
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Địa chỉ giao hàng:</label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingAddress}
+                        onChange={(e) => setShippingAddress(e.target.value)}
+                        placeholder="VD: 123 Lê Lợi, Phường Bến Nghé, Quận 1"
+                        className="w-full p-2.5 rounded-xl border border-slate-300 font-semibold"
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">Phương thức thanh toán:</label>
                     <div className="grid grid-cols-2 gap-2">
@@ -193,6 +245,20 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                     Mã đơn hàng: <strong className="font-mono text-slate-900">{orderResult.orderId}</strong>
                   </p>
                 </div>
+
+                {orderResult.pickupCode && (
+                  <div className="bg-lime-50 border border-lime-300 p-3 rounded-2xl text-left">
+                    <div className="text-[11px] text-lime-900 font-bold uppercase tracking-wider">
+                      Mã Nhận Hàng Tại Quầy (Store Pickup):
+                    </div>
+                    <div className="text-2xl font-black text-lime-950 font-mono tracking-wider mt-0.5">
+                      {orderResult.pickupCode}
+                    </div>
+                    <p className="text-[11px] text-lime-800 mt-1">
+                      Vui lòng xuất trình mã này cho nhân viên chi nhánh khi đến nhận vợt.
+                    </p>
+                  </div>
+                )}
 
                 {orderResult.vietqr && (
                   <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-left space-y-2 text-xs">

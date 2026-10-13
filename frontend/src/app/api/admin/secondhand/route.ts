@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
 
+function getRacketImageForModel(model: string): string {
+  const m = (model || '').toLowerCase();
+  if (m.includes('800') || m.includes('nanoflare 800')) return '/images/secondhand/sh-nanoflare-800-pro.png';
+  if (m.includes('77') || m.includes('astrox 77')) return '/images/secondhand/sh-astrox-77-pro.png';
+  if (m.includes('88d') || m.includes('astrox 88d')) return '/images/secondhand/sh-astrox-88d-pro.png';
+  if (m.includes('88s') || m.includes('astrox 88s')) return '/images/products/yonex-astrox-88s-pro.png';
+  if (m.includes('100zz')) return '/images/products/yonex-astrox-100zz.png';
+  if (m.includes('99') || m.includes('astrox 99')) return '/images/products/yonex-astrox-99-pro.jpg';
+  if (m.includes('1000z')) return '/images/products/yonex-nanoflare-1000z.png';
+  if (m.includes('arcsaber 11') || m.includes('arc 11')) return '/images/products/yonex-arcsaber-11-pro.png';
+  if (m.includes('axforce 80')) return '/images/products/lining-axforce-80.jpg';
+  if (m.includes('halbertec 8000')) return '/images/products/lining-halbertec-8000.jpg';
+  if (m.includes('ryuga')) return '/images/products/victor-thruster-ryuga-ii.webp';
+  if (m.includes('auraspeed 100x')) return '/images/products/victor-auraspeed-100x.webp';
+  return '/images/secondhand/sh-astrox-88d-pro.png';
+}
+
 export async function GET() {
   try {
     const units = await queryDb(
@@ -169,7 +186,7 @@ export async function POST(request: NextRequest) {
           resalePrice,
           warrantyDays,
           `Vợt cũ kiểm định Hạng ${grade}. ${adjustmentReason || ''}`,
-          '["/images/secondhand/sh-astrox-88d-pro.png"]',
+          JSON.stringify([getRacketImageForModel(racketModel)]),
           'PENDING_RESALE_APPROVAL', // Chờ quản lý duyệt niêm yết
         ]
       );
