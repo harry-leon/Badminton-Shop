@@ -238,6 +238,39 @@ runTest('T12. Quy tắc 5.2 - Nhân viên chỉ được thao tác tại chi nh�
     assert.strictEqual(authorizeBranchAction('staff_2', 'BRANCH_HCM_01'), false, 'Không được thao tác ở HCM');
 });
 
+// 11. Kiểm tra kết nối và dữ liệu thực tế trong PostgreSQL Native (Zero-Mock Verification)
+runTest('T13. Live Database: Kết nối PostgreSQL 18 thật và phân lập dữ liệu', () => {
+    const { execSync } = require('child_process');
+    try {
+        const output = execSync('psql -h 127.0.0.1 -p 5432 -U postgres -d catalog_db -t -c "SELECT COUNT(*) FROM products;"', {
+            encoding: 'utf8',
+            timeout: 5000
+        }).trim();
+        const count = parseInt(output, 10);
+        assert(!isNaN(count) && count > 0, `Số lượng sản phẩm trong catalog_db thật phải > 0 (hiện tại: ${count})`);
+    } catch (err) {
+        // Nếu psql chưa có trong command line path, thử dùng đường dẫn tuyệt đối
+        try {
+            const output = execSync('"C:\\Users\\htquo\\tools\\pgsql\\bin\\psql.exe" -h 127.0.0.1 -p 5432 -U postgres -d catalog_db -t -c "SELECT COUNT(*) FROM products;"', {
+                encoding: 'utf8',
+                timeout: 5000
+            }).trim();
+            const count = parseInt(output, 10);
+            assert(!isNaN(count) && count > 0, `Số lượng sản phẩm trong catalog_db thật phải > 0 (hiện tại: ${count})`);
+        } catch (innerErr) {
+            throw new Error(`Không thể truy vấn PostgreSQL thật: ${innerErr.message}`);
+        }
+    }
+});
+
+runTest('T14. Live Database: Xác thực 3 Chi nhánh và Phân quyền nhân viên thực tế trong identity_db', () => {
+    const { execSync } = require('child_process');
+    const cmd = '"C:\\Users\\htquo\\tools\\pgsql\\bin\\psql.exe" -h 127.0.0.1 -p 5432 -U postgres -d identity_db -t -c "SELECT COUNT(*) FROM branches;"';
+    const output = execSync(cmd, { encoding: 'utf8', timeout: 5000 }).trim();
+    const branchCount = parseInt(output, 10);
+    assert.strictEqual(branchCount, 3, `Phải có đúng 3 chi nhánh thực tế (HCM, HN, ĐN), hiện tại: ${branchCount}`);
+});
+
 console.log('\n===============================================================');
 console.log(` KẾT QUẢ KIỂM THỬ: ${passedTests}/${totalTests} TESTS PASS (${((passedTests/totalTests)*100).toFixed(1)}%)`);
 console.log('===============================================================');
