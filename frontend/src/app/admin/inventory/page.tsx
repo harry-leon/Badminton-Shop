@@ -55,7 +55,7 @@ export default function AdminInventoryPage() {
   // Form tạo điều chuyển
   const [fromBranch, setFromBranch] = useState('BR_HCM_01');
   const [toBranch, setToBranch] = useState('BR_HN_01');
-  const [transferSku, setTransferSku] = useState('SKU-AX99P-4UG5');
+  const [transferSku, setTransferSku] = useState('YONEX-AX99PRO-4UG5');
   const [transferQty, setTransferQty] = useState(2);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -308,10 +308,10 @@ export default function AdminInventoryPage() {
                 onChange={(e) => setTransferSku(e.target.value)}
                 className="w-full p-2.5 rounded-xl border border-slate-300 font-mono font-bold text-slate-800"
               >
-                <option value="SKU-AX99P-4UG5">SKU-AX99P-4UG5 (Astrox 99 Pro)</option>
-                <option value="SKU-AX100ZZ-4UG5">SKU-AX100ZZ-4UG5 (Astrox 100ZZ)</option>
-                <option value="SKU-ARC11P-4UG5">SKU-ARC11P-4UG5 (Arcsaber 11 Pro)</option>
-                <option value="SKU-NF700P-4UG5">SKU-NF700P-4UG5 (Nanoflare 700 Pro)</option>
+                <option value="YONEX-AX99PRO-4UG5">YONEX-AX99PRO-4UG5 (Astrox 99 Pro)</option>
+                <option value="YONEX-AX100ZZ-4UG5">YONEX-AX100ZZ-4UG5 (Astrox 100ZZ)</option>
+                <option value="YONEX-ARC11PRO-4UG5">YONEX-ARC11PRO-4UG5 (Arcsaber 11 Pro)</option>
+                <option value="YONEX-NF700PRO-4UG5">YONEX-NF700PRO-4UG5 (Nanoflare 700 Pro)</option>
               </select>
             </div>
 

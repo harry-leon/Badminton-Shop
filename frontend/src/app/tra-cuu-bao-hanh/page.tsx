@@ -30,7 +30,10 @@ interface PurchasedWarranty {
 }
 
 export default function WarrantyLookupPage() {
-  const [query, setQuery] = useState('0909123456');
+  const [lookupMode, setLookupMode] = useState<'PHONE_OR_SERIAL' | 'ORDER_CODE'>('PHONE_OR_SERIAL');
+  const [phoneOrSerial, setPhoneOrSerial] = useState('0909123456');
+  const [orderCode, setOrderCode] = useState('DH-20261013-0001');
+  const [orderPhone, setOrderPhone] = useState('0909123456');
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -39,12 +42,24 @@ export default function WarrantyLookupPage() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!query.trim()) return;
 
     setLoading(true);
     setErrorMessage('');
     try {
-      const res = await fetch(`/api/warranty/lookup?q=${encodeURIComponent(query.trim())}`);
+      let url = '';
+      if (lookupMode === 'ORDER_CODE') {
+        if (!orderCode.trim() || !orderPhone.trim()) {
+          throw new Error('Vui lòng nhập cả Mã đơn hàng và Số điện thoại mua hàng để xác thực!');
+        }
+        url = `/api/warranty/lookup?orderCode=${encodeURIComponent(orderCode.trim())}&phone=${encodeURIComponent(orderPhone.trim())}`;
+      } else {
+        if (!phoneOrSerial.trim()) {
+          throw new Error('Vui lòng nhập số điện thoại hoặc số serial');
+        }
+        url = `/api/warranty/lookup?q=${encodeURIComponent(phoneOrSerial.trim())}`;
+      }
+
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Lỗi tra cứu thông tin');
@@ -93,23 +108,73 @@ export default function WarrantyLookupPage() {
 
       {/* Form Tra Cứu */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm max-w-xl mx-auto mb-10">
+        <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold mb-4">
+          <button
+            type="button"
+            onClick={() => setLookupMode('PHONE_OR_SERIAL')}
+            className={`flex-1 py-2 rounded-lg transition-colors cursor-pointer ${
+              lookupMode === 'PHONE_OR_SERIAL' ? 'bg-white text-emerald-950 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Số Điện Thoại / Số Serial
+          </button>
+          <button
+            type="button"
+            onClick={() => setLookupMode('ORDER_CODE')}
+            className={`flex-1 py-2 rounded-lg transition-colors cursor-pointer ${
+              lookupMode === 'ORDER_CODE' ? 'bg-white text-emerald-950 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Mã Đơn Hàng (+ Xác Thực SĐT)
+          </button>
+        </div>
+
         <form onSubmit={handleSearch} className="space-y-4">
-          <div>
-            <label htmlFor="search-input" className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
-              Mã đơn hàng / SĐT / Số Serial
-            </label>
-            <div className="relative">
-              <input
-                id="search-input"
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="VD: 0909123456, DH-20261013-0001, hoặc SN-AX99P-2026-0042"
-                className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F5132] text-sm text-slate-900"
-              />
-              <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+          {lookupMode === 'PHONE_OR_SERIAL' ? (
+            <div>
+              <label htmlFor="search-input" className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                Số Điện Thoại hoặc Số Serial Vợt
+              </label>
+              <div className="relative">
+                <input
+                  id="search-input"
+                  type="text"
+                  value={phoneOrSerial}
+                  onChange={(e) => setPhoneOrSerial(e.target.value)}
+                  placeholder="VD: 0909123456 hoặc SN-AX99P-2026-0042"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F5132] text-sm text-slate-900"
+                />
+                <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                  Mã Đơn Hàng (DH-...)
+                </label>
+                <input
+                  type="text"
+                  value={orderCode}
+                  onChange={(e) => setOrderCode(e.target.value)}
+                  placeholder="VD: DH-20261013-0001"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F5132] text-sm text-slate-900 font-mono font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                  Số Điện Thoại Mua Hàng (Bảo mật IDOR)
+                </label>
+                <input
+                  type="text"
+                  value={orderPhone}
+                  onChange={(e) => setOrderPhone(e.target.value)}
+                  placeholder="VD: 0909123456"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0F5132] text-sm text-slate-900 font-semibold"
+                />
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -139,7 +204,7 @@ export default function WarrantyLookupPage() {
 
             {claims.length === 0 ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm text-slate-500">
-                Không tìm thấy hồ sơ khiếu nại bảo hành nào cho từ khóa &quot;{query}&quot;.
+                Không tìm thấy hồ sơ khiếu nại bảo hành nào cho thông tin tra cứu &quot;{lookupMode === 'ORDER_CODE' ? orderCode : phoneOrSerial}&quot;.
               </div>
             ) : (
               <div className="grid gap-4">

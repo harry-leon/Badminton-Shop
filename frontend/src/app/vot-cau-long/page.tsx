@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { queryDb } from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'Vợt Cầu Lông Chính Hãng — Yonex, Lining, Victor | Smash Court',
@@ -8,41 +9,41 @@ export const metadata: Metadata = {
   },
 };
 
-interface ProductItem {
+export const revalidate = 0; // Trực tiếp từ PostgreSQL 18 catalog_db
+
+interface ProductRow {
   id: string;
   name: string;
   slug: string;
   brand: string;
-  playerType: string;
-  priceFrom: number;
-  imageUrl: string;
+  player_type: string;
+  image_url: string;
+  price_from: string | number;
 }
 
 export default async function RacketCatalogPage() {
-  // Lấy dữ liệu sản phẩm từ API Catalog
-  let products: ProductItem[] = [];
-  try {
-    const res = await fetch('http://localhost:8080/api/v1/catalog/products', {
-      next: { revalidate: 60 },
-      headers: { 'X-Correlation-Id': crypto.randomUUID() },
-    });
-    if (res.ok) {
-      products = await res.json();
-    }
-  } catch {
-    // Fallback sang danh sách dự phòng khi backend đang khởi động
-    products = [
-      { id: '1', name: 'Yonex Astrox 99 Pro Cherry Sunburst', slug: 'yonex-astrox-99-pro', brand: 'Yonex', playerType: 'Tấn công uy lực', priceFrom: 4250000, imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800' },
-      { id: '2', name: 'Yonex Astrox 100ZZ Kurenai', slug: 'yonex-astrox-100zz', brand: 'Yonex', playerType: 'Tấn công toàn diện', priceFrom: 4490000, imageUrl: 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800' },
-      { id: '3', name: 'Yonex Astrox 88D Pro Gen 3', slug: 'yonex-astrox-88d-pro', brand: 'Yonex', playerType: 'Tấn công cầu sau', priceFrom: 4150000, imageUrl: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800' },
-      { id: '4', name: 'Yonex Nanoflare 1000Z Lightning Yellow', slug: 'yonex-nanoflare-1000z', brand: 'Yonex', playerType: 'Tốc độ phản tạt', priceFrom: 4390000, imageUrl: 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800' },
-      { id: '5', name: 'Yonex Arcsaber 11 Pro Grayish Pearl', slug: 'yonex-arcsaber-11-pro', brand: 'Yonex', playerType: 'Điều cầu kiểm soát', priceFrom: 4200000, imageUrl: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800' },
-      { id: '6', name: 'Lining Axforce 80 Chen Long', slug: 'lining-axforce-80', brand: 'Lining', playerType: 'Tấn công uy lực', priceFrom: 3950000, imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800' },
-      { id: '7', name: 'Lining Halbertec 8000 Yuta Watanabe', slug: 'lining-halbertec-8000', brand: 'Lining', playerType: 'Công thủ toàn diện', priceFrom: 4100000, imageUrl: 'https://images.unsplash.com/photo-1613918108466-292b78a8ef95?w=800' },
-      { id: '8', name: 'Victor Thruster Ryuga II Lee Zii Jia', slug: 'victor-thruster-ryuga-ii', brand: 'Victor', playerType: 'Tấn công hủy diệt', priceFrom: 3850000, imageUrl: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?w=800' },
-      { id: '9', name: 'Victor Auraspeed 100X Mohammad Ahsan', slug: 'victor-auraspeed-100x', brand: 'Victor', playerType: 'Tốc độ phản tạt', priceFrom: 3750000, imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800' },
-    ];
-  }
+  // Lấy dữ liệu sản phẩm trực tiếp từ PostgreSQL catalog_db (Zero-Mock)
+  const rows = await queryDb<ProductRow>(
+    'catalog_db',
+    `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, 
+            p.image_url,
+            COALESCE(MIN(s.price), 0) as price_from
+     FROM products p
+     LEFT JOIN skus s ON p.id = s.product_id
+     WHERE p.is_active = true
+     GROUP BY p.id
+     ORDER BY p.name ASC`
+  );
+
+  const products = rows.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    brand: p.brand ? p.brand.toUpperCase() : 'YONEX',
+    playerType: p.player_type || 'Công thủ toàn diện',
+    priceFrom: parseInt(p.price_from as string, 10),
+    imageUrl: p.image_url || 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800',
+  }));
 
   return (
     <div className="max-w-7xl mx-auto py-10 px-6">
@@ -58,7 +59,7 @@ export default async function RacketCatalogPage() {
         <div>
           <h1 className="text-3xl font-extrabold text-emerald-950 tracking-tight">Vợt Cầu Lông Chính Hãng</h1>
           <p className="text-slate-600 text-sm mt-1">
-            Hiển thị các dòng vợt thi đấu cao cấp, cam kết bảo hành khung chính hãng 12 tháng tại toàn bộ chi nhánh.
+            Dữ liệu trực tiếp từ PostgreSQL 18 catalog_db. Cam kết 100% chính hãng, bảo hành khung 12 tháng tại toàn bộ chi nhánh.
           </p>
         </div>
         <div className="text-xs text-slate-500 font-medium">

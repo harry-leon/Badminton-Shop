@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 // Connection pools for isolated PostgreSQL databases
 const dbConfig = {
@@ -28,6 +28,25 @@ export async function queryDb<T = any>(databaseName: string, text: string, param
   try {
     const res = await client.query(text, params);
     return res.rows as T[];
+  } finally {
+    client.release();
+  }
+}
+
+export async function withTransaction<T>(
+  databaseName: string,
+  callback: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const pool = getDbPool(databaseName);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await callback(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }

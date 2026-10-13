@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryDb } from '@/lib/db';
+import { queryDb, withTransaction } from '@/lib/db';
 
 export async function GET() {
   try {
     const orders = await queryDb(
       'order_db',
       `SELECT o.*, 
-              COALESCE(json_agg(ol.*) FILTER (WHERE ol.id IS NOT NULL), '[]') as lines,
-              COALESCE(json_agg(p.*) FILTER (WHERE p.id IS NOT NULL), '[]') as payments
+              COALESCE((
+                SELECT json_agg(ol.*)
+                FROM order_lines ol
+                WHERE ol.order_id = o.id
+              ), '[]'::json) as lines,
+              COALESCE((
+                SELECT json_agg(p.*)
+                FROM payments p
+                WHERE p.order_id = o.id
+              ), '[]'::json) as payments
        FROM orders o
-       LEFT JOIN order_lines ol ON o.id = ol.order_id
-       LEFT JOIN payments p ON o.id = p.order_id
-       GROUP BY o.id
        ORDER BY o.created_at DESC`
     );
 
@@ -52,27 +57,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Cập nhật trạng thái payment
-    await queryDb(
-      'order_db',
-      `UPDATE payments 
-       SET status = 'CONFIRMED',
-           transaction_ref = $1,
-           confirmed_by = $2,
-           confirmed_at = CURRENT_TIMESTAMP
-       WHERE order_id = $3`,
-      [transactionRef, confirmedBy, orderId]
-    );
+    // Cập nhật trạng thái payment và orders trong transaction của order_db
+    await withTransaction('order_db', async (client) => {
+      await client.query(
+        `UPDATE payments 
+         SET status = 'CONFIRMED',
+             transaction_ref = $1,
+             confirmed_by = $2,
+             confirmed_at = CURRENT_TIMESTAMP
+         WHERE order_id = $3`,
+        [transactionRef, confirmedBy, orderId]
+      );
 
-    // Cập nhật trạng thái đơn hàng sang PAID hoặc PREPARING
-    await queryDb(
-      'order_db',
-      `UPDATE orders 
-       SET status = 'PAID',
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1`,
-      [orderId]
-    );
+      await client.query(
+        `UPDATE orders 
+         SET status = 'PAID',
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1`,
+        [orderId]
+      );
+    });
+
+    // Cập nhật reservations trong inventory_db sang CONFIRMED để expire worker không quét hủy kho
+    try {
+      await queryDb(
+        'inventory_db',
+        `UPDATE reservations SET status = 'CONFIRMED' WHERE order_id = $1 AND status = 'ACTIVE'`,
+        [orderId]
+      );
+    } catch (invErr) {
+      console.error('Lỗi cập nhật reservation status sang CONFIRMED:', invErr);
+    }
+
+    // Nếu đơn hàng có vợt cũ (Unique Unit), chuyển trạng thái sang SOLD trong secondhand_db
+    try {
+      const orderLines = await queryDb<any>(
+        'order_db',
+        `SELECT sku FROM order_lines WHERE order_id = $1`,
+        [orderId]
+      );
+      for (const line of orderLines) {
+        if (line.sku && line.sku.startsWith('SH-')) {
+          await queryDb(
+            'secondhand_db',
+            `UPDATE secondhand_units SET status = 'SOLD', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            [line.sku]
+          );
+        }
+      }
+    } catch (shErr) {
+      console.error('Lỗi cập nhật trạng thái SOLD cho secondhand unit:', shErr);
+    }
 
     return NextResponse.json({ success: true, orderId, transactionRef, status: 'PAID' });
   } catch (error: any) {

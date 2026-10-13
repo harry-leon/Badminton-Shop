@@ -88,11 +88,6 @@ export default function AdminSecondhandPage() {
   const handleCompleteBuyback = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isRejected) {
-      alert('QUY TẮC R6: Vợt Hạng D hoặc chưa xác minh chính hãng bị TỪ CHỐI THU MUA và không thể chi trả tiền mặt!');
-      return;
-    }
-
     setSubmitting(true);
     setMessage('');
     try {
@@ -102,7 +97,7 @@ export default function AdminSecondhandPage() {
         body: JSON.stringify({
           branchId: 'BR_HCM_01',
           staffId: 'nv_le_van_b',
-          userRole: isOutOfLimit ? 'BRANCH_MANAGER' : 'STAFF',
+          userRole: 'STAFF',
           sellerName,
           sellerPhone,
           sellerIdCardMasked: sellerIdCard,
@@ -120,9 +115,15 @@ export default function AdminSecondhandPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage(`Thu mua thành công hồ sơ ${data.caseId}! Đã tạo đơn vị ${data.unitId} chờ Quản lý duyệt bán.`);
+        if (data.status === 'REJECTED') {
+          setMessage(`Đã lưu biên bản từ chối thu mua hồ sơ ${data.caseId} (R6) vào hệ thống kiểm toán!`);
+        } else if (data.status === 'PENDING_MANAGER_APPROVAL') {
+          setMessage(`Hồ sơ ${data.caseId} đã được lưu và gửi Quản lý chi nhánh duyệt giá (R5)!`);
+        } else {
+          setMessage(`Thu mua thành công hồ sơ ${data.caseId}! Đã tạo đơn vị ${data.unitId} chờ Quản lý duyệt bán.`);
+          setActiveTab('RESALE_APPROVAL');
+        }
         await loadData();
-        setActiveTab('RESALE_APPROVAL');
       } else {
         alert(data.error || 'Lỗi xử lý thu mua');
       }
@@ -413,10 +414,16 @@ export default function AdminSecondhandPage() {
 
               <button
                 type="submit"
-                disabled={submitting || isRejected}
+                disabled={submitting}
                 className="w-full bg-[#0F5132] hover:bg-emerald-900 text-white font-bold py-3.5 rounded-xl transition cursor-pointer disabled:opacity-50 text-sm flex items-center justify-center gap-2"
               >
-                {submitting ? 'Đang lưu hồ sơ...' : 'Hoàn Tất Thu Mua & Tạo Unit Chờ Mở Bán'}
+                {submitting 
+                  ? 'Đang lưu hồ sơ...' 
+                  : isRejected 
+                    ? 'Lập Biên Bản Từ Chối Thu Mua (REJECTED R6)' 
+                    : isOutOfLimit 
+                      ? 'Gửi Duyệt Giá Vượt Ngưỡng (PENDING_APPROVAL R5)' 
+                      : 'Hoàn Tất Thu Mua & Tạo Unit Chờ Mở Bán'}
               </button>
             </form>
           </div>

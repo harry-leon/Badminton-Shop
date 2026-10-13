@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { queryDb } from '@/lib/db';
-import { ShieldCheck, Tag, MapPin, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { ShieldCheck, Tag, MapPin, CheckCircle2 } from 'lucide-react';
+import SecondhandOrderButton from './SecondhandOrderButton';
 
 export const metadata: Metadata = {
   title: 'Vợt Cầu Lông Cũ Kiểm Định (Second-Hand) — Cấp Hạng A/B/C | Smash Court',
@@ -149,11 +150,7 @@ export default async function SecondHandPage() {
                       </div>
                     </div>
 
-                    <button
-                      className="bg-[#0F5132] hover:bg-emerald-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" /> Giữ Chỗ Mua
-                    </button>
+                    <SecondhandOrderButton unit={unit} />
                   </div>
                 </div>
               </div>
