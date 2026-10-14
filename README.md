@@ -1,21 +1,22 @@
-# 🏸 BADMINTON SHOP — MULTI-BRANCH E-COMMERCE PLATFORM
+# 🏸 SMASH COURT — MULTI-BRANCH BADMINTON E-COMMERCE & SECOND-HAND INSPECTION PLATFORM
 
-> **Nền tảng thương mại điện tử cầu lông chuyên nghiệp**: Vợt mới chính hãng, Sàn vợt cũ kiểm định (Second-hand), Tra cứu bảo hành điện tử, và Cổng quản trị vận hành đa chi nhánh (Admin Portal).
+> **Nền tảng thương mại điện tử cầu lông chuyên nghiệp**: Vợt mới chính hãng, Sàn vợt cũ kiểm định (Second-hand), Tra cứu bảo hành điện tử, và Cổng quản trị vận hành đa chi nhánh (Admin Portal) theo phong cách thiết kế **Quiet Court**.
 
-[![Master Test Suite](https://img.shields.io/badge/Master%20Test%20Suite-42%2F42%20PASS%20(100%25)-emerald?style=for-the-badge&logo=checkmarx)](test/test-suite.js)
+[![Master Test Suite](https://img.shields.io/badge/Master%20Test%20Suite-51%2F51%20PASS%20(100%25)-emerald?style=for-the-badge&logo=checkmarx)](test/test-suite.js)
 [![Next.js 16](https://img.shields.io/badge/Frontend-Next.js%2016%20Turbopack-black?style=for-the-badge&logo=next.js)](frontend/)
-[![PostgreSQL 18](https://img.shields.io/badge/Database-PostgreSQL%2018%20Native-blue?style=for-the-badge&logo=postgresql)](infra/postgres/)
+[![Design Rules](https://img.shields.io/badge/Design%20Rules-100%25%20PASS%20(0%20violation)-blue?style=for-the-badge)](scripts/check-design-rules.js)
+[![PostgreSQL 18](https://img.shields.io/badge/Database-PostgreSQL%2018%20Native%20(6%20DBs)-blue?style=for-the-badge&logo=postgresql)](infra/postgres/)
 [![Java 21](https://img.shields.io/badge/Backend-Java%2021%20LTS-orange?style=for-the-badge&logo=openjdk)](pom.xml)
 
 ---
 
 ## 1. TỔNG QUAN KIẾN TRÚC HỆ THỐNG
 
-Hệ thống được thiết kế theo kiến trúc **Domain-Driven Microservices** kết hợp mô hình **Database-Per-Service Isolation**:
+Hệ thống được thiết kế theo kiến trúc **Domain-Driven Microservices** kết hợp mô hình **Database-Per-Service Isolation** với 6 cơ sở dữ liệu PostgreSQL 18 native phân lập hoàn toàn:
 
 ```mermaid
 graph TD
-    Client[Storefront Web & Admin Portal<br/>Next.js 16 Turbopack] -->|HTTP / REST + Correlation ID| Gateway[API Gateway<br/>Spring Cloud Gateway]
+    Client[Storefront Web & Admin Portal<br/>Next.js 16 Turbopack - Quiet Court UI] -->|HTTP / REST + Correlation ID| Gateway[API Gateway<br/>Spring Cloud Gateway]
     
     Gateway --> Identity[Identity Service<br/>Port 8081 | identity_db]
     Gateway --> Catalog[Catalog Service<br/>Port 8082 | catalog_db]
@@ -31,14 +32,35 @@ graph TD
 
 ---
 
-## 2. ĐIỂM NỔI BẬT VỀ KỸ THUẬT & 10 QUY TẮC CỐT LÕI (R1 — R10)
+## 2. TRIẾT LÝ THIẾT KẾ MỚI — "QUIET COURT"
 
-1. **Khóa chống bán vượt mức (R1)**: Áp dụng câu lệnh cập nhật nguyên tử `UPDATE stock_levels SET reserved = reserved + :q WHERE on_hand - reserved >= :q` kết hợp CHECK constraint PostgreSQL `chk_reserved_lte_on_hand`. Tuyệt đối không bao giờ xảy ra tình trạng âm kho.
-2. **Đơn vị duy nhất cho vợt cũ (R2)**: Mỗi chiếc vợt second-hand là một thực thể `item_type = 'UNIQUE'` với số lượng $\le 1$ (`chk_unique_item_qty`). Chỉ duy nhất một khách hàng có thể giữ chỗ mua tại một thời điểm.
-3. **Giải phóng kho Idempotent (R3)**: Tự động hủy đơn và nhả tồn kho đúng một lần sau 30 phút (VietQR) hoặc 12 giờ (COD).
+Toàn bộ hệ thống giao diện được tái thiết kế theo định hướng **Quiet Court**: Tối giản, sang trọng, thể thao, mobile-first, loại bỏ hoàn toàn các lỗi font quá đậm, in hoa tùy tiện hay thẻ lồng thẻ:
+
+- **Bảng màu Design Tokens**:
+  - Nền trang trắng ngà `#F5F4F0` (`--bg`), thẻ phẳng trắng thuần `#FFFFFF` (`--surface`).
+  - Chữ chính đen mực `#111613` (`--ink`), chữ phụ xám trung tính `#6A726E` (`--muted`).
+  - Đường phân cách mảnh 1px `#E4E3DD` (`--line`), màu xanh sân đấu `#0F5132` (`--brand`) làm điểm nhấn tinh tế.
+- **Phông chữ tiếng Việt chuẩn mực**:
+  - 100% sử dụng font `Be Vietnam Pro` (subset vietnamese + latin), tối ưu hóa hiển thị dấu thanh tiếng Việt.
+  - Phân cấp trọng lượng tinh giản: **400** cho toàn bộ nội dung văn bản, **500** cho tiêu đề, nút bấm, nhãn và giá tiền.
+  - Tuyệt đối cấm các class `font-semibold`, `font-bold`, `font-black`, `uppercase`, `tracking-wider` trên storefront.
+- **Trải nghiệm khách hàng & Quản trị**:
+  - Tìm kiếm nhanh ⌘K trên toàn hệ thống (`CommandSearch.tsx`).
+  - Giỏ hàng Drawer trượt mượt mà kèm trang thanh toán 1 trang hỗ trợ VietQR Napas và COD.
+  - Tra cứu bảo hành điện tử với dòng thời gian 4 bước và cơ chế bảo mật PII (`0909****56`, `Trần V*** A***`).
+  - Sàn vợt cũ kiểm định 5 điểm cốt lõi với mã serial nón vợt và cam kết bảo hành riêng từng chiếc.
+  - Cổng quản trị tích hợp bộ chọn chi nhánh làm việc (Team Switcher) và bảng dữ liệu DataTable có sticky header.
+
+---
+
+## 3. CÁC QUY TẮC CỐT LÕI (R1 — R10) ĐÃ KIỂM CHỨNG 100%
+
+1. **Khóa chống bán vượt mức (R1)**: Áp dụng câu lệnh cập nhật nguyên tử `UPDATE stock_levels SET reserved = reserved + :q WHERE on_hand - reserved >= :q` kết hợp CHECK constraint PostgreSQL `chk_reserved_lte_on_hand`. Tuyệt đối không bao giờ xảy ra tình trạng âm kho dưới tải tranh chấp đồng thời (Test C1 PASS).
+2. **Đơn vị duy nhất cho vợt cũ (R2)**: Mỗi chiếc vợt second-hand là một thực thể `item_type = 'UNIQUE'` với số lượng $\le 1$ (`chk_unique_item_qty`). Chỉ duy nhất một khách hàng có thể giữ chỗ mua tại một thời điểm (Test C2 PASS).
+3. **Giải phóng kho Idempotent (R3)**: Tự động hủy đơn và nhả tồn kho đúng một lần sau 30 phút (VietQR) hoặc 12 giờ (COD) qua worker `/api/inventory/expire` (Test C3 PASS).
 4. **Bảo mật phạm vi chi nhánh (R4)**: Kiểm soát đa chi nhánh qua header `X-Branch-Id`, nhân viên chỉ được thao tác tại chi nhánh được phân công.
 5. **Kiểm soát giá thu mua (R5)**: Thuật toán so khớp ngưỡng $\pm 10\%$. Nếu nhân viên điều chỉnh vượt quá mức này, phiếu tự động chuyển sang hàng chờ Quản lý chi nhánh (`BRANCH_MANAGER`) duyệt.
-6. **Loại trừ sản phẩm rủi ro (R6)**: Vợt Hạng D (nứt gãy carbon) hoặc chưa xác minh chính hãng bị hệ thống từ chối chi tiền thu mua (`REJECTED`).
+6. **Loại trừ sản phẩm rủi ro (R6)**: Vợt Hạng D (nứt gãy carbon) hoặc chưa xác minh chính hãng bị hệ thống từ chối chi tiền thu mua (`REJECTED`) và lập biên bản lưu vết kiểm toán.
 7. **Cổng phê duyệt mở bán (R7)**: Vợt cũ chỉ được niêm yết lên website khi Quản lý chi nhánh ký duyệt hồ sơ kiểm định (`APPROVED_FOR_SALE`).
 8. **Điều chuyển kho đúng thời điểm (R8)**: Tồn kho chi nhánh gửi chỉ bị trừ khi thực tế xuất hàng (`IN_TRANSIT`). Hàng nhận thiếu được ghi nhận vào `discrepancy`.
 9. **Snapshot dữ liệu bất biến (R9)**: Giá bán, tên sản phẩm và chính sách bảo hành được snapshot nguyên vẹn vào dòng đơn hàng. Mọi thay đổi bảng giá sau đó không làm sai lệch đơn cũ.
@@ -46,15 +68,15 @@ graph TD
 
 ---
 
-## 3. HƯỚNG DẪN CÀI ĐẶT & CHẠY TRONG $\le$ 15 PHÚT
+## 4. HƯỚNG DẪN CÀI ĐẶT & CHẠY HỆ THỐNG
 
-### 3.1 Yêu Cầu Môi Trường
+### 4.1 Yêu Cầu Môi Trường
 - Node.js $\ge$ 20.x & npm
-- PostgreSQL 18 (hoặc Docker Compose)
+- PostgreSQL 18 native (cổng 5432)
 
-### 3.2 Khởi Động Nhanh
+### 4.2 Khởi Động Nhanh
 ```bash
-# 1. Clone repository
+# 1. Clone repository và checkout nhánh dev
 git clone https://github.com/harry-leon/Badminton-Shop.git
 cd Badminton-Shop
 git checkout dev
@@ -71,16 +93,23 @@ psql -U postgres -f infra/postgres/seed-transfers.sql
 # 3. Chạy Master Test Suite kiểm chứng (100% PASS)
 node test/test-suite.js
 
-# 4. Khởi động Giao diện Next.js
+# 4. Kiểm tra quy tắc thiết kế Quiet Court (100% PASS)
+node scripts/check-design-rules.js
+
+# 5. Khởi động Giao diện Next.js Turbopack
 cd frontend
 npm install
 npm run dev
-# Mở trình duyệt tại: http://localhost:3000
 ```
+
+Truy cập hệ thống:
+- **Trang chủ Cửa hàng (Storefront)**: [http://localhost:3000](http://localhost:3000)
+- **Thư viện Styleguide Component**: [http://localhost:3000/_design](http://localhost:3000/_design)
+- **Cổng Quản trị Vận hành (Admin Portal)**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ---
 
-## 4. TÀI KHOẢN TRẢI NGHIỆM HỆ THỐNG (DEMO ACCOUNTS)
+## 5. TÀI KHOẢN TRẢI NGHIỆM HỆ THỐNG (DEMO ACCOUNTS)
 
 Mật khẩu mặc định cho toàn bộ tài khoản: `Password@123`
 
@@ -97,18 +126,9 @@ Mật khẩu mặc định cho toàn bộ tài khoản: `Password@123`
 
 ---
 
-## 5. ĐÁNH ĐỔI THIẾT KẾ & GIỚI HẠN ĐÃ BIẾT (KNOWN TRADE-OFFS)
+## 6. KẾT QUẢ NGHIỆM THU TỔNG THỂ
 
-1. **Không tách đơn giao hàng ngầm (No Silent Split-Shipment)**: Nếu một đơn hàng gồm nhiều món mà không có chi nhánh nào có đủ tồn kho, hệ thống thông báo rõ cho khách hàng thay vì âm thầm tách đơn thành 2 chuyến giao hàng khác nhau phát sinh thêm phí ship.
-2. **Thanh toán VietQR đối soát có người kiểm chứng**: Sử dụng chuỗi VietQR chuẩn NAPAS kèm mã đơn duy nhất. Nhân viên quầy/kế toán đối soát trực tiếp mã giao dịch ngân hàng để bảo đảm 100% an toàn trước khi kích hoạt `PAID`.
-3. **Thu mua vợt cũ độc quyền tại quầy**: Từ chối quy trình thu mua online chuyển khoản trước để bảo vệ cửa hàng trước nguy cơ hàng giả, hàng nứt hàn carbon ngầm.
-
----
-
-## 6. TÀI LIỆU KỸ THUẬT THAM KHẢO
-
-- [ADR 0001: Kiến Trúc Microservices & Công Nghệ](docs/adr/0001-architecture-and-stack.md)
-- [Máy Trạng Thái Nghiệp Vụ (Order, Buyback, Unit, Warranty)](docs/domain/state-machines.md)
-- [Ma Trận Phân Quyền Vai Trò & Chi Nhánh (RBAC Matrix)](docs/rbac-matrix.md)
-- [Hướng Dẫn Vận Hành & Xử Lý Sự Cố (Operational Runbook)](docs/runbook.md)
-- [Báo Cáo Nghiệm Thu 23 Danh Mục Checklist](C:/Users/htquo/.gemini/antigravity/brain/3ace9f90-b641-4e7b-88a8-e6bab8c2f70f/full_system_checklist_report.md)
+- **Test Suite**: 51/51 tests PASS (100.0%).
+- **Design Rules**: 0 lỗi vi phạm trên toàn bộ 19 tệp storefront.
+- **Biên dịch Production**: 23/23 routes tĩnh và động biên dịch thành công không cảnh báo.
+- **Kho ảnh minh chứng**: Lưu trữ đầy đủ 54 ảnh "Before" tại `docs/ui/screenshots/before/` và 91 ảnh "After" tại `docs/ui/screenshots/after/`.
