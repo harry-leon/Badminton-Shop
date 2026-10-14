@@ -1,25 +1,75 @@
 @import "tailwindcss";
 
-:root {
-  --background: #F7F7F2;
-  --foreground: #1A2420;
-  --primary-court: #0F5132;
-  --primary-court-light: #16794C;
-  --accent-lime: #C8F31D;
-  --accent-orange: #FF6B2C;
-  --slate-subtle: #EEF1EE;
+@layer base {
+  :root {
+    --bg: #F5F4F0;       /* nền trang, trắng ngà */
+    --surface: #FFFFFF;  /* thẻ, popover, modal */
+    --ink: #111613;      /* chữ chính, nút chính */
+    --muted: #6A726E;    /* chữ phụ, nhãn phụ */
+    --line: #E4E3DD;     /* đường kẻ mỏng 1px */
+    --brand: #0F5132;    /* xanh sân cầu lông, chỉ dùng điểm nhấn nhỏ */
+    --accent: #C8F31D;   /* xanh chanh, rất hạn chế */
+    --sale: #E5532A;     /* giá giảm, badge sale */
+    
+    --radius-card: 16px;
+    --radius-button: 9999px; /* pill shape */
+    --radius-input: 12px;
+  }
+
+  .dark {
+    --bg: #0B0F0D;       /* nền gần đen xanh thể thao */
+    --surface: #141A17;  /* thẻ, popover nền tối */
+    --ink: #F5F4F0;      /* chữ chính sáng */
+    --muted: #9BA39F;    /* chữ phụ trung tính */
+    --line: #222B26;     /* đường kẻ mỏng 1px tối */
+    --brand: #16794C;    /* xanh sân sáng hơn chút cho nền tối */
+    --accent: #C8F31D;   /* xanh chanh */
+    --sale: #FF6B4A;     /* giá giảm nền tối */
+  }
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-sale: var(--sale);
+
+  --font-sans: var(--font-be-vietnam-pro), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Tabular figures for prices & spec numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide scrollbar */
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
