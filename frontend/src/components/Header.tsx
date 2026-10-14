@@ -3,18 +3,19 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, ShoppingBag, User, Menu, X, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, X, ShieldCheck, Sun, Moon, MapPin, Package } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { CommandSearch } from './CommandSearch';
-import { CartDrawer, CartItem } from './CartDrawer';
+import { CartDrawer } from './CartDrawer';
+import { useCart } from '@/lib/cart-context';
 
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { cartCount, isCartOpen, setIsCartOpen, items, removeItem } = useCart();
   const [mounted, setMounted] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [cartOpen, setCartOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = React.useState(false);
 
@@ -30,6 +31,7 @@ export function Header() {
   const navLinks = [
     { href: '/vot-cau-long', label: 'Vợt mới' },
     { href: '/second-hand', label: 'Vợt cũ đã kiểm định' },
+    { href: '/chi-nhanh', label: 'Chi nhánh' },
     { href: '/tra-cuu-bao-hanh', label: 'Bảo hành' },
     { href: '/_design', label: 'Design System' },
   ];
@@ -60,28 +62,30 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-[14px] transition-colors ${
+                    className={`text-[14px] transition-colors relative py-1 ${
                       isActive
                         ? 'text-ink font-medium'
                         : 'text-muted hover:text-ink font-normal'
                     }`}
                   >
                     {link.label}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-ink rounded-full" />
+                    )}
                   </Link>
                 );
               })}
             </nav>
           </div>
 
-          {/* 2. Actions (Tìm kiếm ⌘K, Theme, Tài khoản, Giỏ hàng) */}
+          {/* 2. Actions: Search, Dark Mode, Account, Cart */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Thanh tìm kiếm nhanh */}
+            {/* ⌘K Search trigger */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 h-9 px-3 text-[13px] text-muted bg-bg hover:bg-surface border border-line rounded-full transition-colors cursor-pointer"
-              title="Tìm kiếm (⌘K / Ctrl+K)"
+              className="flex items-center gap-2 text-[13px] text-muted hover:text-ink bg-bg hover:bg-surface border border-line px-3 py-1.5 rounded-full transition-colors cursor-pointer"
             >
-              <Search className="w-3.5 h-3.5 text-muted" />
+              <Search className="w-4 h-4 text-muted" />
               <span className="hidden sm:inline">Tìm kiếm...</span>
               <kbd className="hidden sm:inline-flex text-[11px] px-1.5 py-0.5 rounded bg-surface border border-line text-muted font-sans">
                 ⌘K
@@ -118,11 +122,18 @@ export function Header() {
                     Khách hàng Smash Court
                   </div>
                   <Link
+                    href="/account"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-[14px] text-ink hover:bg-bg transition-colors"
+                  >
+                    <Package className="w-4 h-4 text-brand" />
+                    <span>Tài khoản & Đơn mua</span>
+                  </Link>
+                  <Link
                     href="/tra-cuu-bao-hanh"
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-[14px] text-ink hover:bg-bg transition-colors"
                   >
                     <ShieldCheck className="w-4 h-4 text-brand" />
-                    <span>Lịch sử đơn & Bảo hành</span>
+                    <span>Tra cứu bảo hành</span>
                   </Link>
                   <div className="pt-1 border-t border-line">
                     <Link
@@ -139,48 +150,62 @@ export function Header() {
 
             {/* Nút Giỏ hàng */}
             <button
-              onClick={() => setCartOpen(true)}
+              onClick={() => setIsCartOpen(true)}
               className="relative flex items-center justify-center w-9 h-9 rounded-full text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
               title="Xem giỏ hàng"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-ink text-bg text-[10px] font-medium flex items-center justify-center">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-ink text-bg text-[10px] font-medium flex items-center justify-center animate-in zoom-in duration-150">
+                  {cartCount}
+                </span>
+              )}
             </button>
 
             {/* Nút Hamburger menu Mobile */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-ink hover:bg-bg transition-colors"
+              className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-ink hover:bg-bg transition-colors cursor-pointer"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden px-4 pt-3 pb-6 border-t border-line bg-surface space-y-2 animate-in slide-in-from-top-2 duration-150">
+          <div className="md:hidden border-t border-line bg-surface/95 backdrop-blur-md px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2.5 rounded-xl text-[15px] font-normal text-ink hover:bg-bg transition-colors"
+                className="block px-3 py-2 rounded-xl text-[14px] text-ink hover:bg-bg font-normal"
               >
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/account"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-xl text-[14px] text-ink hover:bg-bg font-normal border-t border-line/60 pt-3"
+            >
+              Tài khoản & Đơn mua
+            </Link>
           </div>
         )}
       </header>
 
-      {/* Quick Search Dialog ⌘K */}
+      {/* Global Command Search Dialog */}
       <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* Cart Drawer */}
-      <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
+      {/* Global Cart Drawer */}
+      <CartDrawer
+        open={isCartOpen}
+        onOpenChange={setIsCartOpen}
+        items={items}
+        onRemoveItem={removeItem}
+      />
     </>
   );
 }

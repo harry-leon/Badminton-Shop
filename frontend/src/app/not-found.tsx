@@ -16,7 +16,7 @@ export default function NotFound() {
         </svg>
       </div>
 
-      <span className="text-[13px] font-medium text-brand uppercase tracking-wider mb-2">
+      <span className="text-[13px] font-medium text-brand mb-2">
         Mã lỗi 404
       </span>
       <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-ink mb-3">

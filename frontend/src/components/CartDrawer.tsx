@@ -118,14 +118,23 @@ export function CartDrawer({
             <p className="text-[13px] text-muted font-normal">
               Đã bao gồm VAT. Miễn phí giao hàng hoặc nhận tại 3 chi nhánh toàn quốc.
             </p>
-            <Link
-              href="/vot-cau-long"
-              onClick={() => onOpenChange(false)}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-full bg-ink text-bg font-medium text-[15px] hover:opacity-90 transition-opacity"
-            >
-              <span>Tiến hành đặt hàng</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex flex-col gap-2 pt-1">
+              <Link
+                href="/checkout"
+                onClick={() => onOpenChange(false)}
+                className="w-full flex items-center justify-center gap-2 h-12 rounded-full bg-ink text-bg font-medium text-[15px] hover:opacity-90 transition-opacity"
+              >
+                <span>Tiến hành thanh toán</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/cart"
+                onClick={() => onOpenChange(false)}
+                className="w-full flex items-center justify-center h-10 rounded-full border border-line bg-surface text-ink font-medium text-[13px] hover:bg-bg transition-colors"
+              >
+                Xem giỏ hàng chi tiết
+              </Link>
+            </div>
           </div>
         )}
       </div>
