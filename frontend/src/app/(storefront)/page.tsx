@@ -57,27 +57,33 @@ export default async function HomePage() {
   try {
     const shRows = await queryDb<any>(
       'secondhand_db',
-      `SELECT u.id, u.unit_serial, u.grade, u.price, u.image_url, u.branch_id,
-              b.brand_id, p.name as product_name, p.player_type, p.slug as product_slug
-       FROM secondhand_units u
-       JOIN products p ON u.product_id = p.id
-       JOIN brands b ON p.brand_id = b.id
-       WHERE u.status = 'APPROVED_FOR_SALE'
-       ORDER BY u.created_at DESC
+      `SELECT id, serial_number, model_name, grade, resale_price, images_json, branch_id, condition_notes
+       FROM secondhand_units
+       WHERE status = 'APPROVED_FOR_SALE'
+       ORDER BY created_at DESC
        LIMIT 3`
     );
-    secondhandRackets = shRows.map((r) => ({
-      id: r.id,
-      serial: r.unit_serial,
-      name: r.product_name,
-      slug: r.product_slug,
-      brand: r.brand_id,
-      grade: r.grade,
-      playerType: r.player_type,
-      price: Number(r.price),
-      imageUrl: r.image_url,
-      branch: branchLabels[r.branch_id] || r.branch_id,
-    }));
+    secondhandRackets = shRows.map((r) => {
+      let images: string[] = [];
+      try {
+        images = JSON.parse(r.images_json || '[]');
+      } catch {
+        images = ['/images/secondhand/sh-nanoflare-800-pro.png'];
+      }
+      const imgUrl = images[0] || '/images/secondhand/sh-nanoflare-800-pro.png';
+      return {
+        id: r.id,
+        serial: r.serial_number,
+        name: r.model_name,
+        slug: r.id,
+        brand: 'Yonex',
+        grade: r.grade,
+        playerType: 'Độc bản đã kiểm định',
+        price: Number(r.resale_price),
+        imageUrl: imgUrl,
+        branch: branchLabels[r.branch_id] || r.branch_id,
+      };
+    });
   } catch (err) {
     console.error('Lỗi khi tải vợt cũ từ secondhand_db:', err);
   }
@@ -172,9 +178,9 @@ export default async function HomePage() {
 
             {/* Cột ảnh vợt Hero lớn */}
             <div className="lg:col-span-5 relative flex items-center justify-center">
-              <div className="relative w-full aspect-square max-w-md sm:max-w-lg rounded-3xl bg-[#EFECE6] dark:bg-[#18201C] p-8 flex items-center justify-center overflow-hidden border border-line">
+              <div className="relative w-full aspect-square max-w-md sm:max-w-lg rounded-3xl bg-[#EFECE6] dark:bg-surface p-8 flex items-center justify-center overflow-hidden border border-line">
                 <Image
-                  src="/images/products/yonex-astrox-99-pro.png"
+                  src="/images/products/yonex-astrox-99-pro.jpg"
                   alt="Yonex Astrox 99 Pro Flagship Racket"
                   fill
                   priority

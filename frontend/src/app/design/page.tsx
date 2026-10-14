@@ -212,7 +212,7 @@ export default function DesignSystemPage() {
                 brand="Yonex"
                 playerType="Thiên công"
                 priceFrom={3950000}
-                imageUrl="/images/products/yonex-astrox-99-pro.png"
+                imageUrl="/images/products/yonex-astrox-99-pro.jpg"
                 badgeText="Flagship"
                 specSummary="4U · Nặng đầu"
                 onQuickAdd={() => alert('Thêm nhanh demo')}
@@ -225,7 +225,7 @@ export default function DesignSystemPage() {
                 brand="Lining"
                 playerType="Thiên công"
                 priceFrom={2450000}
-                imageUrl="/images/products/lining-axforce-80.png"
+                imageUrl="/images/products/lining-axforce-80.jpg"
                 isSecondHand
                 grade="A"
                 specSummary="Serial: 260341SP"
