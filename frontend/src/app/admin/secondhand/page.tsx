@@ -1,7 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, CheckCircle2, AlertTriangle, XCircle, RefreshCw, Sparkles, UserCheck } from 'lucide-react';
+import { useAdmin } from '@/lib/admin-context';
+import { 
+  ShieldCheck, 
+  CheckCircle2, 
+  AlertTriangle, 
+  XCircle, 
+  RefreshCw, 
+  Sparkles, 
+  UserCheck, 
+  Check,
+  Building2,
+  FileText,
+  BadgeAlert
+} from 'lucide-react';
 
 interface BuybackCase {
   id: string;
@@ -32,6 +45,7 @@ interface SecondhandUnit {
 }
 
 export default function AdminSecondhandPage() {
+  const { selectedBranch, currentRole } = useAdmin();
   const [activeTab, setActiveTab] = useState<'WIZARD' | 'RESALE_APPROVAL'>('WIZARD');
   const [cases, setCases] = useState<BuybackCase[]>([]);
   const [units, setUnits] = useState<SecondhandUnit[]>([]);
@@ -80,14 +94,13 @@ export default function AdminSecondhandPage() {
     loadData();
   }, []);
 
-  // Kiểm tra % điều chỉnh giá
+  // Tính phần trăm điều chỉnh giá
   const priceDiffPercent = Math.round(((adjustedPrice - basePrice) / basePrice) * 100);
   const isOutOfLimit = Math.abs(priceDiffPercent) > 10;
   const isRejected = grade === 'D' || authStatus !== 'AUTHENTIC';
 
   const handleCompleteBuyback = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setSubmitting(true);
     setMessage('');
     try {
@@ -95,9 +108,9 @@ export default function AdminSecondhandPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          branchId: 'BR_HCM_01',
-          staffId: 'nv_le_van_b',
-          userRole: 'STAFF',
+          branchId: selectedBranch,
+          staffId: 'nv_smash_court',
+          userRole: currentRole,
           sellerName,
           sellerPhone,
           sellerIdCardMasked: sellerIdCard,
@@ -120,7 +133,7 @@ export default function AdminSecondhandPage() {
         } else if (data.status === 'PENDING_MANAGER_APPROVAL') {
           setMessage(`Hồ sơ ${data.caseId} đã được lưu và gửi Quản lý chi nhánh duyệt giá (R5)!`);
         } else {
-          setMessage(`Thu mua thành công hồ sơ ${data.caseId}! Đã tạo đơn vị ${data.unitId} chờ Quản lý duyệt bán.`);
+          setMessage(`Thu mua thành công hồ sơ ${data.caseId}! Đã tạo đơn vị ${data.unitId} chờ Quản lý duyệt mở bán.`);
           setActiveTab('RESALE_APPROVAL');
         }
         await loadData();
@@ -141,12 +154,12 @@ export default function AdminSecondhandPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           unitId,
-          approvedBy: 'ql_nguyen_van_a',
+          approvedBy: 'ql_chi_nhanh',
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage(`Quản lý đã duyệt mở bán unit ${unitId}! Sản phẩm đã xuất hiện trên website storefront (/second-hand).`);
+        setMessage(`Quản lý đã duyệt mở bán unit ${unitId}! Sản phẩm đã hiển thị trực tiếp trên Storefront.`);
         await loadData();
       } else {
         alert(data.error || 'Lỗi duyệt mở bán');
@@ -159,93 +172,140 @@ export default function AdminSecondhandPage() {
   const pendingUnits = units.filter((u) => u.status === 'PENDING_RESALE_APPROVAL');
 
   return (
-    <div className="space-y-8">
-      {/* Header & Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-[#E4E3DD]">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-[#0F5132]" />
-            Nghiệp Vụ Thu Mua & Phê Duyệt Vợt Cũ (Second-Hand)
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs px-2 py-0.5 rounded bg-[#0F5132]/10 text-[#0F5132] font-medium border border-[#0F5132]/20">
+              Chi nhánh: {selectedBranch}
+            </span>
+            <span className="text-xs text-[#6A726E]">Quy tắc R5 (±10%), R6 (Từ chối Hạng D) & R7 (Duyệt mở bán)</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-medium text-[#111613] tracking-tight">
+            Thu mua & kiểm định vợt cũ (Second-hand)
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Quy trình độc quyền tại quầy: Kiểm định 5 tiêu chí, phân cấp A/B/C/D, kiểm soát giá ±10% (R5), loại trừ Hạng D (R6) và duyệt mở bán (R7).
+          <p className="text-xs text-[#6A726E] mt-0.5">
+            Quy trình độc quyền: Kiểm định 5 tiêu chí, tự động tính hạng A/B/C, kiểm soát giá và phê duyệt mở bán an toàn.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex bg-slate-200 p-1 rounded-xl text-xs font-bold">
-            <button
-              onClick={() => setActiveTab('WIZARD')}
-              className={`px-4 py-2 rounded-lg transition-colors cursor-pointer ${
-                activeTab === 'WIZARD' ? 'bg-white text-emerald-950 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Wizard Thu Mua Tại Quầy
-            </button>
-            <button
-              onClick={() => setActiveTab('RESALE_APPROVAL')}
-              className={`px-4 py-2 rounded-lg transition-colors cursor-pointer ${
-                activeTab === 'RESALE_APPROVAL' ? 'bg-white text-emerald-950 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Duyệt Bán Lại ({pendingUnits.length})
-            </button>
-          </div>
-
           <button
+            type="button"
             onClick={loadData}
             disabled={loading}
-            className="p-2 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 cursor-pointer"
-            title="Làm mới dữ liệu"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E4E3DD] bg-white hover:bg-stone-50 text-xs font-normal text-[#111613] transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 text-slate-600 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-stone-500 ${loading ? 'animate-spin' : ''}`} />
+            <span>Làm mới</span>
           </button>
         </div>
       </div>
 
       {message && (
-        <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs rounded-xl flex items-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-          {message}
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[#0F5132] shrink-0" />
+          <span>{message}</span>
         </div>
       )}
 
-      {/* TAB 1: WIZARD THU MUA */}
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#E4E3DD] text-xs font-medium">
+        <button
+          type="button"
+          onClick={() => setActiveTab('WIZARD')}
+          className={`flex items-center gap-2 pb-2.5 px-3 border-b-2 transition-colors ${
+            activeTab === 'WIZARD'
+              ? 'border-[#0F5132] text-[#0F5132]'
+              : 'border-transparent text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4" />
+          <span>Wizard kiểm định & thu mua</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('RESALE_APPROVAL')}
+          className={`flex items-center gap-2 pb-2.5 px-3 border-b-2 transition-colors ${
+            activeTab === 'RESALE_APPROVAL'
+              ? 'border-[#0F5132] text-[#0F5132]'
+              : 'border-transparent text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>Duyệt niêm yết mở bán (R7) ({pendingUnits.length})</span>
+        </button>
+      </div>
+
+      {/* TAB 1: BUYBACK WIZARD */}
       {activeTab === 'WIZARD' && (
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 bg-white rounded-xl border border-[#E4E3DD] p-5 sm:p-6">
             <form onSubmit={handleCompleteBuyback} className="space-y-6 text-xs">
+              {/* Stepper Header */}
+              <div className="flex items-center justify-between border-b border-[#E4E3DD] pb-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0F5132] text-white flex items-center justify-center font-medium text-xs">
+                    1
+                  </span>
+                  <span className="font-medium text-[#111613]">Khách hàng</span>
+                </div>
+                <div className="w-8 h-px bg-[#E4E3DD]" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0F5132] text-white flex items-center justify-center font-medium text-xs">
+                    2
+                  </span>
+                  <span className="font-medium text-[#111613]">Vợt & Serial</span>
+                </div>
+                <div className="w-8 h-px bg-[#E4E3DD]" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0F5132] text-white flex items-center justify-center font-medium text-xs">
+                    3
+                  </span>
+                  <span className="font-medium text-[#111613]">Kiểm định 5 điểm</span>
+                </div>
+                <div className="w-8 h-px bg-[#E4E3DD]" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#0F5132] text-white flex items-center justify-center font-medium text-xs">
+                    4
+                  </span>
+                  <span className="font-medium text-[#111613]">Định giá</span>
+                </div>
+              </div>
+
               {/* Bước 1: Khách hàng */}
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2">
-                  1. Thông Tin Khách Bán Lại (Tuân thủ pháp lý ký gửi)
+                <h2 className="text-xs font-medium text-[#111613] mb-2.5">
+                  1. Thông tin khách bán lại (Tuân thủ pháp lý ký gửi)
                 </h2>
-                <div className="grid sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Họ tên khách hàng:</label>
+                    <label className="block text-[#6A726E] mb-1">Họ tên khách hàng:</label>
                     <input
                       type="text"
                       value={sellerName}
                       onChange={(e) => setSellerName(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-semibold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] text-[#111613]"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Số điện thoại:</label>
+                    <label className="block text-[#6A726E] mb-1">Số điện thoại:</label>
                     <input
                       type="text"
                       value={sellerPhone}
                       onChange={(e) => setSellerPhone(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-semibold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] text-[#111613]"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">CCCD (Masked):</label>
+                    <label className="block text-[#6A726E] mb-1">CCCD (Đã che giấu):</label>
                     <input
                       type="text"
                       value={sellerIdCard}
                       onChange={(e) => setSellerIdCard(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] font-mono text-[#111613]"
                     />
                   </div>
                 </div>
@@ -253,26 +313,26 @@ export default function AdminSecondhandPage() {
 
               {/* Bước 2: Model & Serial */}
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2">
-                  2. Thông Tin Cây Vợt & Đối Soát Serial
+                <h2 className="text-xs font-medium text-[#111613] mb-2.5">
+                  2. Thông tin cây vợt & đối soát số serial
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Dòng vợt:</label>
+                    <label className="block text-[#6A726E] mb-1">Dòng vợt:</label>
                     <input
                       type="text"
                       value={racketModel}
                       onChange={(e) => setRacketModel(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] text-[#111613]"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Số Serial (Trên thân/nón vợt):</label>
+                    <label className="block text-[#6A726E] mb-1">Số Serial nón/thân vợt:</label>
                     <input
                       type="text"
                       value={serialNumber}
                       onChange={(e) => setSerialNumber(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] font-mono text-[#111613]"
                     />
                   </div>
                 </div>
@@ -280,11 +340,11 @@ export default function AdminSecondhandPage() {
 
               {/* Bước 3: Checklist kiểm định 5 điểm */}
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2">
-                  3. Biên Bản Kiểm Định Kỹ Thuật (Checklist 5 Điểm)
+                <h2 className="text-xs font-medium text-[#111613] mb-2.5">
+                  3. Biên bản kiểm định kỹ thuật 5 điểm cốt lõi
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-2 bg-slate-50 p-4 rounded-xl">
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#F5F4F0] p-3.5 rounded-lg">
+                  <label className="flex items-center gap-2 p-2 rounded bg-white border border-[#E4E3DD] cursor-pointer text-[#111613]">
                     <input
                       type="checkbox"
                       checked={checklist.frameNotCracked}
@@ -293,7 +353,7 @@ export default function AdminSecondhandPage() {
                     />
                     <span>Khung không rạn nứt / không hàn carbon</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <label className="flex items-center gap-2 p-2 rounded bg-white border border-[#E4E3DD] cursor-pointer text-[#111613]">
                     <input
                       type="checkbox"
                       checked={checklist.shaftStraight}
@@ -302,48 +362,48 @@ export default function AdminSecondhandPage() {
                     />
                     <span>Đũa vợt thẳng, độ đàn hồi chuẩn</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <label className="flex items-center gap-2 p-2 rounded bg-white border border-[#E4E3DD] cursor-pointer text-[#111613]">
                     <input
                       type="checkbox"
                       checked={checklist.grommetIntact}
                       onChange={(e) => setChecklist({ ...checklist, grommetIntact: e.target.checked })}
                       className="w-4 h-4 text-[#0F5132] rounded"
                     />
-                    <span>Gen cước nguyên vẹn, không lún sâu</span>
+                    <span>Gen cước nguyên vẹn, không lún</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <label className="flex items-center gap-2 p-2 rounded bg-white border border-[#E4E3DD] cursor-pointer text-[#111613]">
                     <input
                       type="checkbox"
                       checked={checklist.coneCodeVerified}
                       onChange={(e) => setChecklist({ ...checklist, coneCodeVerified: e.target.checked })}
                       className="w-4 h-4 text-[#0F5132] rounded"
                     />
-                    <span>Mã nón (Cone code) & Logo sắc nét</span>
+                    <span>Mã nón & logo sắc nét chuẩn hãng</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800 sm:col-span-2">
+                  <label className="flex items-center gap-2 p-2 rounded bg-white border border-[#E4E3DD] cursor-pointer text-[#111613] sm:col-span-2">
                     <input
                       type="checkbox"
                       checked={checklist.tJointSolid}
                       onChange={(e) => setChecklist({ ...checklist, tJointSolid: e.target.checked })}
                       className="w-4 h-4 text-[#0F5132] rounded"
                     />
-                    <span>Khớp chữ T nguyên bản, không kêu lạo xạo khi vung</span>
+                    <span>Khớp chữ T chắc chắn, không lạo xạo khi vung</span>
                   </label>
                 </div>
               </div>
 
               {/* Bước 4: Xếp hạng & Định giá */}
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2">
-                  4. Đánh Giá Phân Cấp & Giá Đề Xuất
+                <h2 className="text-xs font-medium text-[#111613] mb-2.5">
+                  4. Đánh giá phân cấp & giá đề xuất
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Xác thực nguồn gốc:</label>
+                    <label className="block text-[#6A726E] mb-1">Xác thực nguồn gốc:</label>
                     <select
                       value={authStatus}
                       onChange={(e) => setAuthStatus(e.target.value as any)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] bg-white text-[#111613]"
                     >
                       <option value="AUTHENTIC">Chính hãng (AUTHENTIC)</option>
                       <option value="UNVERIFIED">Chưa xác minh nguồn gốc (UNVERIFIED)</option>
@@ -351,183 +411,196 @@ export default function AdminSecondhandPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Phân cấp hiện trạng:</label>
+                    <label className="block text-[#6A726E] mb-1">Phân cấp hiện trạng:</label>
                     <select
                       value={grade}
                       onChange={(e) => setGrade(e.target.value as any)}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] bg-white text-[#111613]"
                     >
                       <option value="A">Hạng A (Như mới 98-99%, xước li ti)</option>
                       <option value="B">Hạng B (Ngoại hình 90-95%, trầy dăm)</option>
-                      <option value="C">Hạng C (Ngoại hình 80-85%, tróc sơn nhiều)</option>
+                      <option value="C">Hạng C (Ngoại hình 80-85%, tróc sơn)</option>
                       <option value="D">Hạng D (Nứt gãy / Biến dạng — TỪ CHỐI R6)</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Giá chuẩn theo bảng giá Snapshot (VND):</label>
+                    <label className="block text-[#6A726E] mb-1">Giá chuẩn theo bảng giá Snapshot (₫):</label>
                     <input
                       type="number"
                       value={basePrice}
                       onChange={(e) => setBasePrice(parseInt(e.target.value, 10))}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] font-mono text-[#111613]"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Giá thu mua thực tế (VND):</label>
+                    <label className="block text-[#6A726E] mb-1">Giá thu mua thực tế (₫):</label>
                     <input
                       type="number"
                       value={adjustedPrice}
                       onChange={(e) => setAdjustedPrice(parseInt(e.target.value, 10))}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono font-bold"
+                      className="w-full p-2 rounded-lg border border-[#E4E3DD] font-mono text-[#111613]"
                     />
                   </div>
                 </div>
 
                 <div className="mt-3">
-                  <label className="block font-bold text-slate-700 mb-1">Lý do điều chỉnh / Ghi chú tình trạng:</label>
+                  <label className="block text-[#6A726E] mb-1">Lý do điều chỉnh / Ghi chú chi tiết:</label>
                   <input
                     type="text"
                     value={adjustmentReason}
                     onChange={(e) => setAdjustmentReason(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300"
+                    className="w-full p-2 rounded-lg border border-[#E4E3DD] text-[#111613]"
                   />
                 </div>
               </div>
 
-              {/* Cảnh báo quy tắc nghiệp vụ */}
+              {/* Cảnh báo quy tắc */}
               {isRejected && (
-                <div className="p-3 bg-rose-50 border border-rose-300 text-rose-900 rounded-xl flex items-center gap-2">
-                  <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
-                  <span><strong>QUY TẮC R6:</strong> Hàng Hạng D hoặc không rõ nguồn gốc bị hệ thống từ chối chi tiền thu mua.</span>
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-lg flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span><strong>Quy tắc R6:</strong> Hàng Hạng D hoặc không rõ nguồn gốc bị hệ thống từ chối chi tiền thu mua, lập biên bản lưu vết.</span>
                 </div>
               )}
 
               {isOutOfLimit && !isRejected && (
-                <div className="p-3 bg-amber-50 border border-amber-300 text-amber-900 rounded-xl flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                  <span><strong>QUY TẮC R5:</strong> Mức điều chỉnh ({priceDiffPercent}%) vượt ngưỡng ±10%. Yêu cầu Branch Manager phê duyệt.</span>
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span><strong>Quy tắc R5:</strong> Mức điều chỉnh ({priceDiffPercent}%) vượt ngưỡng ±10%. Yêu cầu Quản lý chi nhánh phê duyệt.</span>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#0F5132] hover:bg-emerald-900 text-white font-bold py-3.5 rounded-xl transition cursor-pointer disabled:opacity-50 text-sm flex items-center justify-center gap-2"
+                className="w-full bg-[#111613] hover:bg-[#0F5132] text-white py-2.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {submitting 
                   ? 'Đang lưu hồ sơ...' 
                   : isRejected 
-                    ? 'Lập Biên Bản Từ Chối Thu Mua (REJECTED R6)' 
+                    ? 'Lập biên bản từ chối thu mua (REJECTED R6)' 
                     : isOutOfLimit 
-                      ? 'Gửi Duyệt Giá Vượt Ngưỡng (PENDING_APPROVAL R5)' 
-                      : 'Hoàn Tất Thu Mua & Tạo Unit Chờ Mở Bán'}
+                      ? 'Gửi duyệt giá vượt ngưỡng (PENDING_APPROVAL R5)' 
+                      : 'Hoàn tất thu mua & Tạo unit chờ mở bán'}
               </button>
             </form>
           </div>
 
-          {/* Cột Lịch Sử Thu Mua Gần Nhất */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2">
-                Hồ Sơ Thu Mua Gần Đây ({cases.length})
-              </h2>
+          {/* Right Panel: Recent Buyback Cases */}
+          <div className="lg:col-span-4 bg-white rounded-xl border border-[#E4E3DD] p-5">
+            <h2 className="text-xs font-medium text-[#111613] mb-3 pb-2 border-b border-[#E4E3DD]">
+              Hồ sơ thu mua gần đây ({cases.length})
+            </h2>
 
-              <div className="space-y-3">
-                {cases.map((c) => (
-                  <div key={c.id} className="border border-slate-100 bg-slate-50/60 p-3 rounded-xl text-xs space-y-1">
+            <div className="space-y-2.5 max-h-[500px] overflow-y-auto">
+              {cases.length === 0 ? (
+                <div className="text-xs text-[#6A726E] text-center py-6">Chưa có hồ sơ thu mua nào.</div>
+              ) : (
+                cases.map((c) => (
+                  <div key={c.id} className="border border-[#E4E3DD] bg-stone-50/50 p-2.5 rounded-lg text-xs space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="font-mono font-bold text-slate-700">{c.id}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <span className="font-mono text-[#111613]">{c.id}</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] ${
                         c.status === 'PAID' ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'
                       }`}>
                         {c.status}
                       </span>
                     </div>
-                    <div className="font-bold text-slate-900">{c.racket_model}</div>
-                    <div className="flex justify-between text-slate-500 text-[11px]">
+                    <div className="font-medium text-[#111613]">{c.racket_model}</div>
+                    <div className="flex justify-between text-[#6A726E] text-[11px]">
                       <span>Hạng {c.grade} • {c.seller_name}</span>
-                      <span className="font-bold text-[#0F5132]">
-                        {parseInt(c.adjusted_price as any, 10).toLocaleString('vi-VN')}₫
+                      <span className="font-medium text-[#0F5132] tabular-nums">
+                        {parseInt(c.adjusted_price as any, 10).toLocaleString('vi-VN')} ₫
                       </span>
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: QUẢN LÝ DUYỆT BÁN LẠI (R7) */}
+      {/* TAB 2: RESALE APPROVAL GATE (R7) */}
       {activeTab === 'RESALE_APPROVAL' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <div className="border-b border-slate-100 pb-4 mb-4">
-            <h2 className="text-base font-extrabold text-slate-900">
-              Danh Sách Vợt Cũ Chờ Quản Lý Phê Duyệt Niêm Yết Mở Bán ({units.length} chiếc)
+        <div className="bg-white rounded-xl border border-[#E4E3DD] p-5">
+          <div className="border-b border-[#E4E3DD] pb-3 mb-4">
+            <h2 className="text-sm font-medium text-[#111613]">
+              Danh sách vợt cũ chờ phê duyệt niêm yết mở bán ({units.length} chiếc)
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Quy tắc R7: Vợt thu mua chỉ được xuất hiện trên Storefront khi Branch Manager ký duyệt giá bán và chính sách bảo hành.
+            <p className="text-xs text-[#6A726E] mt-0.5">
+              Quy tắc R7: Vợt thu mua chỉ được xuất hiện trên Storefront khi Quản lý chi nhánh ký duyệt giá bán và chính sách bảo hành.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {units.map((unit) => {
-              const isPending = unit.status === 'PENDING_RESALE_APPROVAL';
-              const resalePrice = parseInt(unit.resale_price as any, 10);
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {units.length === 0 ? (
+              <div className="col-span-full text-center text-xs text-[#6A726E] py-8">
+                Hiện không có chiếc vợt cũ nào trong danh sách.
+              </div>
+            ) : (
+              units.map((unit) => {
+                const isPending = unit.status === 'PENDING_RESALE_APPROVAL';
+                const resalePrice = parseInt(unit.resale_price as any, 10);
 
-              return (
-                <div
-                  key={unit.id}
-                  className={`border rounded-2xl p-5 text-xs flex flex-col justify-between ${
-                    isPending ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200 bg-white'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="font-mono font-bold text-slate-500">{unit.id}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        isPending ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
-                      }`}>
-                        {unit.status}
-                      </span>
-                    </div>
-
-                    <h3 className="font-black text-slate-900 text-sm mb-1">{unit.model_name}</h3>
-                    <div className="text-slate-600 space-y-1 mb-3">
-                      <div><strong className="text-slate-800">Cấp hạng:</strong> Hạng {unit.grade}</div>
-                      <div><strong className="text-slate-800">Serial:</strong> {unit.serial_number || 'N/A'}</div>
-                      <div><strong className="text-slate-800">Bảo hành cam kết:</strong> {unit.warranty_days} ngày</div>
-                      <div className="italic text-slate-500 text-[11px]">&quot;{unit.condition_notes}&quot;</div>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+                return (
+                  <div
+                    key={unit.id}
+                    className={`border rounded-xl p-4 text-xs flex flex-col justify-between ${
+                      isPending ? 'border-amber-300 bg-amber-50/30' : 'border-[#E4E3DD] bg-white'
+                    }`}
+                  >
                     <div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">Giá niêm yết bán:</div>
-                      <div className="text-base font-black text-[#0F5132]">
-                        {resalePrice.toLocaleString('vi-VN')}₫
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="font-mono text-[#6A726E]">{unit.id}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] ${
+                          isPending ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
+                        }`}>
+                          {unit.status}
+                        </span>
+                      </div>
+
+                      <h3 className="font-medium text-[#111613] text-sm mb-1">{unit.model_name}</h3>
+                      <div className="text-[#6A726E] space-y-1 mb-3">
+                        <div><span className="text-[#111613]">Phân hạng:</span> Hạng {unit.grade}</div>
+                        <div><span className="text-[#111613]">Serial:</span> <span className="font-mono">{unit.serial_number || 'N/A'}</span></div>
+                        <div><span className="text-[#111613]">Bảo hành:</span> {unit.warranty_days} ngày</div>
+                        {unit.condition_notes && (
+                          <div className="text-[11px] text-[#6A726E] italic">&ldquo;{unit.condition_notes}&rdquo;</div>
+                        )}
                       </div>
                     </div>
 
-                    {isPending ? (
-                      <button
-                        onClick={() => handleApproveResale(unit.id)}
-                        className="bg-[#0F5132] hover:bg-emerald-900 text-white font-bold px-3 py-2 rounded-xl transition cursor-pointer flex items-center gap-1 shadow-sm"
-                      >
-                        <UserCheck className="w-3.5 h-3.5" /> Duyệt Mở Bán
-                      </button>
-                    ) : (
-                      <span className="text-emerald-700 font-bold text-xs flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4" /> Đang hiển thị web
-                      </span>
-                    )}
+                    <div className="pt-3 border-t border-[#E4E3DD] flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-[#6A726E]">Giá niêm yết bán:</div>
+                        <div className="text-sm font-medium text-[#0F5132] tabular-nums">
+                          {resalePrice.toLocaleString('vi-VN')} ₫
+                        </div>
+                      </div>
+
+                      {isPending ? (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveResale(unit.id)}
+                          className="bg-[#0F5132] hover:bg-emerald-900 text-white font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>Duyệt mở bán</span>
+                        </button>
+                      ) : (
+                        <span className="text-[#0F5132] font-medium text-xs flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Đang mở bán</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}
