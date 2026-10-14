@@ -56,6 +56,14 @@ export async function POST(request: NextRequest) {
       paymentMethod,
     } = body;
 
+    const headerBranch = request.headers.get('x-branch-id');
+    if (userRole !== 'ADMIN' && headerBranch && headerBranch !== 'ALL' && headerBranch !== branchId) {
+      return NextResponse.json(
+        { error: 'QUY TẮC R4: Nhân viên chỉ được lập hồ sơ thu mua tại chi nhánh được phân công!' },
+        { status: 403 }
+      );
+    }
+
     const caseId = `BB-20261013-00${Math.floor(Math.random() * 900) + 100}`;
 
     // R6: Vợt hạng D hoặc UNVERIFIED / SUSPECTED_FAKE KHÔNG được chi tiền thu mua
@@ -198,12 +206,94 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH: Phê duyệt niêm yết bán lại (R7) và kích hoạt tồn kho item_type = 'UNIQUE' (R2, R10)
+// PATCH: Phê duyệt giá thu mua vượt ngưỡng (R5) hoặc Phê duyệt niêm yết bán lại (R7) và kích hoạt tồn kho item_type = 'UNIQUE' (R2, R10)
 export async function PATCH(request: NextRequest) {
   try {
-    const { unitId, approvedBy } = await request.json();
+    const body = await request.json();
+    const { unitId, caseId, action, approvedBy, userRole } = body;
+
+    // Case 1: Phê duyệt hồ sơ thu mua vượt ngưỡng R5 (PENDING_MANAGER_APPROVAL -> PAID)
+    if (caseId || action === 'APPROVE_CASE') {
+      const targetCaseId = caseId;
+      if (!targetCaseId || !approvedBy) {
+        return NextResponse.json({ error: 'Thiếu thông tin caseId hoặc người duyệt' }, { status: 400 });
+      }
+
+      // R5: Chỉ Branch Manager hoặc Admin mới có quyền duyệt giá vượt ngưỡng
+      if (userRole !== 'BRANCH_MANAGER' && userRole !== 'ADMIN') {
+        return NextResponse.json(
+          { error: 'QUY TẮC R5: Nhân viên (STAFF) không có thẩm quyền phê duyệt mức giá vượt ngưỡng ±10%! Yêu cầu Branch Manager hoặc Admin.' },
+          { status: 403 }
+        );
+      }
+
+      const caseRows = await queryDb<any>('secondhand_db', `SELECT * FROM buyback_cases WHERE id = $1`, [targetCaseId]);
+      if (caseRows.length === 0) {
+        return NextResponse.json({ error: 'Không tìm thấy hồ sơ thu mua' }, { status: 404 });
+      }
+      const bCase = caseRows[0];
+      if (bCase.status !== 'PENDING_MANAGER_APPROVAL') {
+        return NextResponse.json(
+          { error: `Hồ sơ ${targetCaseId} đang ở trạng thái "${bCase.status}", không thể phê duyệt lặp lại!` },
+          { status: 400 }
+        );
+      }
+
+      const newUnitId = `SH-20261013-00${Math.floor(Math.random() * 900) + 100}`;
+      const resalePrice = Math.round(bCase.adjusted_price * 1.30);
+      const warrantyDays = bCase.grade === 'A' ? 60 : 30;
+
+      await withTransaction('secondhand_db', async (client) => {
+        await client.query(
+          `UPDATE buyback_cases 
+           SET status = 'PAID',
+               manager_approval_required = false,
+               payment_method = 'BANK_TRANSFER',
+               paid_at = CURRENT_TIMESTAMP
+           WHERE id = $1`,
+          [targetCaseId]
+        );
+
+        await client.query(
+          `INSERT INTO secondhand_units (
+            id, buyback_case_id, serial_number, model_name, grade, branch_id,
+            resale_price, warranty_days, condition_notes, images_json, status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'PENDING_RESALE_APPROVAL')`,
+          [
+            newUnitId,
+            targetCaseId,
+            bCase.serial_number,
+            bCase.racket_model,
+            bCase.grade,
+            bCase.branch_id,
+            resalePrice,
+            warrantyDays,
+            `Vợt cũ kiểm định Hạng ${bCase.grade} sau khi Quản lý duyệt giá. ${bCase.adjustment_reason || ''}`,
+            JSON.stringify([getRacketImageForModel(bCase.racket_model)]),
+          ]
+        );
+      });
+
+      return NextResponse.json({
+        success: true,
+        caseId: targetCaseId,
+        unitId: newUnitId,
+        status: 'PAID',
+        message: 'QUY TẮC R5: Quản lý chi nhánh đã phê duyệt giá thu mua thành công. Đã tạo unit chờ duyệt mở bán.'
+      });
+    }
+
+    // Case 2: Phê duyệt niêm yết mở bán (R7)
     if (!unitId || !approvedBy) {
       return NextResponse.json({ error: 'Thiếu thông tin unitId hoặc người duyệt' }, { status: 400 });
+    }
+
+    // R7: Chỉ Quản lý chi nhánh (BRANCH_MANAGER) hoặc Quản trị viên (ADMIN) mới có quyền duyệt mở bán
+    if (userRole === 'STAFF') {
+      return NextResponse.json(
+        { error: 'QUY TẮC R7: Nhân viên (STAFF) không có thẩm quyền phê duyệt niêm yết mở bán vợt cũ! Yêu cầu Branch Manager hoặc Admin.' },
+        { status: 403 }
+      );
     }
 
     const unitRows = await queryDb(

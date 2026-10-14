@@ -222,3 +222,53 @@ CREATE TABLE IF NOT EXISTS claim_events (
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+-- -------------------------------------------------------------------------
+-- CATALOG SERVICE EXTENSIONS (catalog_db) — Milestone M1
+-- -------------------------------------------------------------------------
+\connect catalog_db;
+
+CREATE TABLE IF NOT EXISTS product_images (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+    angle VARCHAR(20) NOT NULL CHECK (angle IN ('FRONT', 'BACK', 'SIDE', 'HEAD', 'THROAT', 'GRIP', 'DETAIL')),
+    image_url TEXT NOT NULL,
+    sort_order INT DEFAULT 0,
+    is_primary BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(product_id, angle)
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_images_sort ON product_images(product_id, sort_order ASC, id ASC);
+
+ALTER TABLE products 
+ADD COLUMN IF NOT EXISTS play_style VARCHAR(50),
+ADD COLUMN IF NOT EXISTS play_style_code VARCHAR(30),
+ADD COLUMN IF NOT EXISTS balance_category VARCHAR(50),
+ADD COLUMN IF NOT EXISTS shaft_stiffness VARCHAR(50),
+ADD COLUMN IF NOT EXISTS weight_classes VARCHAR(50),
+ADD COLUMN IF NOT EXISTS grip_sizes VARCHAR(50),
+ADD COLUMN IF NOT EXISTS max_tension_lbs INT,
+ADD COLUMN IF NOT EXISTS max_tension_kg NUMERIC(4,1),
+ADD COLUMN IF NOT EXISTS length_mm INT DEFAULT 675,
+ADD COLUMN IF NOT EXISTS frame_shape VARCHAR(50) DEFAULT 'ISOMETRIC',
+ADD COLUMN IF NOT EXISTS level VARCHAR(50) DEFAULT 'Chuyên nghiệp';
+
+CREATE TABLE IF NOT EXISTS product_attributes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_id UUID UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+    balance_point_mm INT,
+    balance_category VARCHAR(50),
+    shaft_stiffness VARCHAR(50),
+    weight_grip VARCHAR(50),
+    max_tension_lbs INT,
+    max_tension_kg NUMERIC(4,1),
+    length_mm INT DEFAULT 675,
+    frame_shape VARCHAR(50),
+    play_style VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_attributes_product_id ON product_attributes(product_id);
+

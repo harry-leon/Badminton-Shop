@@ -3,7 +3,25 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PriceTag } from '@/components/ui/PriceTag';
+import { SafeImage } from '@/components/ui/SafeImage';
 import { QrCode, CheckCircle2, Clock, AlertCircle, X, ShoppingBag } from 'lucide-react';
+
+function maskSerialNumber(serial?: string | null): string {
+  if (!serial) return 'Khớp hồ sơ';
+  const parts = serial.trim().split('-');
+  if (parts.length >= 4) {
+    const prefix = parts.slice(0, parts.length - 2).join('-');
+    const suffix = parts[parts.length - 1];
+    return `${prefix}-***-${suffix}`;
+  }
+  if (parts.length === 3) {
+    return `${parts[0]}-***-${parts[2]}`;
+  }
+  if (serial.length > 8) {
+    return serial.slice(0, 4) + '-***-' + serial.slice(-3);
+  }
+  return serial;
+}
 
 interface SecondhandOrderButtonProps {
   unit: {
@@ -98,7 +116,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <div className="text-[12px] text-muted font-normal">
-                    Quy tắc R2: Sản phẩm độc bản duy nhất
+                    Sản phẩm độc bản duy nhất
                   </div>
                   <h2 className="text-xl font-medium text-ink mt-1">
                     Giữ chỗ mua vợt cũ Hạng {unit.grade}
@@ -111,7 +129,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                 <div className="p-3 bg-bg rounded-xl text-[13px] space-y-1.5 border border-line">
                   <div className="flex justify-between">
                     <span className="text-muted">Mã serial:</span>
-                    <span className="font-mono text-ink">{unit.serial_number || 'Khớp hồ sơ'}</span>
+                    <span className="font-mono text-ink">{maskSerialNumber(unit.serial_number)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted">Bảo hành kết cấu:</span>
@@ -268,9 +286,11 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                 {orderResult.vietqr && (
                   <div className="bg-bg border border-line p-4 rounded-xl text-left space-y-2 text-[13px]">
                     <div className="flex justify-center mb-2">
-                      <img
+                      <SafeImage
                         src={orderResult.vietqr.qrUrl}
                         alt="VietQR"
+                        width={176}
+                        height={176}
                         className="w-44 h-44 rounded-xl border border-line bg-white p-2"
                       />
                     </div>

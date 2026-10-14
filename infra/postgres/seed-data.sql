@@ -242,3 +242,54 @@ BEGIN
     ('VICTOR-ARS100X-4UG5', p_ars100x, '4U', 'G5', 292, 'Cứng', 29, 3750000)
     ON CONFLICT (id) DO NOTHING;
 END $$;
+
+-- -------------------------------------------------------------------------
+-- SEED PRODUCT IMAGES (7 ANGLES) & STANDARDIZED ATTRIBUTES — Milestone M1
+-- -------------------------------------------------------------------------
+DO $$
+DECLARE
+    rec RECORD;
+BEGIN
+    FOR rec IN SELECT id, image_url FROM products LOOP
+        INSERT INTO product_images (product_id, angle, image_url, sort_order, is_primary) VALUES
+        (rec.id, 'FRONT', rec.image_url, 1, TRUE),
+        (rec.id, 'BACK', rec.image_url, 2, FALSE),
+        (rec.id, 'SIDE', rec.image_url, 3, FALSE),
+        (rec.id, 'HEAD', rec.image_url, 4, FALSE),
+        (rec.id, 'THROAT', rec.image_url, 5, FALSE),
+        (rec.id, 'GRIP', rec.image_url, 6, FALSE),
+        (rec.id, 'DETAIL', rec.image_url, 7, FALSE)
+        ON CONFLICT (product_id, angle) DO NOTHING;
+    END LOOP;
+END $$;
+
+UPDATE products SET play_style = 'Tấn công', play_style_code = 'ATTACK', balance_category = 'Nặng đầu', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 29, max_tension_kg = 13.0, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'yonex-astrox-99-pro';
+UPDATE products SET play_style = 'Tấn công', play_style_code = 'ATTACK', balance_category = 'Nặng đầu', shaft_stiffness = 'Rất cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 29, max_tension_kg = 13.0, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'yonex-astrox-100zz';
+UPDATE products SET play_style = 'Tấn công', play_style_code = 'ATTACK', balance_category = 'Nặng đầu', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 29, max_tension_kg = 13.0, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'yonex-astrox-88d-pro';
+UPDATE products SET play_style = 'Phòng thủ', play_style_code = 'DEFENSE', balance_category = 'Cân bằng', shaft_stiffness = 'Cứng', weight_classes = '4U', grip_sizes = 'G5', max_tension_lbs = 28, max_tension_kg = 12.5, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'yonex-astrox-88s-pro';
+UPDATE products SET play_style = 'Phòng thủ', play_style_code = 'DEFENSE', balance_category = 'Cân bằng', shaft_stiffness = 'Rất cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 29, max_tension_kg = 13.0, length_mm = 675, frame_shape = 'AERO_BOX', level = 'Chuyên nghiệp' WHERE slug = 'yonex-nanoflare-1000z';
+UPDATE products SET play_style = 'Công thủ toàn diện', play_style_code = 'ALL_AROUND', balance_category = 'Cân bằng', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 29, max_tension_kg = 13.0, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'yonex-arcsaber-11-pro';
+UPDATE products SET play_style = 'Tấn công', play_style_code = 'ATTACK', balance_category = 'Nặng đầu', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U, 5U', grip_sizes = 'G5, G6', max_tension_lbs = 31, max_tension_kg = 14.0, length_mm = 675, frame_shape = 'AERO_BOX', level = 'Chuyên nghiệp' WHERE slug = 'lining-axforce-80';
+UPDATE products SET play_style = 'Công thủ toàn diện', play_style_code = 'ALL_AROUND', balance_category = 'Cân bằng', shaft_stiffness = 'Trung bình', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 31, max_tension_kg = 14.0, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'lining-halbertec-8000';
+UPDATE products SET play_style = 'Tấn công', play_style_code = 'ATTACK', balance_category = 'Nặng đầu', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 32, max_tension_kg = 14.5, length_mm = 675, frame_shape = 'ISOMETRIC', level = 'Chuyên nghiệp' WHERE slug = 'victor-thruster-ryuga-ii';
+UPDATE products SET play_style = 'Phòng thủ', play_style_code = 'DEFENSE', balance_category = 'Cân bằng', shaft_stiffness = 'Cứng', weight_classes = '3U, 4U', grip_sizes = 'G5', max_tension_lbs = 30, max_tension_kg = 13.5, length_mm = 675, frame_shape = 'AERO_BOX', level = 'Chuyên nghiệp' WHERE slug = 'victor-auraspeed-100x';
+
+INSERT INTO product_attributes (
+    product_id, balance_point_mm, balance_category, shaft_stiffness, weight_grip, max_tension_lbs, max_tension_kg, length_mm, frame_shape, play_style
+)
+SELECT 
+    p.id,
+    COALESCE(MIN(s.balance_point_mm), 295),
+    p.balance_category,
+    p.shaft_stiffness,
+    p.weight_classes || ' ' || p.grip_sizes,
+    p.max_tension_lbs,
+    p.max_tension_kg,
+    p.length_mm,
+    p.frame_shape,
+    p.play_style
+FROM products p
+LEFT JOIN skus s ON p.id = s.product_id
+GROUP BY p.id, p.balance_category, p.shaft_stiffness, p.weight_classes, p.grip_sizes, p.max_tension_lbs, p.max_tension_kg, p.length_mm, p.frame_shape, p.play_style
+ON CONFLICT (product_id) DO NOTHING;
+

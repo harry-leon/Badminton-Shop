@@ -15,7 +15,8 @@ import {
   Filter,
   Check,
   Building2,
-  Copy
+  Copy,
+  Send
 } from 'lucide-react';
 
 interface OrderLine {
@@ -58,7 +59,7 @@ interface Order {
 }
 
 export default function AdminOrdersPage() {
-  const { selectedBranch, density } = useAdmin();
+  const { selectedBranch, density, currentRole } = useAdmin();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -67,6 +68,40 @@ export default function AdminOrdersPage() {
   const [actionMessage, setActionMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const handleOrderStatusAction = async (action: string) => {
+    if (!selectedOrder) return;
+    setUpdatingStatus(true);
+    setActionMessage('');
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Branch-Id': selectedBranch,
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder.id,
+          action,
+          actor: 'staff_portal',
+          actorRole: currentRole,
+          branchId: selectedBranch,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage(`Cập nhật đơn hàng ${selectedOrder.id} sang trạng thái ${data.status} thành công!`);
+        await loadOrders();
+      } else {
+        alert(data.error || 'Lỗi cập nhật trạng thái đơn hàng');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const loadOrders = async () => {
     setLoading(true);
@@ -409,6 +444,79 @@ export default function AdminOrdersPage() {
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Order Fulfillment & Workflow Actions (Role STAFF & MANAGER R4) */}
+              <div className="border-t border-[#E4E3DD] pt-4">
+                <div className="text-xs font-medium text-[#111613] mb-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ShoppingBag className="w-3.5 h-3.5 text-[#0F5132]" />
+                    <span>Xử lý đơn hàng chi nhánh ({selectedOrder.branch_id})</span>
+                  </span>
+                  <span className="text-[10px] text-[#6A726E]">Quy tắc R4</span>
+                </div>
+
+                {currentRole === 'STAFF' && selectedBranch !== selectedOrder.branch_id && selectedBranch !== 'ALL' && (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-[11px] mb-2">
+                    <strong>Ràng buộc R4:</strong> Bạn đang chọn chi nhánh {selectedBranch}, nhưng đơn hàng này thuộc {selectedOrder.branch_id}. Hệ thống sẽ từ chối thao tác chéo chi nhánh.
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {(selectedOrder.status === 'PENDING_RESERVATION' || selectedOrder.status === 'PENDING_PAYMENT') && (
+                    <button
+                      type="button"
+                      onClick={() => handleOrderStatusAction('CONFIRM')}
+                      disabled={updatingStatus}
+                      className="w-full bg-[#0F5132] hover:bg-emerald-900 text-white py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Xác nhận đơn hàng (CONFIRMED)</span>
+                    </button>
+                  )}
+
+                  {(selectedOrder.status === 'PAID' || selectedOrder.status === 'CONFIRMED') && (
+                    <button
+                      type="button"
+                      onClick={() => handleOrderStatusAction('PREPARE')}
+                      disabled={updatingStatus}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>Bắt đầu chuẩn bị hàng (PREPARING)</span>
+                    </button>
+                  )}
+
+                  {selectedOrder.status === 'PREPARING' && (
+                    <button
+                      type="button"
+                      onClick={() => handleOrderStatusAction('HANDOVER')}
+                      disabled={updatingStatus}
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{selectedOrder.fulfillment_type === 'STORE_PICKUP' ? 'Hàng đã sẵn sàng tại quầy (READY_FOR_PICKUP)' : 'Bàn giao cho bên vận chuyển (DELIVERING)'}</span>
+                    </button>
+                  )}
+
+                  {selectedOrder.status === 'READY_FOR_PICKUP' && (
+                    <button
+                      type="button"
+                      onClick={() => handleOrderStatusAction('COMPLETE')}
+                      disabled={updatingStatus}
+                      className="w-full bg-[#111613] hover:bg-stone-800 text-white py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#C8F31D]" />
+                      <span>Đã giao cho khách tại quầy (Hoàn tất COMPLETED)</span>
+                    </button>
+                  )}
+
+                  {selectedOrder.status === 'COMPLETED' && (
+                    <div className="bg-stone-50 border border-stone-200 text-stone-700 p-2.5 rounded-lg text-[11px] text-center font-medium">
+                      Đơn hàng đã hoàn tất toàn bộ quy trình giao nhận.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (

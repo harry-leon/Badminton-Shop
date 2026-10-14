@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
+import { SafeImage } from './ui/SafeImage';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -38,7 +38,7 @@ export function FloatingCompareBar() {
                 className="relative flex items-center gap-2 bg-bg border border-line rounded-xl p-1.5 pr-2.5 shrink-0 group"
               >
                 <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0">
-                  <Image
+                  <SafeImage
                     src={item.imageUrl}
                     alt={item.name}
                     fill

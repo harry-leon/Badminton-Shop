@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "node ../test/run-e2e.js"
   },
   "dependencies": {
     "@number-flow/react": "^0.5.5",

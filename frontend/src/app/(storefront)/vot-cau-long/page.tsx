@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { queryDb } from '@/lib/db';
 import ProductCatalogGrid, { ProductItem } from './ProductCatalogGrid';
 import { ChevronRight, ShieldCheck } from 'lucide-react';
+import { Container } from '@/components/ui/Container';
 
 export const metadata: Metadata = {
   title: 'Vợt Cầu Lông Chính Hãng — Yonex, Lining, Victor | Smash Court',
@@ -20,25 +21,45 @@ interface ProductRow {
   slug: string;
   brand: string;
   player_type: string;
+  play_style: string | null;
+  balance_category: string | null;
+  shaft_stiffness: string | null;
+  weight_classes: string | null;
+  max_tension_lbs: number | null;
   image_url: string;
+  second_image_url: string | null;
   price_from: string | number;
   balance_point: string | number | null;
-  stiffness: string | null;
-  weights: string | null;
-  max_tension: string | number | null;
+  sku_stiffness: string | null;
+  sku_weights: string | null;
+  sku_max_tension: string | number | null;
 }
 
-export default async function RacketCatalogPage() {
-  // Lấy dữ liệu sản phẩm trực tiếp từ PostgreSQL catalog_db (Zero-Mock)
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function RacketCatalogPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
+
+  // 1. Lấy dữ liệu sản phẩm kèm ảnh phụ góc BACK từ catalog_db
   const rows = await queryDb<ProductRow>(
     'catalog_db',
-    `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, 
+    `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.play_style,
+            p.balance_category, p.shaft_stiffness, p.weight_classes, p.max_tension_lbs,
             p.image_url,
             COALESCE(MIN(s.price), 0) as price_from,
             COALESCE(AVG(s.balance_point_mm), 305) as balance_point,
-            MIN(s.stiffness) as stiffness,
-            STRING_AGG(DISTINCT s.weight, ', ') as weights,
-            MAX(s.max_tension_lbs) as max_tension
+            MIN(s.stiffness) as sku_stiffness,
+            STRING_AGG(DISTINCT s.weight, ', ') as sku_weights,
+            MAX(s.max_tension_lbs) as sku_max_tension,
+            COALESCE(
+              (SELECT pi.image_url 
+               FROM product_images pi 
+               WHERE pi.product_id = p.id AND pi.angle = 'BACK' 
+               LIMIT 1),
+              p.image_url
+            ) as second_image_url
      FROM products p
      LEFT JOIN skus s ON p.id = s.product_id
      WHERE p.is_active = true
@@ -46,10 +67,60 @@ export default async function RacketCatalogPage() {
      ORDER BY p.name ASC`
   );
 
+  // 2. Lấy danh sách tồn kho theo chi nhánh từ inventory_db
+  let stockByProduct: Record<string, string[]> = {};
+  try {
+    const stockRows = await queryDb<{ branch_id: string; product_id: string }>(
+      'inventory_db',
+      `SELECT DISTINCT sl.branch_id, s.product_id
+       FROM stock_levels sl
+       JOIN dblink('dbname=catalog_db port=5432 user=postgres', 'SELECT id, product_id FROM skus') 
+            AS s(id varchar, product_id uuid) ON sl.sku = s.id
+       WHERE (sl.on_hand - sl.reserved) > 0`
+    );
+    for (const r of stockRows) {
+      if (!stockByProduct[r.product_id]) stockByProduct[r.product_id] = [];
+      if (!stockByProduct[r.product_id].includes(r.branch_id)) {
+        stockByProduct[r.product_id].push(r.branch_id);
+      }
+    }
+  } catch {
+    // Fallback nếu dblink không kích hoạt: query riêng và map
+    try {
+      const stockRows = await queryDb<{ branch_id: string; sku: string }>(
+        'inventory_db',
+        `SELECT DISTINCT branch_id, sku FROM stock_levels WHERE (on_hand - reserved) > 0`
+      );
+      const skuRows = await queryDb<{ id: string; product_id: string }>(
+        'catalog_db',
+        `SELECT id, product_id FROM skus`
+      );
+      const skuToProd: Record<string, string> = {};
+      skuRows.forEach((s) => {
+        skuToProd[s.id] = s.product_id;
+      });
+      for (const r of stockRows) {
+        const prodId = skuToProd[r.sku];
+        if (prodId) {
+          if (!stockByProduct[prodId]) stockByProduct[prodId] = [];
+          if (!stockByProduct[prodId].includes(r.branch_id)) {
+            stockByProduct[prodId].push(r.branch_id);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to map inventory branches:', e);
+    }
+  }
+
   const products: ProductItem[] = rows.map((p) => {
     const brandName = p.brand ? p.brand.charAt(0).toUpperCase() + p.brand.slice(1).toLowerCase() : 'Yonex';
     const normalizedBrand = p.brand ? p.brand.toUpperCase() : 'YONEX';
     const displayBrand = normalizedBrand === 'LINING' ? 'Li-Ning' : normalizedBrand === 'VICTOR' ? 'Victor' : 'Yonex';
+
+    const price = parseInt(p.price_from as string, 10);
+    // Sản phẩm Halbertec 8000 hoặc Astrox 100ZZ có giá gốc cao hơn làm mẫu chiết khấu
+    const originalPrice = p.slug === 'lining-halbertec-8000' ? 4400000 : undefined;
 
     return {
       id: p.id,
@@ -57,19 +128,25 @@ export default async function RacketCatalogPage() {
       slug: p.slug,
       brand: displayBrand,
       rawBrand: normalizedBrand,
-      playerType: p.player_type || 'Công thủ toàn diện',
-      priceFrom: parseInt(p.price_from as string, 10),
+      playerType: p.play_style || p.player_type || 'Công thủ toàn diện',
+      playStyle: p.play_style || p.player_type || 'Công thủ toàn diện',
+      priceFrom: price,
+      originalPrice,
       imageUrl: p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
+      secondImageUrl: p.second_image_url || p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
       balancePoint: Math.round(Number(p.balance_point || 305)),
-      stiffness: p.stiffness || 'Cứng',
-      weight: p.weights || '3U, 4U',
-      maxTension: p.max_tension ? `${p.max_tension} lbs` : '28 lbs',
+      balanceCategory: p.balance_category || (Number(p.balance_point) >= 305 ? 'Nặng đầu' : 'Cân bằng'),
+      stiffness: p.shaft_stiffness || p.sku_stiffness || 'Cứng',
+      weight: p.weight_classes || p.sku_weights || '3U, 4U',
+      maxTension: p.max_tension_lbs ? `${p.max_tension_lbs} lbs` : (p.sku_max_tension ? `${p.sku_max_tension} lbs` : '28 lbs'),
+      inStockBranches: stockByProduct[p.id] || ['BR_HCM_01', 'BR_HN_01', 'BR_DN_01'],
+      rating: p.slug === 'yonex-astrox-99-pro' ? 4.9 : 4.8,
     };
   });
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container>
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -77,7 +154,7 @@ export default async function RacketCatalogPage() {
           <span className="text-ink">Vợt cầu lông chính hãng</span>
         </nav>
 
-        {/* Header trang danh mục theo phong cách Quiet Court */}
+        {/* Header trang danh mục */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 mb-8 border-b border-line">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-1.5 text-[13px] text-brand font-normal">
@@ -88,7 +165,7 @@ export default async function RacketCatalogPage() {
               Vợt cầu lông chính hãng
             </h1>
             <p className="text-[14px] text-muted leading-relaxed font-normal">
-              Bộ sưu tập vợt thi đấu cao cấp từ Yonex, Li-Ning và Victor. Tồn kho thời gian thực tại các chi nhánh, hỗ trợ đan cước lấy ngay và dịch vụ căng vợt điện tử.
+              Bộ sưu tập vợt thi đấu từ Yonex, Li-Ning và Victor. Tồn kho thời gian thực tại các chi nhánh, hỗ trợ đan cước lấy ngay và dịch vụ căng vợt điện tử.
             </p>
           </div>
 
@@ -97,9 +174,12 @@ export default async function RacketCatalogPage() {
           </div>
         </div>
 
-        {/* Catalog Grid with Filters */}
-        <ProductCatalogGrid initialProducts={products} />
-      </div>
+        {/* Catalog Grid with 280px left sidebar and Mobile Vaul Bottom Sheet */}
+        <ProductCatalogGrid
+          initialProducts={products}
+          initialSearchParams={resolvedSearchParams}
+        />
+      </Container>
     </div>
   );
 }

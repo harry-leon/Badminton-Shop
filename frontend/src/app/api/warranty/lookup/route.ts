@@ -1,16 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 
-function maskPhone(p: string): string {
-  if (!p || p.length < 7) return '***';
-  return p.slice(0, 4) + '****' + p.slice(-2);
+function maskPhone(p?: string | null): string {
+  if (!p) return '***';
+  const clean = p.trim();
+  if (clean.length < 7) return '***';
+  if (clean.length >= 10) {
+    return clean.slice(0, 3) + '****' + clean.slice(-3);
+  }
+  return clean.slice(0, 2) + '****' + clean.slice(-2);
 }
 
-function maskName(n: string): string {
+function maskName(n?: string | null): string {
   if (!n) return '***';
-  const parts = n.trim().split(' ');
-  if (parts.length <= 1) return n[0] + '***';
-  return parts[0] + ' *** ' + parts[parts.length - 1];
+  const parts = n.trim().split(/\s+/);
+  return parts
+    .map((w) => {
+      if (w.length <= 1) return w + '*';
+      if (w.length === 2) return w[0] + '*';
+      if (w.length === 3) return w[0] + '**';
+      return w.slice(0, 2) + '***';
+    })
+    .join(' ');
+}
+
+function rfc9457Error(
+  status: number,
+  title: string,
+  detail: string,
+  type: string = 'https://smashcourt.vn/problems/invalid-lookup-parameters'
+) {
+  return new NextResponse(
+    JSON.stringify({
+      type,
+      title,
+      status,
+      detail,
+      instance: '/api/warranty/lookup',
+      error: detail,
+    }),
+    {
+      status,
+      headers: {
+        'Content-Type': 'application/problem+json',
+      },
+    }
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -32,30 +67,36 @@ export async function GET(request: NextRequest) {
     } else if (/^[0-9+]{9,15}$/.test(q)) {
       targetPhone = q;
     } else {
-      // Từ chối nếu q là SKU danh mục hoặc chuỗi tùy ý để ngăn chặn rà quét PII dữ liệu khách hàng
-      return NextResponse.json(
-        {
-          error: 'Vui lòng cung cấp định dạng hợp lệ: Số điện thoại mua hàng, Số serial vợt (bắt đầu bằng SN-), hoặc Mã đơn hàng (DH-...) kèm số điện thoại.',
-        },
-        { status: 400 }
+      return rfc9457Error(
+        400,
+        'Yêu cầu không hợp lệ',
+        'Vui lòng cung cấp định dạng hợp lệ: Số serial vợt (bắt đầu bằng SN-), hoặc Mã đơn hàng (DH-...) kèm số điện thoại.'
       );
     }
   }
 
-  // IDOR Protection: Tra cứu theo mã đơn BẮT BUỘC có số điện thoại đi kèm
-  if (targetOrderCode && !targetPhone) {
-    return NextResponse.json(
-      {
-        error: 'QUY TẮC BẢO MẬT (Chống IDOR): Tra cứu theo mã đơn hàng bắt buộc phải cung cấp số điện thoại mua hàng đi kèm để xác minh danh tính!',
-      },
-      { status: 400 }
+  // Anti-IDOR: Bắt buộc cung cấp đồng thời Mã đơn hàng + Số điện thoại khi tra cứu theo đơn/SĐT
+  if (targetPhone && !targetOrderCode) {
+    return rfc9457Error(
+      400,
+      'Yêu cầu không hợp lệ (Chống IDOR)',
+      'Bảo mật tra cứu (Chống IDOR): Yêu cầu cung cấp đồng thời Mã đơn hàng và Số điện thoại để tra cứu bảo hành.'
     );
   }
 
-  if (!targetPhone && !targetSerial && !targetOrderCode) {
-    return NextResponse.json(
-      { error: 'Vui lòng cung cấp số điện thoại mua hàng, số serial của vợt, hoặc mã đơn hàng kèm số điện thoại.' },
-      { status: 400 }
+  if (targetOrderCode && !targetPhone) {
+    return rfc9457Error(
+      400,
+      'Yêu cầu không hợp lệ (Chống IDOR)',
+      'Bảo mật tra cứu (Chống IDOR): Tra cứu theo mã đơn hàng bắt buộc phải cung cấp số điện thoại mua hàng đi kèm để xác minh danh tính!'
+    );
+  }
+
+  if (!targetSerial && !(targetOrderCode && targetPhone)) {
+    return rfc9457Error(
+      400,
+      'Thiếu thông tin tra cứu',
+      'Vui lòng cung cấp số serial của vợt, hoặc đồng thời mã đơn hàng và số điện thoại.'
     );
   }
 
@@ -78,22 +119,6 @@ export async function GET(request: NextRequest) {
          WHERE o.id = $1 AND o.customer_phone = $2
          ORDER BY o.created_at DESC`,
         [targetOrderCode, targetPhone]
-      );
-    } else if (targetPhone) {
-      claims = await queryDb(
-        'warranty_db',
-        `SELECT * FROM warranty_claims WHERE customer_phone = $1 ORDER BY created_at DESC`,
-        [targetPhone]
-      );
-
-      orders = await queryDb(
-        'order_db',
-        `SELECT o.id as order_code, o.customer_phone, o.customer_name, o.created_at, ol.sku, ol.product_name_snapshot, ol.warranty_policy_snapshot
-         FROM orders o
-         JOIN order_lines ol ON o.id = ol.order_id
-         WHERE o.customer_phone = $1
-         ORDER BY o.created_at DESC`,
-        [targetPhone]
       );
     } else if (targetSerial) {
       claims = await queryDb(
@@ -124,28 +149,28 @@ export async function GET(request: NextRequest) {
           [targetSerial]
         );
       }
-
-      // Bảo vệ PII người dùng khi tra cứu chỉ bằng số serial (che số điện thoại và tên)
-      claims = claims.map((c) => ({
-        ...c,
-        customer_phone: maskPhone(c.customer_phone),
-      }));
-
-      orders = orders.map((o) => ({
-        ...o,
-        customer_phone: maskPhone(o.customer_phone),
-        customer_name: maskName(o.customer_name),
-      }));
     }
+
+    // Che mặt nạ PII người dùng cho toàn bộ phản hồi trả về
+    const safeClaims = claims.map((c) => ({
+      ...c,
+      customer_phone: maskPhone(c.customer_phone),
+    }));
+
+    const safeOrders = orders.map((o) => ({
+      ...o,
+      customer_phone: maskPhone(o.customer_phone),
+      customer_name: maskName(o.customer_name),
+    }));
 
     return NextResponse.json({
       query: {
         orderCode: targetOrderCode || null,
-        phone: targetPhone || null,
+        phone: targetPhone ? maskPhone(targetPhone) : null,
         serial: targetSerial || null,
       },
-      claims,
-      purchasedWarranties: orders,
+      claims: safeClaims,
+      purchasedWarranties: safeOrders,
     });
   } catch (error: any) {
     console.error('Warranty lookup error:', error);

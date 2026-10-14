@@ -114,3 +114,63 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// PATCH: Cập nhật quy trình xử lý đơn hàng theo vai trò nhân viên / quản lý (R4)
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { orderId, action, actor, actorRole, branchId } = body;
+
+    if (!orderId || !action) {
+      return NextResponse.json({ error: 'Thiếu thông tin bắt buộc (orderId, action)' }, { status: 400 });
+    }
+
+    const orderRows = await queryDb<any>('order_db', `SELECT * FROM orders WHERE id = $1`, [orderId]);
+    if (orderRows.length === 0) {
+      return NextResponse.json({ error: 'Không tìm thấy đơn hàng' }, { status: 404 });
+    }
+    const order = orderRows[0];
+
+    // R4: Ràng buộc chi nhánh nhân viên
+    const headerBranch = request.headers.get('x-branch-id');
+    const effectiveBranch = headerBranch || branchId;
+
+    if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== order.branch_id) {
+      return NextResponse.json(
+        { error: 'QUY TẮC R4: Nhân viên chỉ được thao tác đơn hàng tại chi nhánh được phân công!' },
+        { status: 403 }
+      );
+    }
+
+    let nextStatus = order.status;
+    if (action === 'CONFIRM') {
+      nextStatus = 'CONFIRMED';
+    } else if (action === 'PREPARE') {
+      nextStatus = 'PREPARING';
+    } else if (action === 'HANDOVER') {
+      nextStatus = order.fulfillment_type === 'STORE_PICKUP' ? 'READY_FOR_PICKUP' : 'COMPLETED';
+    } else if (action === 'COMPLETE') {
+      nextStatus = 'COMPLETED';
+    } else {
+      return NextResponse.json({ error: 'Action không hợp lệ (hỗ trợ: CONFIRM, PREPARE, HANDOVER, COMPLETE)' }, { status: 400 });
+    }
+
+    await queryDb(
+      'order_db',
+      `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [nextStatus, orderId]
+    );
+
+    return NextResponse.json({
+      success: true,
+      orderId,
+      fromStatus: order.status,
+      status: nextStatus,
+      branchId: order.branch_id,
+      action,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+

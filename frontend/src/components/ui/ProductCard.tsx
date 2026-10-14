@@ -1,13 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
+import { SafeImage } from './SafeImage';
 import Link from 'next/link';
-import { motion } from 'motion/react';
 import { PriceTag } from './PriceTag';
 import { Badge } from './Badge';
 import { useCompare, type CompareItem } from '@/lib/compare-context';
-import { Scale } from 'lucide-react';
+import { Scale, Star } from 'lucide-react';
 
 export interface ProductCardProps {
   id: string;
@@ -16,6 +15,10 @@ export interface ProductCardProps {
   brand: string;
   playerType: string;
   priceFrom: number;
+  originalPrice?: number;
+  rating?: number;
+  inStock?: boolean;
+  stockStatusText?: string;
   imageUrl: string;
   secondImageUrl?: string;
   badgeText?: string;
@@ -34,6 +37,10 @@ export function ProductCard({
   brand,
   playerType,
   priceFrom,
+  originalPrice,
+  rating,
+  inStock = true,
+  stockStatusText,
   imageUrl,
   secondImageUrl,
   badgeText,
@@ -50,6 +57,9 @@ export function ProductCard({
   const href = isSecondHand ? `/second-hand#${slug}` : `/vot-cau-long/${slug}`;
   const compared = isInCompare(slug);
 
+  const hasDiscount = Boolean(originalPrice && originalPrice > priceFrom);
+  const hasSecondaryImage = Boolean(secondImageUrl && secondImageUrl !== imageUrl);
+
   return (
     <div
       className={`group relative flex flex-col justify-between rounded-2xl p-3 sm:p-4 transition-colors hover:bg-surface border border-transparent hover:border-line ${className}`}
@@ -57,26 +67,45 @@ export function ProductCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div>
-        {/* Khung ảnh tỷ lệ 1:1 nền trung tính ấm, hòa trộn ảnh trắng */}
-        <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-3">
-          <Link href={href} className="block w-full h-full">
-            <motion.div
-              className="w-full h-full relative p-4 flex items-center justify-center"
-              animate={{ scale: isHovered ? 1.03 : 1 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+        {/* Khung ảnh tỷ lệ chuẩn 4:5 */}
+        <div className="relative w-full aspect-[4/5] bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-3">
+          <Link href={href} className="block w-full h-full relative p-4 flex items-center justify-center">
+            {/* Ảnh chính (Front angle) */}
+            <div
+              className={`absolute inset-4 transition-opacity duration-300 ${
+                isHovered && hasSecondaryImage ? 'opacity-0' : 'opacity-100'
+              }`}
             >
-              <Image
-                src={isHovered && secondImageUrl ? secondImageUrl : imageUrl}
+              <SafeImage
+                src={imageUrl}
                 alt={name}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-contain mix-blend-multiply dark:mix-blend-normal p-2"
                 loading="lazy"
               />
-            </motion.div>
+            </div>
+
+            {/* Ảnh phụ (Back angle) xuất hiện khi hover desktop */}
+            {hasSecondaryImage && (
+              <div
+                className={`absolute inset-4 transition-opacity duration-300 ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <SafeImage
+                  src={secondImageUrl}
+                  alt={`${name} — Mặt sau`}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-contain mix-blend-multiply dark:mix-blend-normal p-2"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </Link>
 
-          {/* Badge duy nhất ở góc trên bên trái */}
+          {/* Badge góc trên bên trái */}
           {grade && (
             <div className="absolute top-2.5 left-2.5 pointer-events-none">
               <Badge variant={grade === 'A' ? 'gradeA' : grade === 'B' ? 'gradeB' : 'gradeC'}>
@@ -133,16 +162,47 @@ export function ProductCard({
               {name}
             </h3>
           </Link>
+
+          {/* Đánh giá sao & Trạng thái tồn kho */}
+          <div className="flex items-center justify-between pt-1 text-[12px]">
+            <div className="flex items-center gap-1" data-rating={rating || 0}>
+              {typeof rating === 'number' && rating > 0 ? (
+                <>
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" aria-label={`${rating} sao`} />
+                  <span className="font-medium text-ink">{rating.toFixed(1)}</span>
+                </>
+              ) : (
+                <span className="text-muted font-normal">Chưa có đánh giá</span>
+              )}
+            </div>
+
+            <div className="text-[12px]">
+              {stockStatusText ? (
+                <span className="text-emerald-700 dark:text-emerald-400 font-normal">{stockStatusText}</span>
+              ) : inStock ? (
+                <span className="text-emerald-700 dark:text-emerald-400 font-normal">Còn hàng</span>
+              ) : (
+                <span className="text-muted font-normal">Tạm hết</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Giá tiền & Nút tương tác */}
       <div className="pt-3 mt-2 border-t border-line flex items-center justify-between">
         <div>
-          <span className="text-[13px] text-muted block font-normal">
+          <span className="text-[12px] text-muted block font-normal">
             {isSecondHand ? 'Giá niêm yết' : 'Giá từ'}
           </span>
-          <PriceTag amount={priceFrom} size="md" />
+          <div className="flex items-baseline gap-2">
+            <PriceTag amount={priceFrom} size="md" />
+            {hasDiscount && (
+              <span className="line-through text-muted text-[13px] font-normal">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(originalPrice!)}
+              </span>
+            )}
+          </div>
         </div>
 
         {onQuickAdd && (
@@ -160,3 +220,5 @@ export function ProductCard({
     </div>
   );
 }
+
+export default ProductCard;

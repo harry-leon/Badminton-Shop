@@ -3,8 +3,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { X, ShoppingBag, ArrowRight, Trash2 } from 'lucide-react';
-import { Button } from './ui/Button';
 import { PriceTag } from './ui/PriceTag';
+import { SafeImage } from './ui/SafeImage';
 
 export interface CartItem {
   id: string;
@@ -80,10 +80,12 @@ export function CartDrawer({
                 key={item.id}
                 className="flex gap-4 p-3 rounded-xl border border-line bg-bg/50 relative group"
               >
-                <div className="w-16 h-16 rounded-lg bg-white p-2 border border-line shrink-0 flex items-center justify-center">
-                  <img
+                <div className="w-16 h-16 rounded-lg bg-white p-2 border border-line shrink-0 flex items-center justify-center overflow-hidden">
+                  <SafeImage
                     src={item.imageUrl}
                     alt={item.name}
+                    width={64}
+                    height={64}
                     className="max-h-full max-w-full object-contain mix-blend-multiply"
                   />
                 </div>

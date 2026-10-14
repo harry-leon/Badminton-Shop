@@ -51,11 +51,11 @@ export default function AdminDashboardPage() {
       const inTransit = transfers.filter((t: any) => t.status === 'IN_TRANSIT').length;
 
       const orders = orderData.orders || [];
-      const branchOrders = orders.filter((o: any) => o.branch_id === selectedBranch);
-      const pendingPay = orders.filter((o: any) => o.status === 'PENDING_PAYMENT').length;
+      const branchOrders = selectedBranch === 'ALL' ? orders : orders.filter((o: any) => o.branch_id === selectedBranch);
+      const pendingPay = orders.filter((o: any) => o.status === 'PENDING_PAYMENT' || o.status === 'AWAITING_PAYMENT').length;
 
       const units = shData.units || [];
-      const pendingUnits = units.filter((u: any) => u.status === 'INSPECTED').length;
+      const pendingUnits = units.filter((u: any) => u.status === 'PENDING_RESALE_APPROVAL' || u.status === 'INSPECTED').length;
 
       const claims = warData.claims || [];
       const pendingClaims = claims.filter((c: any) => c.status === 'SUBMITTED' || c.status === 'INSPECTING').length;

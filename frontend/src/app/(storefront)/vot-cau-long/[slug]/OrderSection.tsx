@@ -4,7 +4,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useCompare } from '@/lib/compare-context';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
-import { QrCode, CheckCircle2, Clock, AlertCircle, X, Scale } from 'lucide-react';
+import { QrCode, CheckCircle2, Clock, AlertCircle, X, Scale, Phone } from 'lucide-react';
+import { SafeImage } from '@/components/ui/SafeImage';
 
 interface SKU {
   id: string;
@@ -65,11 +66,26 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
     return bestId;
   };
 
-  const initialSkuId = skus[0]?.id || '';
-  const initialBranchId = getBestBranchForSku(initialSkuId);
+  // Tìm SKU đầu tiên còn hàng trong toàn hệ thống (ưu tiên biến thể còn hàng như 4UG5)
+  const defaultSkuId = useMemo(() => {
+    const inStockSku = skus.find((sku) => {
+      const totalAvail = stockLevels
+        .filter((sl) => sl.sku === sku.id)
+        .reduce((sum, sl) => sum + Math.max(0, sl.available), 0);
+      return totalAvail > 0;
+    });
+    return inStockSku?.id || skus[0]?.id || '';
+  }, [skus, stockLevels]);
 
-  const [selectedSkuId, setSelectedSkuId] = useState<string>(initialSkuId);
+  const initialBranchId = getBestBranchForSku(defaultSkuId);
+
+  const [selectedSkuId, setSelectedSkuId] = useState<string>(defaultSkuId);
   const [selectedBranchId, setSelectedBranchId] = useState<string>(initialBranchId);
+
+  useEffect(() => {
+    setSelectedSkuId(defaultSkuId);
+    setSelectedBranchId(getBestBranchForSku(defaultSkuId));
+  }, [defaultSkuId]);
   const [fulfillmentType, setFulfillmentType] = useState<'DELIVERY' | 'STORE_PICKUP'>('DELIVERY');
   const [paymentMethod, setPaymentMethod] = useState<'VIETQR' | 'COD'>('VIETQR');
   const [customerName, setCustomerName] = useState('');
@@ -214,68 +230,95 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
           </span>
         </div>
 
-        <div className="space-y-2">
-          {branches.map((b) => {
-            const stock = stockLevels.find(
-              (sl) => sl.sku === selectedSkuId && sl.branch_id === b.id
-            );
-            const avail = stock ? Math.max(0, stock.available) : 0;
-            const isSelected = b.id === selectedBranchId;
-            const isOutOfStock = avail === 0;
+        {totalAvailableAcrossBranches === 0 ? (
+          <div className="p-4 rounded-xl border border-line bg-surface/60 text-[13px] flex items-center justify-between">
+            <div className="flex items-center gap-2 text-muted font-normal">
+              <span className="w-2 h-2 rounded-full bg-sale/60" />
+              <span>Tạm hết hàng tại tất cả {branches.length} chi nhánh</span>
+            </div>
+            <span className="text-[12px] text-muted font-normal shrink-0 ml-2">Hỗ trợ đặt trước</span>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {branches.map((b) => {
+              const stock = stockLevels.find(
+                (sl) => sl.sku === selectedSkuId && sl.branch_id === b.id
+              );
+              const avail = stock ? Math.max(0, stock.available) : 0;
+              const isSelected = b.id === selectedBranchId;
+              const isOutOfStock = avail === 0;
 
-            return (
-              <div
-                key={b.id}
-                onClick={() => setSelectedBranchId(b.id)}
-                className={`p-3 rounded-xl border text-[13px] transition-all flex items-center justify-between cursor-pointer ${
-                  isSelected
-                    ? 'border-ink bg-surface shadow-xs font-medium'
-                    : isOutOfStock
-                    ? 'border-line/60 bg-bg/40 opacity-60 hover:opacity-80'
-                    : 'border-line bg-surface hover:border-ink/40'
-                }`}
-              >
-                <div className="space-y-0.5">
-                  <div className="text-ink">
-                    {b.name} <span className="text-muted font-normal">({b.city})</span>
+              return (
+                <div
+                  key={b.id}
+                  onClick={() => setSelectedBranchId(b.id)}
+                  className={`p-3 rounded-xl border text-[13px] transition-all flex items-center justify-between cursor-pointer ${
+                    isSelected
+                      ? 'border-ink bg-surface shadow-xs font-medium'
+                      : isOutOfStock
+                      ? 'border-line/60 bg-bg/40 opacity-60 hover:opacity-80'
+                      : 'border-line bg-surface hover:border-ink/40'
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <div className="text-ink">
+                      {b.name} <span className="text-muted font-normal">({b.city})</span>
+                    </div>
+                    <div className="text-[12px] text-muted font-normal">
+                      {b.address}
+                    </div>
                   </div>
-                  <div className="text-[12px] text-muted font-normal">
-                    {b.address}
+
+                  <div className="text-right shrink-0 pl-3">
+                    {avail > 0 ? (
+                      <span className="text-brand font-medium text-[13px] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
+                        Còn {avail} cây
+                      </span>
+                    ) : (
+                      <span className="text-muted font-normal text-[12px]">
+                        Hết hàng tại chi nhánh này
+                      </span>
+                    )}
                   </div>
                 </div>
-
-                <div className="text-right shrink-0 pl-3">
-                  {avail > 0 ? (
-                    <span className="text-brand font-medium text-[13px] flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
-                      Còn {avail} cây
-                    </span>
-                  ) : (
-                    <span className="text-muted font-normal text-[12px]">
-                      Hết hàng tại chi nhánh này
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 3. Các nút hành động chính */}
       <div className="flex items-center gap-3 pt-2">
-        <Button
-          onClick={handleOpenOrder}
-          disabled={availableQty === 0}
-          className="flex-1"
-          size="lg"
-        >
-          {availableQty > 0
-            ? 'Đặt mua ngay (Khóa kho R1)'
-            : totalAvailableAcrossBranches > 0
-            ? 'Chi nhánh này tạm hết (Hãy chọn chi nhánh còn hàng)'
-            : 'Tạm hết hàng toàn hệ thống'}
-        </Button>
+        {totalAvailableAcrossBranches === 0 ? (
+          <a
+            href="tel:19006868"
+            className="flex-1 inline-flex items-center justify-center gap-2 h-13 px-6 rounded-full bg-brand text-white text-[14px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none"
+          >
+            <Phone className="w-4 h-4" />
+            <span>Gọi hotline 1900 6868 tư vấn đặt trước</span>
+          </a>
+        ) : (
+          <Button
+            onClick={handleOpenOrder}
+            disabled={availableQty === 0}
+            className="flex-1"
+            size="lg"
+            aria-label={availableQty > 0 ? 'Thêm vào giỏ hàng / Đặt mua ngay' : undefined}
+            data-testid="add-to-cart-btn"
+          >
+            {availableQty > 0 ? (
+              <>
+                <span className="sr-only">Thêm vào giỏ hàng · </span>
+                <span>Đặt mua ngay</span>
+              </>
+            ) : totalAvailableAcrossBranches > 0 ? (
+              'Chi nhánh này tạm hết (Hãy chọn chi nhánh còn hàng)'
+            ) : (
+              'Tạm hết hàng toàn hệ thống'
+            )}
+          </Button>
+        )}
 
         <button
           type="button"
@@ -315,17 +358,27 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
           <PriceTag amount={selectedSku?.price || 0} size="md" />
         </div>
 
-        <Button
-          onClick={handleOpenOrder}
-          disabled={availableQty === 0}
-          size="md"
-          className="px-6"
-        >
-          {availableQty > 0 ? 'Mua ngay' : 'Hết hàng'}
-        </Button>
+        {totalAvailableAcrossBranches === 0 ? (
+          <a
+            href="tel:19006868"
+            className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-full bg-brand text-white text-[13px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none"
+          >
+            <Phone className="w-4 h-4" />
+            <span>Gọi 1900 6868</span>
+          </a>
+        ) : (
+          <Button
+            onClick={handleOpenOrder}
+            disabled={availableQty === 0}
+            size="md"
+            className="px-6"
+          >
+            {availableQty > 0 ? 'Mua ngay' : 'Hết hàng'}
+          </Button>
+        )}
       </div>
 
-      {/* 5. MODAL CHECKOUT & VIETQR CHUẨN QUIET COURT */}
+      {/* 5. MODAL CHECKOUT & VIETQR */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-ink/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-surface rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-8 border border-line">
@@ -343,7 +396,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
               <form onSubmit={handleSubmitOrder} className="space-y-4">
                 <div>
                   <div className="text-[12px] text-muted font-normal">
-                    Khóa kho nguyên tử R1
+                    Xác nhận thông tin
                   </div>
                   <h2 className="text-xl font-medium text-ink mt-1">
                     Xác nhận đặt mua vợt
@@ -522,9 +575,11 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                     </div>
 
                     <div className="flex justify-center">
-                      <img
+                      <SafeImage
                         src={orderResult.vietqr.qrUrl}
                         alt="VietQR Payment"
+                        width={192}
+                        height={192}
                         className="w-48 h-48 rounded-xl border border-line bg-white p-2"
                       />
                     </div>
@@ -554,7 +609,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
 
                     <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[12px] flex items-center gap-2">
                       <Clock className="w-4 h-4 shrink-0 text-muted" />
-                      <span>Hàng được giữ kho trong <strong>30 phút</strong>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
+                      <span>Hàng được giữ kho trong <span className="font-medium text-ink">30 phút</span>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
                     </div>
                   </div>
                 )}

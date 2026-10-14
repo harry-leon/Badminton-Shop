@@ -155,6 +155,7 @@ export default function AdminSecondhandPage() {
         body: JSON.stringify({
           unitId,
           approvedBy: 'ql_chi_nhanh',
+          userRole: currentRole,
         }),
       });
       const data = await res.json();
@@ -163,6 +164,29 @@ export default function AdminSecondhandPage() {
         await loadData();
       } else {
         alert(data.error || 'Lỗi duyệt mở bán');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleApproveCase = async (caseId: string) => {
+    try {
+      const res = await fetch('/api/admin/secondhand', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caseId,
+          approvedBy: 'ql_chi_nhanh',
+          userRole: currentRole,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(`Quản lý chi nhánh đã phê duyệt giá hồ sơ ${caseId} (R5)! Đã tạo unit chờ mở bán.`);
+        await loadData();
+      } else {
+        alert(data.error || 'Lỗi duyệt giá thu mua');
       }
     } catch (err: any) {
       alert(err.message);
@@ -503,7 +527,11 @@ export default function AdminSecondhandPage() {
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-[#111613]">{c.id}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] ${
-                        c.status === 'PAID' ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'
+                        c.status === 'PAID' 
+                          ? 'bg-emerald-100 text-emerald-900' 
+                          : c.status === 'PENDING_MANAGER_APPROVAL'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                            : 'bg-rose-100 text-rose-900'
                       }`}>
                         {c.status}
                       </span>
@@ -515,6 +543,24 @@ export default function AdminSecondhandPage() {
                         {parseInt(c.adjusted_price as any, 10).toLocaleString('vi-VN')} ₫
                       </span>
                     </div>
+                    {c.status === 'PENDING_MANAGER_APPROVAL' && (
+                      <div className="pt-2 mt-1 border-t border-stone-200">
+                        {currentRole === 'BRANCH_MANAGER' || currentRole === 'ADMIN' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveCase(c.id)}
+                            className="w-full bg-[#0F5132] hover:bg-emerald-900 text-white font-medium py-1 px-2 rounded text-[11px] transition-colors flex items-center justify-center gap-1"
+                          >
+                            <UserCheck className="w-3 h-3" />
+                            <span>Duyệt giá thu mua (Branch Manager R5)</span>
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-amber-800 italic block text-center">
+                            Đang chờ Quản lý chi nhánh duyệt giá (R5)
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
@@ -582,14 +628,20 @@ export default function AdminSecondhandPage() {
                       </div>
 
                       {isPending ? (
-                        <button
-                          type="button"
-                          onClick={() => handleApproveResale(unit.id)}
-                          className="bg-[#0F5132] hover:bg-emerald-900 text-white font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          <span>Duyệt mở bán</span>
-                        </button>
+                        currentRole === 'BRANCH_MANAGER' || currentRole === 'ADMIN' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveResale(unit.id)}
+                            className="bg-[#0F5132] hover:bg-emerald-900 text-white font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>Duyệt mở bán (R7)</span>
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-amber-800 italic">
+                            Chờ Quản lý duyệt mở bán (R7)
+                          </span>
+                        )
                       ) : (
                         <span className="text-[#0F5132] font-medium text-xs flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" />

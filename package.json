@@ -1,0 +1,10 @@
+{
+  "name": "smash-court-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node test/test-suite.js",
+    "test:e2e": "node test/run-e2e.js",
+    "lint:design": "node scripts/check-design-rules.js"
+  }
+}

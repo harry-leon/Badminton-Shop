@@ -20,10 +20,19 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { claimId, toStatus, actor, notes, resolutionType, rejectionReason } = body;
+    const { claimId, toStatus, actor, notes, resolutionType, rejectionReason, actorRole } = body;
 
     if (!claimId || !toStatus || !actor) {
       return NextResponse.json({ error: 'Thiếu thông tin bắt buộc (claimId, toStatus, actor)' }, { status: 400 });
+    }
+
+    // Phân quyền vai trò: Nhân viên chỉ được tiếp nhận kiểm định (INSPECTING).
+    // Phê duyệt đổi mới/sửa chữa hoặc từ chối bắt buộc phải là Branch Manager hoặc Admin.
+    if ((toStatus === 'APPROVED' || toStatus === 'REJECTED') && actorRole === 'STAFF') {
+      return NextResponse.json(
+        { error: 'QUY TẮC PHÂN QUYỀN: Nhân viên (STAFF) chỉ được tiếp nhận kiểm định (INSPECTING). Phê duyệt đổi trả hoặc từ chối yêu cầu Branch Manager hoặc Admin!' },
+        { status: 403 }
+      );
     }
 
     // Lấy trạng thái hiện tại

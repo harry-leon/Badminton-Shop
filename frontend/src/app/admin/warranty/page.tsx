@@ -44,7 +44,7 @@ interface ClaimEvent {
 }
 
 export default function AdminWarrantyPage() {
-  const { selectedBranch } = useAdmin();
+  const { selectedBranch, currentRole } = useAdmin();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [events, setEvents] = useState<ClaimEvent[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -87,7 +87,8 @@ export default function AdminWarrantyPage() {
         body: JSON.stringify({
           claimId,
           toStatus,
-          actor: 'ktv_admin_portal',
+          actor: currentRole === 'STAFF' ? 'ktv_staff_portal' : 'manager_admin_portal',
+          actorRole: currentRole,
           resolutionType,
           rejectionReason: rejectReason,
           notes: `Thao tác thẩm định bảo hành: chuyển sang ${toStatus}`,
@@ -281,35 +282,41 @@ export default function AdminWarrantyPage() {
                   )}
 
                   {claim.status === 'INSPECTING' && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateStatus(claim.id, 'APPROVED', 'REPLACE')}
-                        className="bg-[#0F5132] text-white font-medium px-3 py-1.5 rounded-lg hover:bg-emerald-900 transition-colors flex items-center gap-1.5"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Duyệt đổi mới (Lỗi NSX)</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateStatus(claim.id, 'APPROVED', 'REPAIR')}
-                        className="bg-blue-600 text-white font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-                      >
-                        <Wrench className="w-3.5 h-3.5" />
-                        <span>Duyệt sửa chữa khung</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveClaimId(claim.id);
-                          setRejectModalOpen(true);
-                        }}
-                        className="bg-rose-600 text-white font-medium px-3 py-1.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center gap-1.5"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span>Từ chối (Va đập đối kháng - K10)</span>
-                      </button>
-                    </>
+                    currentRole === 'BRANCH_MANAGER' || currentRole === 'ADMIN' ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(claim.id, 'APPROVED', 'REPLACE')}
+                          className="bg-[#0F5132] text-white font-medium px-3 py-1.5 rounded-lg hover:bg-emerald-900 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Duyệt đổi mới (Lỗi NSX)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(claim.id, 'APPROVED', 'REPAIR')}
+                          className="bg-blue-600 text-white font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Wrench className="w-3.5 h-3.5" />
+                          <span>Duyệt sửa chữa khung</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveClaimId(claim.id);
+                            setRejectModalOpen(true);
+                          }}
+                          className="bg-rose-600 text-white font-medium px-3 py-1.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Từ chối (Va đập đối kháng - K10)</span>
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-[11px] text-amber-800 italic">
+                        Đang kiểm định — Chờ Quản lý chi nhánh (BRANCH_MANAGER) duyệt phương án hoặc từ chối
+                      </span>
+                    )
                   )}
 
                   {claim.status === 'APPROVED' && (

@@ -107,10 +107,23 @@ function getJson(path) {
     });
 }
 
+function resetDatabaseState() {
+    queryPg('order_db', "DELETE FROM payments WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
+    queryPg('order_db', "DELETE FROM order_lines WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
+    queryPg('order_db', "DELETE FROM orders WHERE id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
+    queryPg('inventory_db', "DELETE FROM reservations WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
+    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_DN_01' AND sku = 'YONEX-ARC11PRO-4UG5';");
+    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_HCM_01' AND sku = 'SH-20261013-0001';");
+    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_HN_01' AND sku = 'SH-20261013-0002';");
+    queryPg('secondhand_db', "UPDATE secondhand_units SET status = 'APPROVED_FOR_SALE' WHERE id IN ('SH-20261013-0001', 'SH-20261013-0002');");
+}
+
 async function main() {
     console.log('===============================================================');
     console.log(' BẮT ĐẦU CHẠY MASTER TEST SUITE: BADMINTON SHOP MONOREPO');
     console.log('===============================================================\n');
+
+    resetDatabaseState();
 
     // -----------------------------------------------------------------------------
     // PHẦN 1: CẤU TRÚC MONOREPO & CHUẨN KỸ THUẬT (T1 - T7)
@@ -473,6 +486,8 @@ async function main() {
     // -----------------------------------------------------------------------------
     // PHẦN 6: KIỂM THỬ CONCURRENCY & BẢO MẬT API TRỰC TIẾP (C1 - C5)
     // -----------------------------------------------------------------------------
+    resetDatabaseState();
+
     await runTest('C1. Concurrency R1: Gửi đồng thời 25 POST vào /api/checkout khi kho còn 5, không bán âm kho', async () => {
         // Đặt lại reserved = 0 cho SKU YONEX-ARC11PRO-4UG5 tại BR_DN_01 (on_hand = 5)
         queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_DN_01' AND sku = 'YONEX-ARC11PRO-4UG5';");
@@ -650,14 +665,7 @@ async function main() {
     // -----------------------------------------------------------------------------
     // DỌN DẸP DỮ LIỆU KIỂM THỬ (Bảo toàn trạng thái sạch cho cơ sở dữ liệu)
     // -----------------------------------------------------------------------------
-    queryPg('order_db', "DELETE FROM payments WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
-    queryPg('order_db', "DELETE FROM order_lines WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
-    queryPg('order_db', "DELETE FROM orders WHERE id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
-    queryPg('inventory_db', "DELETE FROM reservations WHERE order_id NOT IN ('DH-20261013-0001', 'DH-20261013-0002', 'DH-20261013-0003', 'DH-20261013-0004');");
-    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_DN_01' AND sku = 'YONEX-ARC11PRO-4UG5';");
-    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_HCM_01' AND sku = 'SH-20261013-0001';");
-    queryPg('inventory_db', "UPDATE stock_levels SET reserved = 0 WHERE branch_id = 'BR_HN_01' AND sku = 'SH-20261013-0002';");
-    queryPg('secondhand_db', "UPDATE secondhand_units SET status = 'APPROVED_FOR_SALE' WHERE id IN ('SH-20261013-0001', 'SH-20261013-0002');");
+    resetDatabaseState();
 
     console.log('\n===============================================================');
     console.log(` KẾT QUẢ KIỂM THỬ: ${passedTests}/${totalTests} TESTS PASS (${((passedTests/totalTests)*100).toFixed(1)}%)`);
@@ -674,5 +682,8 @@ async function main() {
 
 main().catch((err) => {
     console.error('Lỗi thực thi test suite:', err);
+    try {
+        resetDatabaseState();
+    } catch (_) {}
     process.exit(1);
 });

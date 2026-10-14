@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/SafeImage';
+import { Container } from '@/components/ui/Container';
 import { useCart } from '@/lib/cart-context';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
@@ -10,9 +11,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { QrCode, CheckCircle2, Clock, AlertCircle, ChevronRight, ShieldCheck, MapPin, Truck, Store } from 'lucide-react';
 
 const BRANCHES = [
-  { id: 'BR_HCM_01', name: 'Chi nhánh Quận 1 (TP. Hồ Chí Minh)', address: '120 Nguyễn Thị Minh Khai, P. Võ Thị Sáu, Quận 1' },
-  { id: 'BR_HN_01', name: 'Chi nhánh Cầu Giấy (Hà Nội)', address: '45 Xuân Thủy, P. Dịch Vọng Hậu, Cầu Giấy' },
-  { id: 'BR_DN_01', name: 'Chi nhánh Hải Châu (Đà Nẵng)', address: '88 Nguyễn Văn Linh, P. Nam Dương, Hải Châu' },
+  { id: 'BR_HCM_01', name: 'Chi nhánh Quận 1 (TP. Hồ Chí Minh)', address: '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1' },
+  { id: 'BR_HN_01', name: 'Chi nhánh Cầu Giấy (Hà Nội)', address: '45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy' },
+  { id: 'BR_DN_01', name: 'Chi nhánh Hải Châu (Đà Nẵng)', address: '78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu' },
 ];
 
 export default function CheckoutPage() {
@@ -116,9 +117,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="flex justify-center">
-                <img
+                <SafeImage
                   src={orderResult.vietqr.qrUrl}
                   alt="VietQR"
+                  width={192}
+                  height={192}
                   className="w-48 h-48 rounded-xl border border-line bg-white p-2"
                 />
               </div>
@@ -148,7 +151,7 @@ export default function CheckoutPage() {
 
               <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[12px] flex items-center gap-2">
                 <Clock className="w-4 h-4 shrink-0 text-muted" />
-                <span>Hàng được giữ kho trong <strong>30 phút</strong>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
+                <span>Hàng được giữ kho trong <span className="font-medium text-ink">30 phút</span>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
               </div>
             </div>
           )}
@@ -190,7 +193,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <Container className="max-w-6xl">
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -364,7 +367,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="pt-3 first:pt-0 flex gap-3 items-center">
                     <div className="w-12 h-12 rounded-lg bg-[#EFECE6] dark:bg-[#18201C] p-1.5 shrink-0 flex items-center justify-center relative overflow-hidden">
-                      <Image
+                      <SafeImage
                         src={item.imageUrl}
                         alt={item.name}
                         fill
@@ -404,17 +407,17 @@ export default function CheckoutPage() {
                 size="lg"
                 className="w-full text-[15px]"
               >
-                Xác nhận đặt hàng (Khóa kho R1)
+                Xác nhận đặt hàng
               </Button>
 
               <div className="text-[12px] text-muted text-center flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand" />
-                <span>Khóa kho nguyên tử R1 · Cam kết không bán âm kho</span>
+                <span>Giữ hàng tự động · Cam kết chính xác theo tồn kho</span>
               </div>
             </div>
           </div>
         </form>
-      </div>
+      </Container>
     </div>
   );
 }

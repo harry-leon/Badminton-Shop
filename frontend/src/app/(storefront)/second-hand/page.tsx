@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/SafeImage';
+import { Container } from '@/components/ui/Container';
 import { queryDb } from '@/lib/db';
 import { Badge } from '@/components/ui/Badge';
 import { PriceTag } from '@/components/ui/PriceTag';
@@ -21,18 +22,40 @@ const branchNames: Record<string, { name: string; city: string }> = {
   BR_DN_01: { name: 'Chi nhánh Hải Châu', city: 'Đà Nẵng' },
 };
 
+function maskSerialNumber(serial?: string | null): string {
+  if (!serial) return 'Khớp hồ sơ';
+  const parts = serial.trim().split('-');
+  if (parts.length >= 4) {
+    const prefix = parts.slice(0, parts.length - 2).join('-');
+    const suffix = parts[parts.length - 1];
+    return `${prefix}-***-${suffix}`;
+  }
+  if (parts.length === 3) {
+    return `${parts[0]}-***-${parts[2]}`;
+  }
+  if (serial.length > 8) {
+    return serial.slice(0, 4) + '-***-' + serial.slice(-3);
+  }
+  return serial;
+}
+
 export default async function SecondHandPage() {
   // R7: Chỉ hiển thị vợt có status = 'APPROVED_FOR_SALE'
-  const units = await queryDb<any>(
+  const rawUnits = await queryDb<any>(
     'secondhand_db',
     `SELECT * FROM secondhand_units 
      WHERE status = 'APPROVED_FOR_SALE' 
      ORDER BY created_at DESC`
   );
 
+  const units = (rawUnits || []).map((u: any) => ({
+    ...u,
+    serial_number: maskSerialNumber(u.serial_number),
+  }));
+
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container>
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -40,7 +63,7 @@ export default async function SecondHandPage() {
           <span className="text-ink">Vợt cũ đã kiểm định</span>
         </nav>
 
-        {/* Header trang theo phong cách Quiet Court */}
+        {/* Header trang danh mục */}
         <div className="space-y-4 pb-8 mb-8 border-b border-line">
           <div className="inline-flex items-center gap-1.5 text-[13px] text-brand font-normal">
             <ShieldCheck className="w-4 h-4" />
@@ -53,7 +76,7 @@ export default async function SecondHandPage() {
                 Vợt cũ đã kiểm định
               </h1>
               <p className="text-[14px] text-muted leading-relaxed font-normal">
-                Mỗi cây vợt là một sản phẩm độc bản duy nhất (Quy tắc R2: Unique Unit) với số serial niêm yết, ảnh chụp thực tế và hồ sơ kiểm định độc lập. Cam kết tuyệt đối không thu mua vợt nứt gãy hoặc qua sửa chữa.
+                Mỗi cây vợt là một sản phẩm độc bản duy nhất với số serial niêm yết, ảnh chụp thực tế và hồ sơ kiểm định độc lập. Cam kết tuyệt đối không thu mua vợt nứt gãy hoặc qua sửa chữa.
               </p>
             </div>
 
@@ -127,7 +150,7 @@ export default async function SecondHandPage() {
                     {/* Khung ảnh tỷ lệ 1:1 nền ấm hòa trộn ảnh trắng */}
                     <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4">
                       <div className="relative w-full h-full">
-                        <Image
+                        <SafeImage
                           src={imgUrl}
                           alt={unit.model_name}
                           fill
@@ -168,7 +191,7 @@ export default async function SecondHandPage() {
                     <div className="p-3 bg-bg rounded-xl text-[13px] space-y-1 mb-4 border border-line">
                       <div className="flex items-center gap-1.5 text-ink">
                         <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
-                        <span>Serial: <span className="font-mono text-muted">{unit.serial_number || 'Khớp hồ sơ'}</span></span>
+                        <span>Serial: <span className="font-mono text-muted">{maskSerialNumber(unit.serial_number)}</span></span>
                       </div>
                       <p className="text-[12px] text-muted leading-relaxed font-normal pt-0.5">
                         {unit.condition_notes || 'Khung nguyên bản, đã kiểm tra đa điểm 16 tiêu chuẩn kỹ thuật.'}
@@ -192,7 +215,7 @@ export default async function SecondHandPage() {
             })}
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

@@ -13,6 +13,7 @@ export const ADMIN_BRANCHES: Branch[] = [
   { id: 'BR_HCM_01', name: 'Smash Court — Quận 1', city: 'TP. Hồ Chí Minh', address: 'Số 15 Lê Duẩn, P. Bến Nghé, Quận 1' },
   { id: 'BR_HN_01', name: 'Smash Court — Cầu Giấy', city: 'Hà Nội', address: 'Số 28 Cầu Giấy, P. Quan Hoa, Q. Cầu Giấy' },
   { id: 'BR_DN_01', name: 'Smash Court — Hải Châu', city: 'Đà Nẵng', address: 'Số 102 Bạch Đằng, P. Hải Châu 1, Q. Hải Châu' },
+  { id: 'ALL', name: 'Toàn quốc (Tất cả chi nhánh)', city: 'Toàn quốc', address: 'Quản trị tập trung toàn hệ thống' },
 ];
 
 export type AdminRole = 'ADMIN' | 'BRANCH_MANAGER' | 'STAFF';

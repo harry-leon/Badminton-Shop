@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     let stockQuery = `SELECT * FROM stock_levels`;
     const params: any[] = [];
-    if (branchId) {
+    if (branchId && branchId !== 'ALL') {
       stockQuery += ` WHERE branch_id = $1`;
       params.push(branchId);
     }
@@ -17,11 +17,17 @@ export async function GET(request: NextRequest) {
     const stockLevels = await queryDb('inventory_db', stockQuery, params);
     const transfers = await queryDb('inventory_db', `SELECT * FROM stock_transfers ORDER BY created_at DESC`);
     const movements = await queryDb('inventory_db', `SELECT * FROM stock_movements ORDER BY created_at DESC LIMIT 30`);
+    const auditStats = await queryDb('inventory_db', `
+      SELECT 
+        (SELECT COALESCE(SUM(on_hand), 0) FROM stock_levels) as total_on_hand,
+        (SELECT COALESCE(SUM(quantity), 0) FROM stock_movements) as total_movements
+    `);
 
     return NextResponse.json({
       stockLevels,
       transfers,
       movements,
+      audit: auditStats[0] || { total_on_hand: 0, total_movements: 0 },
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -31,13 +37,14 @@ export async function GET(request: NextRequest) {
 // POST: Tạo yêu cầu điều chuyển kho mới (R4 & R8)
 export async function POST(request: NextRequest) {
   try {
-    const { fromBranchId, toBranchId, sku, quantity, actor, actorBranchId } = await request.json();
+    const { fromBranchId, toBranchId, sku, quantity, actor, actorBranchId, actorRole } = await request.json();
 
-    // R4: Nhân viên chỉ được thao tác tại chi nhánh được phân công (ưu tiên header X-Branch-Id)
+    // R4: Ràng buộc chi nhánh: Nhân viên và Quản lý chỉ được thao tác tại chi nhánh nguồn được phân công.
+    // Quản trị viên (ADMIN) có toàn quyền trên toàn hệ thống (hoặc khi chọn chi nhánh ALL).
     const headerBranch = request.headers.get('x-branch-id');
     const effectiveBranch = headerBranch || actorBranchId;
 
-    if (effectiveBranch && effectiveBranch !== fromBranchId && effectiveBranch !== 'ADMIN') {
+    if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== fromBranchId) {
       return NextResponse.json(
         { error: 'QUY TẮC R4: Bạn không có quyền thao tác kho tại chi nhánh nguồn!' },
         { status: 403 }
@@ -72,7 +79,9 @@ export async function POST(request: NextRequest) {
 // PATCH: Cập nhật trạng thái điều chuyển (Xuất kho -> IN_TRANSIT, Nhận hàng -> RECEIVED/DISCREPANCY)
 export async function PATCH(request: NextRequest) {
   try {
-    const { transferId, action, receivedQty, discrepancyReason, actor } = await request.json();
+    const headerBranch = request.headers.get('x-branch-id');
+    const { transferId, action, receivedQty, discrepancyReason, actor, actorBranchId, actorRole } = await request.json();
+    const effectiveBranch = headerBranch || actorBranchId;
 
     const transferRows = await queryDb('inventory_db', `SELECT * FROM stock_transfers WHERE id = $1`, [transferId]);
     if (transferRows.length === 0) {
@@ -81,6 +90,14 @@ export async function PATCH(request: NextRequest) {
     const transfer = transferRows[0];
 
     if (action === 'DISPATCH') {
+      // R4: Nhân viên và Quản lý chỉ được xuất kho điều chuyển tại chi nhánh gửi from_branch_id (ADMIN toàn quyền)
+      if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.from_branch_id) {
+        return NextResponse.json(
+          { error: 'QUY TẮC R4: Nhân viên chỉ được xuất kho điều chuyển tại chi nhánh được phân công!' },
+          { status: 403 }
+        );
+      }
+
       // Idempotency / State machine gate
       if (transfer.status !== 'APPROVED') {
         return NextResponse.json(
@@ -119,6 +136,14 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ success: true, status: 'IN_TRANSIT' });
       });
     } else if (action === 'RECEIVE') {
+      // R4: Nhân viên và Quản lý chỉ được nhận kho điều chuyển tại chi nhánh đích to_branch_id (ADMIN toàn quyền)
+      if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.to_branch_id) {
+        return NextResponse.json(
+          { error: 'QUY TẮC R4: Nhân viên chỉ được nhận kho điều chuyển tại chi nhánh đích được phân công!' },
+          { status: 403 }
+        );
+      }
+
       // Idempotency / State machine gate
       if (transfer.status !== 'IN_TRANSIT') {
         return NextResponse.json(

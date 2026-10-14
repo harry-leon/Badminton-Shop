@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Search, ShieldCheck, Clock, CheckCircle2, AlertTriangle, XCircle, FileText, Wrench, Check, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Container } from '@/components/ui/Container';
 
 interface Claim {
   id: string;
@@ -241,7 +242,7 @@ function WarrantyLookupContent() {
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <Container className="max-w-4xl">
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -249,17 +250,17 @@ function WarrantyLookupContent() {
           <span className="text-ink">Tra cứu bảo hành</span>
         </nav>
 
-        {/* Tiêu đề trang Quiet Court */}
+        {/* Tiêu đề trang */}
         <div className="text-center max-w-xl mx-auto mb-8 space-y-2">
           <div className="inline-flex items-center gap-1.5 text-[13px] text-brand font-normal">
             <ShieldCheck className="w-4 h-4" />
-            <span>Bảo hành điện tử minh bạch · Snapshot chính sách bất biến</span>
+            <span>Bảo hành điện tử minh bạch · Cam kết chính sách bất biến</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-ink">
             Tra cứu bảo hành & tiến độ sửa chữa
           </h1>
           <p className="text-[14px] text-muted leading-relaxed font-normal">
-            Nhập số điện thoại mua hàng, số serial nón vợt hoặc mã đơn để tra cứu chi tiết snapshot chính sách bảo hành đã cam kết (Quy tắc R9: Snapshot Immutability).
+            Nhập số serial nón vợt hoặc mã đơn kèm số điện thoại để tra cứu chi tiết chính sách bảo hành đã cam kết theo đơn hàng.
           </p>
         </div>
 
@@ -275,7 +276,7 @@ function WarrantyLookupContent() {
                   : 'text-muted hover:text-ink font-normal'
               }`}
             >
-              Số ĐT / Số serial vợt
+              Số serial nón vợt
             </button>
             <button
               type="button"
@@ -286,7 +287,7 @@ function WarrantyLookupContent() {
                   : 'text-muted hover:text-ink font-normal'
               }`}
             >
-              Mã đơn (+ Xác thực SĐT)
+              Mã đơn hàng + Số ĐT
             </button>
           </div>
 
@@ -294,7 +295,7 @@ function WarrantyLookupContent() {
             {lookupMode === 'PHONE_OR_SERIAL' ? (
               <div>
                 <label htmlFor="search-input" className="block text-[13px] text-ink font-medium mb-1.5">
-                  Số điện thoại mua hàng hoặc số serial nón vợt
+                  Số serial nón vợt
                 </label>
                 <div className="relative">
                   <input
@@ -302,7 +303,7 @@ function WarrantyLookupContent() {
                     type="text"
                     value={phoneOrSerial}
                     onChange={(e) => setPhoneOrSerial(e.target.value)}
-                    placeholder="VD: 0909123456 hoặc SN-AX99P-2026-0042"
+                    placeholder="VD: SN-AX99P-2026-0042"
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-line bg-surface text-ink focus:outline-none focus:border-ink text-[14px] font-normal"
                   />
                   <Search className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
@@ -366,7 +367,7 @@ function WarrantyLookupContent() {
                   <FileText className="w-4 h-4 text-brand" />
                   <span>Sản phẩm & hợp đồng bảo hành ({purchasedWarranties.length})</span>
                 </h2>
-                <span className="text-[13px] text-muted font-normal">Quy tắc R9: Snapshot Immutability</span>
+                <span className="text-[13px] text-muted font-normal">Chính sách bảo hành bất biến</span>
               </div>
 
               {purchasedWarranties.length === 0 ? (
@@ -458,7 +459,7 @@ function WarrantyLookupContent() {
                           <div className="p-3 bg-sale/5 border border-sale/20 rounded-lg text-sale text-[12px] mt-2 space-y-1">
                             <div className="font-medium flex items-center gap-1.5">
                               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                              <span>Quy tắc K10: Kết luận từ chối bảo hành có bằng chứng:</span>
+                              <span>Lý do từ chối bảo hành kèm căn cứ kỹ thuật:</span>
                             </div>
                             <p className="leading-relaxed pl-5">&ldquo;{claim.rejection_reason}&rdquo;</p>
                           </div>
@@ -477,7 +478,7 @@ function WarrantyLookupContent() {
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

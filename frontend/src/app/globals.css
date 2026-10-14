@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    --page-gutter: 16px; /* 16px trên mobile (<768px) */
     --bg: #F5F4F0;       /* nền trang, trắng ngà */
     --surface: #FFFFFF;  /* thẻ, popover, modal */
     --ink: #111613;      /* chữ chính, nút chính */
@@ -18,6 +19,18 @@
     --radius-input: 12px;
   }
 
+  @media (min-width: 768px) {
+    :root {
+      --page-gutter: 24px; /* 24px trên tablet (>=768px) */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --page-gutter: 32px; /* 32px trên desktop (>=1024px) */
+    }
+  }
+
   .dark {
     --bg: #0B0F0D;       /* nền gần đen xanh thể thao */
     --surface: #141A17;  /* thẻ, popover nền tối */
@@ -27,6 +40,10 @@
     --brand: #16794C;    /* xanh sân sáng hơn chút cho nền tối */
     --accent: #C8F31D;   /* xanh chanh */
     --sale: #FF6B4A;     /* giá giảm nền tối */
+  }
+
+  b, strong {
+    font-weight: 500;
   }
 }
 

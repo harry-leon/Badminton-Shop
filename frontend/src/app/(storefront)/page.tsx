@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/SafeImage';
+import { Container } from '@/components/ui/Container';
 import { queryDb } from '@/lib/db';
 import { ShieldCheck, Award, MapPin, ArrowRight, Zap, CheckCircle2, ChevronRight, HelpCircle, PhoneCall, Search } from 'lucide-react';
 import { ProductCard } from '@/components/ui/ProductCard';
@@ -20,6 +21,23 @@ const branchLabels: Record<string, string> = {
   BR_DN_01: 'Hải Châu, Đà Nẵng',
 };
 
+function maskSerialNumber(serial?: string | null): string {
+  if (!serial) return 'Khớp hồ sơ';
+  const parts = serial.trim().split('-');
+  if (parts.length >= 4) {
+    const prefix = parts.slice(0, parts.length - 2).join('-');
+    const suffix = parts[parts.length - 1];
+    return `${prefix}-***-${suffix}`;
+  }
+  if (parts.length === 3) {
+    return `${parts[0]}-***-${parts[2]}`;
+  }
+  if (serial.length > 8) {
+    return serial.slice(0, 4) + '-***-' + serial.slice(-3);
+  }
+  return serial;
+}
+
 export default async function HomePage() {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -37,22 +55,22 @@ export default async function HomePage() {
       {
         '@type': 'Store',
         name: 'Smash Court Quận 1',
-        address: '120 Nguyễn Thị Minh Khai, P. Võ Thị Sáu, Quận 1, TP.HCM',
+        address: '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1',
       },
       {
         '@type': 'Store',
         name: 'Smash Court Cầu Giấy',
-        address: '45 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội',
+        address: '45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy',
       },
       {
         '@type': 'Store',
         name: 'Smash Court Hải Châu',
-        address: '88 Nguyễn Văn Linh, Nam Dương, Hải Châu, Đà Nẵng',
+        address: '78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu',
       },
     ],
   };
 
-  // 1. Lấy vợt cũ đã duyệt mở bán (R7: APPROVED_FOR_SALE) trực tiếp từ secondhand_db
+  // 1. Lấy vợt cũ đã duyệt mở bán trực tiếp từ secondhand_db
   let secondhandRackets: any[] = [];
   try {
     const shRows = await queryDb<any>(
@@ -73,7 +91,7 @@ export default async function HomePage() {
       const imgUrl = images[0] || '/images/secondhand/sh-nanoflare-800-pro.png';
       return {
         id: r.id,
-        serial: r.serial_number,
+        serial: maskSerialNumber(r.serial_number),
         name: r.model_name,
         slug: r.id,
         brand: 'Yonex',
@@ -125,7 +143,7 @@ export default async function HomePage() {
 
       {/* 1. HERO SECTION (Phương án A: Nền sáng ngà #F5F4F0) */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 sm:pb-24 border-b border-line bg-surface/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Container>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Cột chữ */}
             <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-left">
@@ -179,11 +197,13 @@ export default async function HomePage() {
             {/* Cột ảnh vợt Hero lớn */}
             <div className="lg:col-span-5 relative flex items-center justify-center">
               <div className="relative w-full aspect-square max-w-md sm:max-w-lg rounded-3xl bg-[#EFECE6] dark:bg-surface p-8 flex items-center justify-center overflow-hidden border border-line">
-                <Image
+                <SafeImage
                   src="/images/products/yonex-astrox-99-pro.jpg"
                   alt="Yonex Astrox 99 Pro Flagship Racket"
                   fill
                   priority
+                  fetchPriority="high"
+                  loading="eager"
                   sizes="(max-width: 768px) 100vw, 450px"
                   className="object-contain mix-blend-multiply dark:mix-blend-normal p-6"
                 />
@@ -192,17 +212,17 @@ export default async function HomePage() {
                     <div className="text-[13px] font-medium text-ink">Yonex Astrox 99 Pro</div>
                     <div className="text-[12px] text-muted">Dòng vợt thiên công thi đấu</div>
                   </div>
-                  <span className="text-[14px] font-medium text-ink">3.950.000 ₫</span>
+                  <span className="text-[14px] font-medium text-ink">4.250.000 ₫</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 2. DẢI TIN CẬY (TRUST STRIP) */}
       <section className="py-10 border-b border-line bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center text-brand shrink-0">
@@ -244,12 +264,12 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 3. CHỌN VỢT THEO LỐI CHƠI (PLAYSTYLE SELECTOR) */}
       <section className="py-16 sm:py-20 border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <Container className="space-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div className="space-y-1">
               <span className="text-[13px] font-medium text-brand">Định hình phong cách</span>
@@ -324,12 +344,12 @@ export default async function HomePage() {
               </div>
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 4. HÀNG MỚI VỀ (NEW ARRIVALS CAROUSEL) */}
       <section className="py-16 sm:py-20 border-b border-line bg-surface/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <Container className="space-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div className="space-y-1">
               <span className="text-[13px] font-medium text-brand">Bộ sưu tập nổi bật</span>
@@ -362,25 +382,23 @@ export default async function HomePage() {
               />
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 5. THƯƠNG HIỆU MARQUEE */}
       <section className="py-8 border-b border-line bg-bg overflow-hidden select-none">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-around gap-8 text-[15px] sm:text-[18px] font-medium text-muted">
+        <Container className="flex items-center justify-around gap-8 text-[15px] sm:text-[18px] font-medium text-muted">
           <span className="hover:text-ink transition-colors">YONEX</span>
           <span>•</span>
           <span className="hover:text-ink transition-colors">LI-NING</span>
           <span>•</span>
           <span className="hover:text-ink transition-colors">VICTOR</span>
-          <span>•</span>
-          <span className="hover:text-ink transition-colors">MIZUNO</span>
-        </div>
+        </Container>
       </section>
 
       {/* 6. VỢT CŨ ĐÃ KIỂM ĐỊNH (SECOND-HAND SECTION) */}
       <section className="py-16 sm:py-24 border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <Container className="space-y-12">
           <div className="max-w-2xl space-y-3">
             <span className="text-[13px] font-medium text-brand">Quy trình minh bạch</span>
             <h2 className="text-2xl sm:text-4xl font-medium tracking-tight text-ink">
@@ -419,7 +437,7 @@ export default async function HomePage() {
               </div>
               <h4 className="text-[16px] font-medium text-ink">Bảo hành độc bản</h4>
               <p className="text-[14px] text-muted leading-relaxed font-normal">
-                Mỗi cây vợt là độc nhất (Unique Unit), cấp mã niêm phong riêng và lưu snapshot điều kiện bảo hành.
+                Mỗi cây vợt là sản phẩm độc bản, cấp mã niêm phong riêng và lưu trữ điều kiện bảo hành bất biến.
               </p>
             </div>
           </div>
@@ -451,12 +469,12 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 7. HỆ THỐNG CỬA HÀNG & GIỜ MỞ CỬA */}
       <section className="py-16 sm:py-20 border-b border-line bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <Container className="space-y-8">
           <div className="max-w-xl space-y-2">
             <span className="text-[13px] font-medium text-brand">Hệ thống chi nhánh</span>
             <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-ink">
@@ -471,7 +489,7 @@ export default async function HomePage() {
                 <Badge variant="brand">TP. Hồ Chí Minh</Badge>
               </div>
               <p className="text-[14px] text-muted font-normal leading-relaxed">
-                120 Nguyễn Thị Minh Khai, P. Võ Thị Sáu, Quận 1
+                123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1
               </p>
               <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: 08:30 – 21:30 hàng ngày
@@ -484,7 +502,7 @@ export default async function HomePage() {
                 <Badge variant="brand">Hà Nội</Badge>
               </div>
               <p className="text-[14px] text-muted font-normal leading-relaxed">
-                45 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy
+                45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy
               </p>
               <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: 08:30 – 21:30 hàng ngày
@@ -497,26 +515,26 @@ export default async function HomePage() {
                 <Badge variant="brand">Đà Nẵng</Badge>
               </div>
               <p className="text-[14px] text-muted font-normal leading-relaxed">
-                88 Nguyễn Văn Linh, Nam Dương, Hải Châu
+                78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu
               </p>
               <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: 08:30 – 21:30 hàng ngày
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 8. TRA CỨU BẢO HÀNH NHANH (FAST LOOKUP WIDGET) */}
       <section className="py-16 sm:py-20 border-b border-line bg-surface/50">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-6">
+        <Container className="max-w-3xl text-center space-y-6">
           <div className="space-y-2">
             <span className="text-[13px] font-medium text-brand">Hậu mãi chu đáo</span>
             <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-ink">
               Tra cứu tiến độ bảo hành điện tử
             </h2>
             <p className="text-[15px] text-muted font-normal max-w-lg mx-auto">
-              Nhập số điện thoại mua hàng để kiểm tra thời hạn bảo hành khung vợt và tiến độ xử lý khiếu nại.
+              Nhập số serial nón vợt để kiểm tra thời hạn bảo hành khung vợt và tiến độ xử lý khiếu nại.
             </p>
           </div>
 
@@ -527,8 +545,8 @@ export default async function HomePage() {
           >
             <input
               type="text"
-              name="phone"
-              placeholder="Nhập số điện thoại mua hàng..."
+              name="q"
+              placeholder="Nhập số serial nón vợt (VD: SN-AX99P-2026-0042)..."
               className="w-full h-12 px-5 rounded-full bg-surface border border-line text-[14px] text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ink"
               required
             />
@@ -539,12 +557,12 @@ export default async function HomePage() {
               Tra cứu
             </button>
           </form>
-        </div>
+        </Container>
       </section>
 
       {/* 9. CÂU HỎI THƯỜNG GẶP (FAQ ACCORDION) */}
       <section className="py-16 sm:py-20 border-b border-line">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <Container className="max-w-4xl space-y-8">
           <div className="text-center space-y-2">
             <span className="text-[13px] font-medium text-brand">Giải đáp thắc mắc</span>
             <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-ink">
@@ -593,12 +611,12 @@ export default async function HomePage() {
               </p>
             </details>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* 10. KÊU GỌI CUỐI TRANG (FINAL CTA) */}
       <section className="py-16 sm:py-24 text-center">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-6">
+        <Container className="max-w-2xl text-center space-y-6">
           <h2 className="text-3xl sm:text-4xl font-medium tracking-tight text-ink">
             Sẵn sàng nâng tầm trận cầu của bạn?
           </h2>
@@ -613,7 +631,7 @@ export default async function HomePage() {
               Khám phá bộ sưu tập vợt
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
     </div>
   );

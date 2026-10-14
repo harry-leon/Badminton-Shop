@@ -18,6 +18,9 @@ seed:
 test:
 	node test/test-suite.js
 
+test-e2e:
+	node test/run-e2e.js
+
 dev:
 	cd frontend && npm run dev
 

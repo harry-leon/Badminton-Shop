@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/SafeImage';
+import { Container } from '@/components/ui/Container';
 import { useCart } from '@/lib/cart-context';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +15,7 @@ export default function CartPage() {
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <Container className="max-w-6xl">
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -60,7 +61,7 @@ export default function CartPage() {
                   <div key={item.id} className="p-4 sm:p-5 flex gap-4 sm:gap-5 items-center">
                     {/* Ảnh sản phẩm */}
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-[#EFECE6] dark:bg-[#18201C] p-2 shrink-0 flex items-center justify-center relative overflow-hidden">
-                      <Image
+                      <SafeImage
                         src={item.imageUrl}
                         alt={item.name}
                         fill
@@ -174,7 +175,7 @@ export default function CartPage() {
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

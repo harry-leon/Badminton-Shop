@@ -41,36 +41,44 @@ export default function AccountPage() {
     setLoading(true);
     setErrorMessage('');
     try {
-      // 1. Tra cứu bảo hành & claims qua /api/warranty/lookup
-      const warrantyRes = await fetch(`/api/warranty/lookup?q=${encodeURIComponent(userPhone.trim())}`);
-      const warrantyData = await warrantyRes.json();
-      if (warrantyRes.ok) {
-        setWarranties(warrantyData.purchasedWarranties || []);
-        setClaims(warrantyData.claims || []);
-      }
+      const res = await fetch(`/api/account/orders?phone=${encodeURIComponent(userPhone.trim())}`);
+      const data = await res.json();
+      if (res.ok) {
+        const rawOrders = data.orders || [];
+        const formattedOrders = rawOrders.map((o: any) => ({
+          orderCode: o.id,
+          createdAt: o.created_at,
+          customerName: o.customer_name,
+          status: o.status,
+          totalAmount: o.total_amount,
+          fulfillmentType: o.fulfillment_type,
+          pickupCode: o.pickup_code,
+          items: (o.lines || []).map((l: any) => ({
+            name: l.name,
+            sku: l.sku,
+            quantity: l.quantity,
+            price: l.unit_price,
+            policy: l.policy,
+          })),
+        }));
+        setOrders(formattedOrders);
 
-      // 2. Tra cứu danh sách đơn hàng
-      // Sử dụng purchasedWarranties để tổng hợp các đơn hàng mà khách đã đặt
-      const uniqueOrders: any[] = [];
-      if (warrantyData.purchasedWarranties) {
-        const orderMap = new Map();
-        for (const item of warrantyData.purchasedWarranties) {
-          if (!orderMap.has(item.order_code)) {
-            orderMap.set(item.order_code, {
-              orderCode: item.order_code,
-              createdAt: item.created_at,
-              customerName: item.customer_name,
-              items: [{ name: item.product_name_snapshot, sku: item.sku, policy: item.warranty_policy_snapshot }],
-            });
-          } else {
-            orderMap.get(item.order_code).items.push({
-              name: item.product_name_snapshot,
-              sku: item.sku,
-              policy: item.warranty_policy_snapshot,
+        const warrantyList: any[] = [];
+        for (const order of rawOrders) {
+          for (const line of order.lines || []) {
+            warrantyList.push({
+              order_code: order.id,
+              product_name_snapshot: line.name,
+              sku: line.sku,
+              warranty_policy_snapshot: line.policy,
+              created_at: order.created_at,
             });
           }
         }
-        setOrders(Array.from(orderMap.values()));
+        setWarranties(warrantyList);
+        setClaims(data.claims || []);
+      } else {
+        setErrorMessage(data.error || 'Lỗi khi tải thông tin tài khoản');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Lỗi khi tải thông tin tài khoản');
@@ -167,7 +175,7 @@ export default function AccountPage() {
                 </Button>
               </form>
 
-              <div className="text-[12px] text-muted font-normal pt-2 border-t border-line">
+              <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Dữ liệu được bảo mật PII theo tiêu chuẩn an toàn của Smash Court.
               </div>
             </div>

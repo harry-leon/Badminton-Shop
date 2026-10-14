@@ -9,6 +9,8 @@ import { CommandSearch } from './CommandSearch';
 import { CartDrawer } from './CartDrawer';
 import { useCart } from '@/lib/cart-context';
 
+import { Container } from '@/components/ui/Container';
+
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -33,7 +35,6 @@ export function Header() {
     { href: '/second-hand', label: 'Vợt cũ đã kiểm định' },
     { href: '/chi-nhanh', label: 'Chi nhánh' },
     { href: '/tra-cuu-bao-hanh', label: 'Bảo hành' },
-    { href: '/_design', label: 'Design System' },
   ];
 
   return (
@@ -45,9 +46,9 @@ export function Header() {
             : 'bg-surface/60 backdrop-blur-sm border-line/60 py-4'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <Container className="flex items-center justify-between gap-2 sm:gap-4">
           {/* 1. Logo chữ tối giản */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <Link href="/" className="flex items-center gap-1.5 group select-none">
               <span className="text-xl sm:text-2xl font-medium tracking-tight text-ink">
                 Smash<span className="text-brand">Court</span>
@@ -79,11 +80,11 @@ export function Header() {
           </div>
 
           {/* 2. Actions: Search, Dark Mode, Account, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             {/* ⌘K Search trigger */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 text-[13px] text-muted hover:text-ink bg-bg hover:bg-surface border border-line px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-2 text-[13px] text-muted hover:text-ink bg-bg hover:bg-surface border border-line w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 rounded-full transition-colors cursor-pointer"
             >
               <Search className="w-4 h-4 text-muted" />
               <span className="hidden sm:inline">Tìm kiếm...</span>
@@ -96,7 +97,7 @@ export function Header() {
             {mounted && (
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
                 title="Chuyển chế độ sáng/tối"
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -107,7 +108,7 @@ export function Header() {
             <div className="relative">
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
                 title="Tài khoản"
               >
                 <User className="w-4 h-4" />
@@ -151,7 +152,7 @@ export function Header() {
             {/* Nút Giỏ hàng */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center justify-center w-9 h-9 rounded-full text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
+              className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full text-ink hover:bg-bg border border-transparent hover:border-line transition-colors cursor-pointer"
               title="Xem giỏ hàng"
             >
               <ShoppingBag className="w-4 h-4" />
@@ -165,12 +166,12 @@ export function Header() {
             {/* Nút Hamburger menu Mobile */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-ink hover:bg-bg transition-colors cursor-pointer"
+              className="md:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-ink hover:bg-bg transition-colors cursor-pointer"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-        </div>
+        </Container>
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (

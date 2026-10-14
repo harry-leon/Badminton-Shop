@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/SafeImage';
+import { Container } from '@/components/ui/Container';
 import Link from 'next/link';
 import { useCompare } from '@/lib/compare-context';
 import { PriceTag } from '@/components/ui/PriceTag';
@@ -14,7 +15,7 @@ export default function ComparePage() {
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <Container className="max-w-6xl">
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -74,7 +75,7 @@ export default function ComparePage() {
 
                     <div>
                       <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-3">
-                        <Image
+                        <SafeImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill
@@ -226,7 +227,7 @@ export default function ComparePage() {
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

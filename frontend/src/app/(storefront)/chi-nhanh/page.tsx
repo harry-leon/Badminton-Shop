@@ -5,16 +5,17 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { MapPin, Phone, Clock, ChevronRight, CheckCircle2, Navigation, ShieldCheck, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { Container } from '@/components/ui/Container';
 
 const BRANCH_LIST = [
   {
     id: 'BR_HCM_01',
     name: 'Smash Court — Quận 1',
     city: 'TP. Hồ Chí Minh',
-    address: '120 Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 1',
+    address: '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1',
     phone: '028 3822 1234',
     hours: '08:30 – 21:30 (Thứ 2 — Chủ Nhật)',
-    mapUrl: 'https://maps.google.com/?q=120+Nguyen+Thi+Minh+Khai+Quan+1+Ho+Chi+Minh',
+    mapUrl: 'https://maps.google.com/?q=123+Nguyen+Thi+Minh+Khai+Ben+Thanh+Quan+1+Ho+Chi+Minh',
     services: [
       'Máy căng cước điện tử chuẩn BWF lấy ngay 15 phút',
       'Khu vực vung thử vợt thực tế',
@@ -27,10 +28,10 @@ const BRANCH_LIST = [
     id: 'BR_HN_01',
     name: 'Smash Court — Cầu Giấy',
     city: 'Hà Nội',
-    address: '45 Xuân Thủy, Phường Dịch Vọng Hậu, Cầu Giấy',
+    address: '45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy',
     phone: '024 3755 5678',
     hours: '08:30 – 21:30 (Thứ 2 — Chủ Nhật)',
-    mapUrl: 'https://maps.google.com/?q=45+Xuan+Thuy+Cau+Giay+Ha+Noi',
+    mapUrl: 'https://maps.google.com/?q=45+Xuan+Thuy+Dich+Vong+Hau+Cau+Giay+Ha+Noi',
     services: [
       'Máy căng cước điện tử Yonex Precision 9.0',
       'Khắc tên và trọng lượng laser cán vợt miễn phí',
@@ -43,10 +44,10 @@ const BRANCH_LIST = [
     id: 'BR_DN_01',
     name: 'Smash Court — Hải Châu',
     city: 'Đà Nẵng',
-    address: '88 Nguyễn Văn Linh, Phường Nam Dương, Hải Châu',
+    address: '78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu',
     phone: '0236 365 9999',
     hours: '08:30 – 21:30 (Thứ 2 — Chủ Nhật)',
-    mapUrl: 'https://maps.google.com/?q=88+Nguyen+Van+Linh+Hai+Chau+Da+Nang',
+    mapUrl: 'https://maps.google.com/?q=78+Nguyen+Van+Linh+Nam+Duong+Hai+Chau+Da+Nang',
     services: [
       'Dịch vụ căng cước điện tử chuyên nghiệp',
       'Phụ kiện cầu lông thi đấu chính hãng',
@@ -72,7 +73,7 @@ function BranchesContent() {
 
   return (
     <div className="py-8 sm:py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <Container className="max-w-6xl">
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -222,7 +223,7 @@ function BranchesContent() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

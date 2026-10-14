@@ -71,7 +71,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
                   <span className="font-medium">Yonex Astrox 99 Pro</span>
                   <span className="text-muted text-[13px]">· 4U Nặng đầu</span>
                 </div>
-                <span className="text-[13px] text-muted">Từ 3.950.000 ₫</span>
+                <span className="text-[13px] text-muted">Từ 4.250.000 ₫</span>
               </Command.Item>
 
               <Command.Item
@@ -83,7 +83,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
                   <span className="font-medium">Lining Axforce 80</span>
                   <span className="text-muted text-[13px]">· Thân cứng thiên công</span>
                 </div>
-                <span className="text-[13px] text-muted">Từ 4.250.000 ₫</span>
+                <span className="text-[13px] text-muted">Từ 3.950.000 ₫</span>
               </Command.Item>
 
               <Command.Item
@@ -119,7 +119,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
               >
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-brand" />
-                  <span>Tra cứu bảo hành theo Số điện thoại / Mã đơn</span>
+                  <span>Tra cứu bảo hành theo Serial / Mã đơn</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-muted" />
               </Command.Item>

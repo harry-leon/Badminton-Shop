@@ -1,10 +1,11 @@
 import * as React from 'react';
 import Link from 'next/link';
+import { Container } from '@/components/ui/Container';
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-surface text-ink py-12 px-4 sm:px-6 lg:px-8 mt-auto">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-[14px]">
+    <footer className="border-t border-line bg-surface text-ink py-12 mt-auto">
+      <Container className="grid grid-cols-1 md:grid-cols-4 gap-8 text-[14px]">
         {/* Cột 1: Thương hiệu */}
         <div className="space-y-3">
           <Link href="/" className="inline-block text-xl font-medium tracking-tight text-ink">
@@ -37,11 +38,6 @@ export function Footer() {
                 Tra cứu bảo hành điện tử
               </Link>
             </li>
-            <li>
-              <Link href="/_design" className="hover:text-ink transition-colors">
-                Thư viện thiết kế (Quiet Court)
-              </Link>
-            </li>
           </ul>
         </div>
 
@@ -50,16 +46,22 @@ export function Footer() {
           <h4 className="font-medium text-ink text-[14px]">Hệ thống cửa hàng</h4>
           <ul className="space-y-2 text-muted font-normal text-[13px]">
             <li>
-              <span className="text-ink font-medium">TP. Hồ Chí Minh:</span> 120 Nguyễn Thị Minh Khai, P. Võ Thị Sáu, Quận 1
+              <span className="text-ink font-medium">TP. Hồ Chí Minh:</span> 123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1
             </li>
             <li>
-              <span className="text-ink font-medium">Hà Nội:</span> 45 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy
+              <span className="text-ink font-medium">Hà Nội:</span> 45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy
             </li>
             <li>
-              <span className="text-ink font-medium">Đà Nẵng:</span> 88 Nguyễn Văn Linh, Nam Dương, Hải Châu
+              <span className="text-ink font-medium">Đà Nẵng:</span> 78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu
             </li>
             <li className="pt-1 text-ink font-medium">
-              Hotline: 1900 6868 (Miễn phí)
+              <a
+                href="tel:19006868"
+                className="hover:underline text-ink hover:text-brand transition-colors"
+              >
+                Hotline: 1900 6868
+              </a>{' '}
+              <span className="text-muted font-normal">(Miễn phí)</span>
             </li>
           </ul>
         </div>
@@ -74,16 +76,17 @@ export function Footer() {
             <li>Thanh toán chuyển khoản VietQR tự động khớp đơn</li>
           </ul>
         </div>
-      </div>
+      </Container>
 
-      <div className="max-w-7xl mx-auto pt-8 mt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-muted font-normal">
+      <Container className="pt-8 mt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-muted font-normal">
         <div>© 2026 Smash Court. Bản quyền thuộc về hệ thống cửa hàng cầu lông chính hãng.</div>
         <div className="flex gap-4">
           <span>Điều khoản dịch vụ</span>
           <span>•</span>
           <span>Chính sách bảo mật</span>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }
+

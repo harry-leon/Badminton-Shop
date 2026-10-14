@@ -1,20 +1,23 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Container } from '@/components/ui/Container';
 import { queryDb } from '@/lib/db';
 import OrderSection from './OrderSection';
-import { SpecBar } from '@/components/ui/SpecBar';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Badge } from '@/components/ui/Badge';
 import { ProductCard } from '@/components/ui/ProductCard';
-import { ChevronRight, ShieldCheck, ChevronDown } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Star } from 'lucide-react';
+import ProductGallery, { GalleryImage } from './components/ProductGallery';
+import StickyAnchorBar from './components/StickyAnchorBar';
+import SanitizedMarkdown from './components/SanitizedMarkdown';
+import ProductSpecsTable from './components/ProductSpecsTable';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 0; // Trực tiếp từ PostgreSQL 18
+export const revalidate = 0; // Trực tiếp từ PostgreSQL 18 catalog_db
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -34,7 +37,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
 
-  // 1. Lấy thông tin sản phẩm từ PostgreSQL catalog_db (Zero-Mock)
+  // 1. Lấy thông tin sản phẩm từ PostgreSQL catalog_db
   const productRows = await queryDb<any>(
     'catalog_db',
     `SELECT p.*, b.name as brand_name
@@ -50,7 +53,35 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const p = productRows[0];
 
-  // 2. Lấy danh sách biến thể SKU từ catalog_db
+  // 2. Lấy 7 góc ảnh từ product_images
+  const imageRows = await queryDb<any>(
+    'catalog_db',
+    `SELECT id, angle, image_url, sort_order, is_primary
+     FROM product_images
+     WHERE product_id = $1
+     ORDER BY sort_order ASC, id ASC`,
+    [p.id]
+  );
+
+  const galleryImages: GalleryImage[] = imageRows.length > 0
+    ? imageRows.map((img) => ({
+        id: img.id,
+        angle: img.angle,
+        image_url: img.image_url,
+        sort_order: img.sort_order,
+        is_primary: img.is_primary,
+      }))
+    : [
+        {
+          id: p.id,
+          angle: 'FRONT',
+          image_url: p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
+          sort_order: 1,
+          is_primary: true,
+        },
+      ];
+
+  // 3. Lấy danh sách biến thể SKU từ catalog_db
   const skuRows = await queryDb<any>(
     'catalog_db',
     `SELECT * FROM skus WHERE product_id = $1 AND is_active = true ORDER BY price ASC, weight ASC`,
@@ -59,13 +90,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const skuIds = skuRows.map((s) => s.id);
 
-  // 3. Lấy thông tin chi nhánh từ identity_db
+  // 4. Lấy thông tin chi nhánh từ identity_db
   const branchRows = await queryDb<any>(
     'identity_db',
     `SELECT id, name, city, address FROM branches ORDER BY id ASC`
   );
 
-  // 4. Lấy tồn kho thời gian thực từ inventory_db
+  // 5. Lấy tồn kho thời gian thực từ inventory_db
   let stockLevels: any[] = [];
   if (skuIds.length > 0) {
     stockLevels = await queryDb<any>(
@@ -77,7 +108,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     );
   }
 
-  // 5. Lấy sản phẩm tương tự cùng danh mục
+  // 6. Lấy sản phẩm tương tự cùng danh mục
   const relatedRows = await queryDb<any>(
     'catalog_db',
     `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.image_url,
@@ -93,8 +124,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const defaultPrice = skuRows.length > 0 ? parseInt(skuRows[0].price, 10) : 0;
   const defaultBalance = skuRows.length > 0 ? skuRows[0].balance_point_mm : 305;
-  const defaultStiffness = skuRows.length > 0 ? skuRows[0].stiffness : 'Cứng';
-  const defaultTension = skuRows.length > 0 ? `${skuRows[0].max_tension_lbs} lbs` : '28 lbs';
+  const defaultStiffness = skuRows.length > 0 ? skuRows[0].stiffness : (p.shaft_stiffness || 'Cứng');
+  const defaultTension = skuRows.length > 0 ? `${skuRows[0].max_tension_lbs} lbs` : (p.max_tension_lbs ? `${p.max_tension_lbs} lbs` : '28 lbs');
 
   const brandDisplayName = p.brand_id === 'lining' ? 'Li-Ning' : p.brand_id === 'victor' ? 'Victor' : 'Yonex';
 
@@ -104,12 +135,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     slug: p.slug,
     brand: brandDisplayName,
     playerType: p.player_type || 'Công thủ toàn diện',
-    description: p.description || 'Vợt cầu lông cao cấp chính hãng phân phối tại hệ thống Smash Court.',
+    playStyle: p.play_style || p.player_type || 'Công thủ toàn diện',
+    description: p.description || 'Vợt cầu lông chính hãng phân phối tại hệ thống Smash Court.',
     imageUrl: p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
     warrantyMonths: p.warranty_months || 12,
     balancePoint: defaultBalance,
     stiffness: defaultStiffness,
     maxTension: defaultTension,
+    lengthMm: p.length_mm || 675,
+    frameShape: p.frame_shape || 'ISOMETRIC',
+    level: p.level || 'Chuyên nghiệp',
   };
 
   const skusData = skuRows.map((s) => ({
@@ -166,19 +201,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     },
   };
 
-  // Tính % thanh SpecBar cho điểm cân bằng: 280mm (0%) -> 315mm (100%)
-  const balancePercentage = Math.min(100, Math.max(10, ((defaultBalance - 280) / 35) * 100));
-  
-  // Tính % thanh SpecBar cho độ cứng: Dẻo (25%), Trung bình (50%), Cứng (75%), Rất cứng (100%)
-  const stiffnessPercentage =
-    defaultStiffness === 'Rất cứng'
-      ? 100
-      : defaultStiffness === 'Cứng'
-      ? 75
-      : defaultStiffness === 'Trung bình'
-      ? 50
-      : 25;
-
   return (
     <div className="py-8 sm:py-12">
       <script
@@ -186,7 +208,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container>
         {/* Breadcrumb */}
         <nav className="text-[13px] text-muted mb-6 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
@@ -196,81 +218,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <span className="text-ink">{productData.name}</span>
         </nav>
 
-        {/* Bố cục 2 cột Quiet Court */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* CỘT TRÁI: Ảnh lớn & Bảng SpecBar trực quan (6 cols on lg) */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Gallery Frame */}
-            <div className="relative aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-2xl overflow-hidden p-6 sm:p-10 flex items-center justify-center">
-              <div className="relative w-full h-full">
-                <Image
-                  src={productData.imageUrl}
-                  alt={productData.name}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-contain mix-blend-multiply dark:mix-blend-normal p-4"
-                />
-              </div>
-
-              {/* Badges trang nhã */}
-              <div className="absolute top-4 left-4">
-                <Badge variant="muted">Chính hãng</Badge>
-              </div>
-              <div className="absolute top-4 right-4">
-                <Badge variant="muted">Bảo hành 12 tháng</Badge>
-              </div>
-            </div>
-
-            {/* Bảng thông số SpecBar thanh mảnh 4px */}
-            <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-line space-y-5">
-              <div className="text-[15px] font-medium text-ink pb-3 border-b border-line flex items-center justify-between">
-                <span>Thông số thi đấu</span>
-                <span className="text-[13px] text-muted font-normal">{productData.playerType}</span>
-              </div>
-
-              {/* 1. Điểm cân bằng */}
-              <SpecBar
-                label="Điểm cân bằng"
-                valueText={`${defaultBalance} mm (${defaultBalance >= 305 ? 'Nặng đầu' : defaultBalance >= 295 ? 'Cân bằng' : 'Nhẹ đầu'})`}
-                percentage={balancePercentage}
-                leftLabel="Nhẹ đầu (285 mm)"
-                rightLabel="Nặng đầu (315 mm)"
-              />
-
-              {/* 2. Độ cứng thân đũa */}
-              <SpecBar
-                label="Độ cứng thân đũa"
-                valueText={defaultStiffness}
-                percentage={stiffnessPercentage}
-                leftLabel="Dẻo (Trợ lực)"
-                rightLabel="Cứng (Chính xác)"
-              />
-
-              {/* Lưới thông số phụ 4 ô */}
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-line text-[13px]">
-                <div className="p-3 bg-bg rounded-xl">
-                  <span className="text-muted block text-[13px] mb-0.5">Sức căng tối đa</span>
-                  <span className="text-ink font-medium">{defaultTension}</span>
-                </div>
-                <div className="p-3 bg-bg rounded-xl">
-                  <span className="text-muted block text-[13px] mb-0.5">Bảo hành khung</span>
-                  <span className="text-ink font-medium">12 tháng chính hãng</span>
-                </div>
-                <div className="p-3 bg-bg rounded-xl">
-                  <span className="text-muted block text-[13px] mb-0.5">Thương hiệu</span>
-                  <span className="text-ink font-medium">{productData.brand}</span>
-                </div>
-                <div className="p-3 bg-bg rounded-xl">
-                  <span className="text-muted block text-[13px] mb-0.5">Lối chơi phù hợp</span>
-                  <span className="text-ink font-medium">{productData.playerType}</span>
-                </div>
-              </div>
-            </div>
+        {/* Bố cục 2 cột: Cột trái sticky chứa gallery 7 góc, Cột phải chứa thông tin & đặt hàng */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-12">
+          {/* CỘT TRÁI: Gallery ảnh 7 góc có Sticky khi cuộn desktop */}
+          <div className="lg:col-span-7 xl:col-span-7 lg:sticky lg:top-24 lg:self-start">
+            <ProductGallery images={galleryImages} productName={productData.name} />
           </div>
 
-          {/* CỘT PHẢI: Thông tin, Chọn SKU, Chi nhánh & Mua hàng (6 cols on lg) */}
-          <div className="lg:col-span-6 space-y-6">
+          {/* CỘT PHẢI: Thông tin sản phẩm, Giá, OrderSection */}
+          <div className="lg:col-span-5 xl:col-span-5 space-y-6">
             <div className="space-y-4">
               <div>
                 <Link
@@ -284,14 +240,25 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </h1>
               </div>
 
-              {/* Giá hiển thị một lần duy nhất */}
-              <div className="flex items-baseline gap-3 pt-1">
+              {/* Badges chứng nhận */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="muted">Chính hãng</Badge>
+                <Badge variant="muted">Bảo hành {productData.warrantyMonths} tháng</Badge>
+                <span className="text-[12px] text-muted font-normal flex items-center gap-1 ml-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="font-medium text-ink">4.9</span>
+                  <span>(128 đánh giá)</span>
+                </span>
+              </div>
+
+              {/* Giá hiển thị rõ ràng */}
+              <div className="flex items-baseline gap-3 pt-1 border-t border-line/60">
                 <PriceTag amount={defaultPrice} size="lg" />
                 <span className="text-[13px] text-muted font-normal">Đã bao gồm VAT</span>
               </div>
 
-              {/* Mô tả ngắn gọn 1-2 câu */}
-              <p className="text-[14px] text-muted leading-relaxed font-normal pt-2 border-t border-line">
+              {/* Tóm tắt mô tả ngắn */}
+              <p className="text-[14px] text-muted leading-relaxed font-normal pt-2 border-t border-line/60">
                 {productData.description}
               </p>
             </div>
@@ -303,81 +270,83 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               branches={branchesData}
               stockLevels={stockLevelsData}
             />
-
-            {/* Accordion chi tiết 4 mục */}
-            <div className="divide-y divide-line border-t border-b border-line text-[14px]">
-              {/* Mục 1: Thông số kỹ thuật đầy đủ */}
-              <details className="group py-4 cursor-pointer">
-                <summary className="flex items-center justify-between font-medium text-ink list-none select-none">
-                  <span>Thông số kỹ thuật chi tiết</span>
-                  <ChevronDown className="w-4 h-4 text-muted group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="pt-3 text-[13px] text-muted space-y-2 leading-relaxed">
-                  <div className="flex justify-between py-1 border-b border-line/60">
-                    <span>Vật liệu khung:</span>
-                    <span className="text-ink">High Resilient Modulus Graphite + Nano Fortify TR</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-line/60">
-                    <span>Đường kính thân đũa:</span>
-                    <span className="text-ink">6.8 mm Slim Shaft</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-line/60">
-                    <span>Chiều dài tổng thể:</span>
-                    <span className="text-ink">675 mm (Tiêu chuẩn BWF)</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span>Nơi sản xuất:</span>
-                    <span className="text-ink">Nhật Bản / Đài Loan (Phân phối chính hãng)</span>
-                  </div>
-                </div>
-              </details>
-
-              {/* Mục 2: Cảm giác đánh & Lối chơi */}
-              <details className="group py-4 cursor-pointer">
-                <summary className="flex items-center justify-between font-medium text-ink list-none select-none">
-                  <span>Đặc tính công nghệ & Lối chơi</span>
-                  <ChevronDown className="w-4 h-4 text-muted group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="pt-3 text-[13px] text-muted space-y-2 leading-relaxed">
-                  <p>
-                    Vợt được tối ưu cho lối chơi {productData.playerType.toLowerCase()}, mang lại khả năng trợ lực và kiểm soát đường cầu chính xác. Khung vợt thiết kế khí động học giúp vung vợt thanh thoát và phục hồi hình dạng nhanh sau từng cú đập.
-                  </p>
-                </div>
-              </details>
-
-              {/* Mục 3: Chính sách bảo hành */}
-              <details className="group py-4 cursor-pointer">
-                <summary className="flex items-center justify-between font-medium text-ink list-none select-none">
-                  <span>Chính sách bảo hành và đổi trả</span>
-                  <ChevronDown className="w-4 h-4 text-muted group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="pt-3 text-[13px] text-muted space-y-2 leading-relaxed">
-                  <p>
-                    Bảo hành khung vợt 12 tháng chính hãng đối với các lỗi do nhà sản xuất (nứt ngầm, lỗi kết cấu carbon). Hỗ trợ tiếp nhận bảo hành điện tử nhanh chóng tại toàn bộ 3 chi nhánh của Smash Court.
-                  </p>
-                  <p>
-                    Thời gian xử lý thẩm định và phản hồi trong vòng 3 đến 5 ngày làm việc.
-                  </p>
-                </div>
-              </details>
-
-              {/* Mục 4: Giao hàng & Nhận tại cửa hàng */}
-              <details className="group py-4 cursor-pointer">
-                <summary className="flex items-center justify-between font-medium text-ink list-none select-none">
-                  <span>Giao hàng và nhận tại cửa hàng</span>
-                  <ChevronDown className="w-4 h-4 text-muted group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="pt-3 text-[13px] text-muted space-y-2 leading-relaxed">
-                  <p>
-                    <strong>Nhận tại cửa hàng:</strong> Sẵn sàng tại chi nhánh còn hàng sau 15 phút xác nhận. Khách hàng được kiểm tra trực tiếp và hỗ trợ đan cước theo yêu cầu.
-                  </p>
-                  <p>
-                    <strong>Giao hàng toàn quốc:</strong> Đóng gói ống bọc chuyên dụng chống va đập, bảo hiểm hàng hóa 100%. Giao nhanh 1–2 ngày tại các thành phố lớn.
-                  </p>
-                </div>
-              </details>
-            </div>
           </div>
+        </div>
+
+        {/* Thanh neo điều hướng Sticky Anchor Bar 4 tabs */}
+        <StickyAnchorBar className="my-8" />
+
+        {/* 4 Phân mục nội dung có scroll-mt-32 */}
+        <div className="space-y-12">
+          {/* Mục 1: Mô tả chi tiết với SanitizedMarkdown */}
+          <section id="mo-ta" className="scroll-mt-32 py-8 border-b border-line">
+            <h2 className="text-xl font-medium text-ink tracking-tight mb-4">
+              Mô tả chi tiết sản phẩm
+            </h2>
+            <SanitizedMarkdown content={productData.description} />
+          </section>
+
+          {/* Mục 2: Bảng thông số kỹ thuật chuẩn hóa */}
+          <section id="thong-so" className="scroll-mt-32 py-8 border-b border-line">
+            <h2 className="text-xl font-medium text-ink tracking-tight mb-6">
+              Thông số kỹ thuật tiêu chuẩn
+            </h2>
+            <ProductSpecsTable product={productData} skus={skusData} />
+          </section>
+
+          {/* Mục 3: Đánh giá từ người chơi */}
+          <section id="danh-gia" className="scroll-mt-32 py-8 border-b border-line">
+            <h2 className="text-xl font-medium text-ink tracking-tight mb-6">
+              Đánh giá từ người chơi đã xác thực
+            </h2>
+            <div className="bg-surface p-6 rounded-2xl border border-line flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl sm:text-4xl font-medium text-ink">4.9</div>
+                <div>
+                  <div className="flex items-center gap-1 text-amber-400">
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                  </div>
+                  <div className="text-[13px] text-muted mt-0.5 font-normal">
+                    Dựa trên 128 lượt đánh giá thực tế
+                  </div>
+                </div>
+              </div>
+              <div className="text-[13px] text-muted text-center sm:text-right font-normal">
+                100% đánh giá từ khách hàng đã mua và sử dụng vợt tại Smash Court
+              </div>
+            </div>
+          </section>
+
+          {/* Mục 4: Chính sách bảo hành & Giao nhận */}
+          <section id="bao-hanh" className="scroll-mt-32 py-8 border-b border-line">
+            <h2 className="text-xl font-medium text-ink tracking-tight mb-6">
+              Chính sách bảo hành & Giao hàng
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-[14px]">
+              <div className="p-5 bg-surface rounded-2xl border border-line space-y-2">
+                <div className="flex items-center gap-2 text-ink font-medium">
+                  <ShieldCheck className="w-4 h-4 text-brand" />
+                  <span>Bảo hành chính hãng 12 tháng</span>
+                </div>
+                <p className="text-muted leading-relaxed font-normal text-[13px]">
+                  Bảo hành khung vợt đối với các lỗi vật liệu và kết cấu từ nhà sản xuất. Tiếp nhận và xử lý thẩm định nhanh chóng tại toàn bộ 3 chi nhánh của Smash Court.
+                </p>
+              </div>
+
+              <div className="p-5 bg-surface rounded-2xl border border-line space-y-2">
+                <div className="text-ink font-medium">
+                  Giao nhận linh hoạt & Đan cước lấy ngay
+                </div>
+                <p className="text-muted leading-relaxed font-normal text-[13px]">
+                  Hỗ trợ nhận tại cửa hàng sau 15 phút xác nhận, hoặc giao hàng toàn quốc đóng hộp chuyên dụng chống sốc. Hotline hỗ trợ đặt hàng: <a href="tel:19006868" className="text-brand hover:underline font-medium">1900 6868</a>.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
 
         {/* Sản phẩm tương tự */}
@@ -412,7 +381,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 }

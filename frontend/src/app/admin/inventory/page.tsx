@@ -63,11 +63,12 @@ const branchLabels: Record<string, string> = {
 };
 
 export default function AdminInventoryPage() {
-  const { selectedBranch, setSelectedBranch, density, branches } = useAdmin();
+  const { selectedBranch, setSelectedBranch, density, branches, currentRole } = useAdmin();
   const [activeTab, setActiveTab] = useState<'STOCK' | 'TRANSFERS' | 'MOVEMENTS'>('STOCK');
   const [stockLevels, setStockLevels] = useState<StockLevel[]>([]);
   const [transfers, setTransfers] = useState<StockTransfer[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
+  const [audit, setAudit] = useState<{ total_on_hand: number; total_movements: number }>({ total_on_hand: 0, total_movements: 0 });
   const [loading, setLoading] = useState(true);
   const [skuSearch, setSkuSearch] = useState('');
   const [itemTypeFilter, setItemTypeFilter] = useState('ALL');
@@ -92,6 +93,12 @@ export default function AdminInventoryPage() {
         setStockLevels(data.stockLevels || []);
         setTransfers(data.transfers || []);
         setMovements(data.movements || []);
+        if (data.audit) {
+          setAudit({
+            total_on_hand: parseInt(data.audit.total_on_hand, 10) || 0,
+            total_movements: parseInt(data.audit.total_movements, 10) || 0,
+          });
+        }
       }
     } catch (err) {
       console.error('Lỗi tải dữ liệu kho:', err);
@@ -116,14 +123,18 @@ export default function AdminInventoryPage() {
     try {
       const res = await fetch('/api/admin/inventory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Branch-Id': selectedBranch,
+        },
         body: JSON.stringify({
           fromBranchId: fromBranch,
           toBranchId: toBranch,
           sku: transferSku,
           quantity: transferQty,
           actor: 'manager_portal',
-          actorBranchId: fromBranch,
+          actorBranchId: selectedBranch,
+          actorRole: currentRole,
         }),
       });
       const data = await res.json();
@@ -146,8 +157,17 @@ export default function AdminInventoryPage() {
     try {
       const res = await fetch('/api/admin/inventory', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transferId, action: 'DISPATCH', actor: 'manager_portal' }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Branch-Id': selectedBranch,
+        },
+        body: JSON.stringify({
+          transferId,
+          action: 'DISPATCH',
+          actor: 'manager_portal',
+          actorBranchId: selectedBranch,
+          actorRole: currentRole,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -178,13 +198,18 @@ export default function AdminInventoryPage() {
     try {
       const res = await fetch('/api/admin/inventory', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Branch-Id': selectedBranch,
+        },
         body: JSON.stringify({
           transferId,
           action: 'RECEIVE',
           receivedQty,
           discrepancyReason,
           actor: 'manager_dest',
+          actorBranchId: selectedBranch,
+          actorRole: currentRole,
         }),
       });
       const data = await res.json();
@@ -529,7 +554,7 @@ export default function AdminInventoryPage() {
       {/* TAB 3: STOCK MOVEMENTS (APPEND-ONLY LEDGER R10) */}
       {activeTab === 'MOVEMENTS' && (
         <div className="bg-white rounded-xl border border-[#E4E3DD] overflow-hidden">
-          <div className="p-4 border-b border-[#E4E3DD] flex items-center justify-between">
+          <div className="p-4 border-b border-[#E4E3DD] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-medium text-[#111613] flex items-center gap-2">
                 <History className="w-4 h-4 text-[#0F5132]" />
@@ -539,6 +564,20 @@ export default function AdminInventoryPage() {
                 Bất biến append-only theo quy tắc R10. Không có bất kỳ lệnh DELETE hay UPDATE nào được thực thi trên bảng này.
               </p>
             </div>
+
+            {audit.total_movements > 0 && (
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-950 px-3 py-1.5 rounded-lg text-xs">
+                <CheckCircle2 className="w-4 h-4 text-[#0F5132] shrink-0" />
+                <span>
+                  Kiểm toán R10: Sổ cái ({audit.total_movements} cây) = Tồn kho thực ({audit.total_on_hand} cây)
+                  {audit.total_movements === audit.total_on_hand ? (
+                    <span className="ml-1.5 font-medium text-[#0F5132]">(KHỚP 100%)</span>
+                  ) : (
+                    <span className="ml-1.5 font-medium text-rose-600">(LỆCH KHO)</span>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
