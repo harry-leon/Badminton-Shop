@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
 
 export interface CartItem {
   id: string;
@@ -61,7 +60,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const existing = prev.find((i) => i.id === item.id || i.sku === item.sku);
       if (existing) {
         if (item.isSecondhand) {
-          toast.warning('Vợt cũ là sản phẩm độc bản, mỗi đơn chỉ mua tối đa 1 cây.');
           return prev;
         }
         return prev.map((i) =>
@@ -70,12 +68,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...item, quantity }];
     });
-    toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
   };
 
   const removeItem = (id: string) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
-    toast.info('Đã xóa sản phẩm khỏi giỏ hàng');
   };
 
   const updateQuantity = (id: string, quantity: number) => {

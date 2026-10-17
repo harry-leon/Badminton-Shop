@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: badminton-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        value: smash-court-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256-security
+      - key: IMAGEKIT_PUBLIC_KEY
+        value: public_oAr8SA2i9Ed1U4+4kcEA+I16UO4=
+      - key: IMAGEKIT_PRIVATE_KEY
+        value: private_hOECE/HeE+7R8xq8MW++vJEoyJU=
+      - key: IMAGEKIT_URL_ENDPOINT
+        value: https://ik.imagekit.io/htqhun
+      - key: SPRING_DATA_REDIS_HOST
+        value: localhost
+      - key: SPRING_DATA_REDIS_PORT
+        value: "6379"
+      - key: MANAGEMENT_HEALTH_REDIS_ENABLED
+        value: "false"
+      - key: JAVA_OPTS
+        value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"

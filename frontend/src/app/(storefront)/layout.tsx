@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { CompareProvider } from '@/lib/compare-context';
 import { CartProvider } from '@/lib/cart-context';
 import { FloatingCompareBar } from '@/components/FloatingCompareBar';
+import { FloatingContactWidget } from '@/components/FloatingContactWidget';
 
 export default function StorefrontLayout({
   children,
@@ -20,6 +21,7 @@ export default function StorefrontLayout({
           </main>
           <Footer />
           <FloatingCompareBar />
+          <FloatingContactWidget />
         </div>
       </CompareProvider>
     </CartProvider>

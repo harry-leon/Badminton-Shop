@@ -90,7 +90,7 @@ export default async function SecondHandPage() {
             <div className="bg-surface rounded-xl p-4 border border-line space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="gradeA">Hạng A (98–99%)</Badge>
-                <span className="text-[12px] text-muted">Bảo hành 60 ngày</span>
+                <span className="text-[13px] text-muted">Bảo hành 60 ngày</span>
               </div>
               <p className="text-muted leading-relaxed font-normal">
                 Như mới, không cấn trầy, thân đũa thẳng tuyệt đối.
@@ -100,7 +100,7 @@ export default async function SecondHandPage() {
             <div className="bg-surface rounded-xl p-4 border border-line space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="gradeB">Hạng B (90–95%)</Badge>
-                <span className="text-[12px] text-muted">Bảo hành 30 ngày</span>
+                <span className="text-[13px] text-muted">Bảo hành 30 ngày</span>
               </div>
               <p className="text-muted leading-relaxed font-normal">
                 Ngoại hình đẹp, trầy dăm sơn nhẹ, kết cấu nguyên bản.
@@ -110,7 +110,7 @@ export default async function SecondHandPage() {
             <div className="bg-surface rounded-xl p-4 border border-line space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="gradeC">Hạng C (85%)</Badge>
-                <span className="text-[12px] text-muted">Bảo hành 30 ngày</span>
+                <span className="text-[13px] text-muted">Bảo hành 30 ngày</span>
               </div>
               <p className="text-muted leading-relaxed font-normal">
                 Xước sơn quanh vành, khung carbon chịu lực tốt.
@@ -148,14 +148,17 @@ export default async function SecondHandPage() {
                 >
                   <div>
                     {/* Khung ảnh tỷ lệ 1:1 nền ấm hòa trộn ảnh trắng */}
-                    <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4">
+                    <Link
+                      href={`/second-hand/${unit.id}`}
+                      className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4 block group"
+                    >
                       <div className="relative w-full h-full">
                         <SafeImage
                           src={imgUrl}
                           alt={unit.model_name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-contain mix-blend-multiply dark:mix-blend-normal p-2"
+                          className="object-contain mix-blend-multiply dark:mix-blend-normal p-2 group-hover:scale-105 transition-transform"
                           loading="lazy"
                         />
                       </div>
@@ -169,21 +172,26 @@ export default async function SecondHandPage() {
                       </div>
 
                       <div className="absolute bottom-3 right-3">
-                        <span className="text-[12px] text-muted bg-surface/90 backdrop-blur-xs px-2.5 py-1 rounded-full border border-line">
+                        <span className="text-[13px] text-muted bg-surface/90 backdrop-blur-xs px-2.5 py-1 rounded-full border border-line">
                           Bảo hành {unit.warranty_days} ngày
                         </span>
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Chi nhánh & Tên sản phẩm */}
                     <div className="space-y-1.5 mb-3">
-                      <div className="flex items-center gap-1.5 text-[12px] text-muted font-normal">
+                      <div className="flex items-center gap-1.5 text-[13px] text-muted font-normal">
                         <MapPin className="w-3.5 h-3.5 text-brand shrink-0" />
                         <span>{branch.name} ({branch.city})</span>
                       </div>
 
                       <h3 className="text-[16px] font-medium text-ink leading-snug">
-                        {unit.model_name}
+                        <Link
+                          href={`/second-hand/${unit.id}`}
+                          className="hover:text-brand transition-colors block"
+                        >
+                          {unit.model_name}
+                        </Link>
                       </h3>
                     </div>
 
@@ -193,22 +201,30 @@ export default async function SecondHandPage() {
                         <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
                         <span>Serial: <span className="font-mono text-muted">{maskSerialNumber(unit.serial_number)}</span></span>
                       </div>
-                      <p className="text-[12px] text-muted leading-relaxed font-normal pt-0.5">
+                      <p className="text-[13px] text-muted leading-relaxed font-normal pt-0.5">
                         {unit.condition_notes || 'Khung nguyên bản, đã kiểm tra đa điểm 16 tiêu chuẩn kỹ thuật.'}
                       </p>
                     </div>
                   </div>
 
                   {/* Giá niêm yết & Nút giữ chỗ */}
-                  <div className="pt-3 border-t border-line flex items-center justify-between gap-3">
+                  <div className="pt-3 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <span className="text-[12px] text-muted block font-normal">
+                      <span className="text-[13px] text-muted block font-normal">
                         Giá niêm yết
                       </span>
                       <PriceTag amount={price} size="md" />
                     </div>
 
-                    <SecondhandOrderButton unit={unit} />
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/second-hand/${unit.id}`}
+                        className="text-[13px] text-brand hover:underline font-normal inline-block"
+                      >
+                        Kiểm định 16 mục →
+                      </Link>
+                      <SecondhandOrderButton unit={unit} />
+                    </div>
                   </div>
                 </div>
               );

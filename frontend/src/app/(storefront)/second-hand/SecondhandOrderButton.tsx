@@ -115,7 +115,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
             {!orderResult ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <div className="text-[12px] text-muted font-normal">
+                  <div className="text-[13px] text-muted font-normal">
                     Sản phẩm độc bản duy nhất
                   </div>
                   <h2 className="text-xl font-medium text-ink mt-1">
@@ -271,13 +271,13 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
 
                 {orderResult.pickupCode && (
                   <div className="bg-bg border border-line p-3.5 rounded-xl text-left">
-                    <div className="text-[12px] text-muted">
+                    <div className="text-[13px] text-muted">
                       Mã nhận hàng tại quầy:
                     </div>
                     <div className="text-2xl font-medium text-ink mt-0.5 font-mono">
                       {orderResult.pickupCode}
                     </div>
-                    <p className="text-[12px] text-muted mt-1 font-normal">
+                    <p className="text-[13px] text-muted mt-1 font-normal">
                       Vui lòng xuất trình mã này cho nhân viên chi nhánh khi đến nhận vợt.
                     </p>
                   </div>

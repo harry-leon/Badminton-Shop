@@ -23,7 +23,7 @@ export function SanitizedMarkdown({ content, className = '' }: SanitizedMarkdown
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
       .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
+      .replace(/<embed\b[^>]*>(?:<\/embed>)?/gi, '')
       .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
       .replace(/javascript\s*:/gi, '');
 
@@ -64,8 +64,8 @@ export function SanitizedMarkdown({ content, className = '' }: SanitizedMarkdown
         continue;
       }
 
-      // List - or *
-      const listMatch = line.match(/^[-*]\s+(.+)$/);
+      // List - or * or •
+      const listMatch = line.match(/^[-*•]\s+(.+)$/);
       if (listMatch) {
         if (!currentList) currentList = [];
         currentList.push(listMatch[1]);
@@ -88,8 +88,9 @@ export function SanitizedMarkdown({ content, className = '' }: SanitizedMarkdown
   }, [content]);
 
   // Inline styling: biến đổi **in đậm** -> <span className="font-medium text-ink"> (Không dùng <b> hay <strong>)
+  // và hỗ trợ link an toàn [text](url)
   const renderInline = (text: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
     return parts.map((part, idx) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         const inner = part.slice(2, -2);
@@ -98,6 +99,22 @@ export function SanitizedMarkdown({ content, className = '' }: SanitizedMarkdown
             {inner}
           </span>
         );
+      }
+      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (linkMatch) {
+        const [, linkText, linkUrl] = linkMatch;
+        const isSafe = !/^javascript:/i.test(linkUrl.trim());
+        if (isSafe) {
+          return (
+            <a
+              key={idx}
+              href={linkUrl}
+              className="text-brand hover:underline font-medium inline-flex items-center gap-0.5"
+            >
+              {linkText}
+            </a>
+          );
+        }
       }
       return <span key={idx}>{part}</span>;
     });

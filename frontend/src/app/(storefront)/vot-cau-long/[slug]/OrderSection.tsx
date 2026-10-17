@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCompare } from '@/lib/compare-context';
+import { useCart } from '@/lib/cart-context';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
-import { QrCode, CheckCircle2, Clock, AlertCircle, X, Scale, Phone } from 'lucide-react';
+import { QrCode, CheckCircle2, Clock, AlertCircle, X, Scale, Phone, ShoppingBag, Truck, RefreshCw, ShieldCheck, Gift } from 'lucide-react';
 import { SafeImage } from '@/components/ui/SafeImage';
 
 interface SKU {
@@ -50,6 +51,7 @@ interface OrderSectionProps {
 
 export default function OrderSection({ product, skus, branches, stockLevels }: OrderSectionProps) {
   const { addToCompare, isInCompare } = useCompare();
+  const { addItem, setIsCartOpen } = useCart();
 
   // Tìm chi nhánh tối ưu có tồn kho available > 0 cho một SKU
   const getBestBranchForSku = (skuId: string) => {
@@ -91,6 +93,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
+  const [selectedTension, setSelectedTension] = useState('10.5');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -209,7 +212,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
               >
                 <span>{sku.weight} · {sku.grip_size}</span>
                 {sku.price !== skus[0]?.price && (
-                  <span className="text-[12px] opacity-80">
+                  <span className="text-[13px] opacity-80">
                     (+{new Intl.NumberFormat('vi-VN').format(sku.price - skus[0].price)} ₫)
                   </span>
                 )}
@@ -219,11 +222,76 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
         </div>
       </div>
 
+      {/* =================================================================== */}
+      {/* 1.1. HỘP QUÀ TẶNG KÈM ĐỘC QUYỀN (HỌC HỎI TỪ SHOPVNB ẢNH 3)           */}
+      {/* =================================================================== */}
+      <div className="rounded-2xl border-2 border-dashed border-amber-400/80 bg-amber-500/10 p-4 sm:p-5 space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Gift className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className="text-[13px] font-bold text-amber-900 dark:text-amber-200 uppercase tracking-tight">
+              COMBO QUÀ TẶNG KÈM TRỊ GIÁ 250.000₫
+            </span>
+          </div>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase shadow-2xs">
+            Miễn phí
+          </span>
+        </div>
+
+        <div className="space-y-2 text-[12px] text-ink/90">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span><strong>01 Cước Yonex BG65 / BG66 Ultimax</strong> (Miễn phí công đan máy điện tử chuẩn lbs)</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span><strong>01 Quấn cán vợt cao cấp Yonex AC102EX</strong> thấm hút mồ hôi</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span><strong>01 Bao đựng vợt đơn chống sốc</strong> chuyên dụng</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span><strong>Thẻ bảo hành điện tử chính hãng 12 tháng</strong> tra cứu theo SĐT</span>
+          </div>
+        </div>
+
+        {/* Lựa chọn độ căng cước theo yêu cầu */}
+        <div className="pt-2.5 border-t border-amber-400/40 space-y-1.5">
+          <div className="text-[12px] font-semibold text-ink flex items-center justify-between">
+            <span>Yêu cầu đan cước sẵn:</span>
+            <span className="text-[11px] text-muted font-normal">Kỹ thuật viên đan 4 nút chuẩn BWF</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[12px]">
+            {[
+              { val: '10.5', label: '10.5 kg (Mức chuẩn)' },
+              { val: '11.0', label: '11.0 kg (Công thủ)' },
+              { val: '11.5', label: '11.5 kg (Tay khỏe)' },
+              { val: 'NONE', label: 'Không đan cước' },
+            ].map((opt) => (
+              <button
+                key={opt.val}
+                type="button"
+                onClick={() => setSelectedTension(opt.val)}
+                className={`py-1.5 px-2 rounded-xl text-center border text-[11px] font-medium transition-all cursor-pointer ${
+                  selectedTension === opt.val
+                    ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-2xs'
+                    : 'bg-surface border-line text-muted hover:border-ink/40'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* 2. Nhận tại cửa hàng & Tồn kho thực tế (Tự động chọn chi nhánh còn hàng) */}
       <div>
         <div className="text-[13px] text-muted font-normal mb-2 flex items-center justify-between">
           <span>Nhận tại cửa hàng</span>
-          <span className="text-[12px] text-muted">
+          <span className="text-[13px] text-muted">
             {totalAvailableAcrossBranches > 0
               ? `Còn ${totalAvailableAcrossBranches} cây toàn hệ thống`
               : 'Tạm hết hàng toàn hệ thống'}
@@ -236,7 +304,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
               <span className="w-2 h-2 rounded-full bg-sale/60" />
               <span>Tạm hết hàng tại tất cả {branches.length} chi nhánh</span>
             </div>
-            <span className="text-[12px] text-muted font-normal shrink-0 ml-2">Hỗ trợ đặt trước</span>
+            <span className="text-[13px] text-muted font-normal shrink-0 ml-2">Hỗ trợ đặt trước</span>
           </div>
         ) : (
           <div className="space-y-2">
@@ -264,7 +332,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                     <div className="text-ink">
                       {b.name} <span className="text-muted font-normal">({b.city})</span>
                     </div>
-                    <div className="text-[12px] text-muted font-normal">
+                    <div className="text-[13px] text-muted font-normal">
                       {b.address}
                     </div>
                   </div>
@@ -276,7 +344,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                         Còn {avail} cây
                       </span>
                     ) : (
-                      <span className="text-muted font-normal text-[12px]">
+                      <span className="text-muted font-normal text-[13px]">
                         Hết hàng tại chi nhánh này
                       </span>
                     )}
@@ -288,73 +356,124 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
         )}
       </div>
 
-      {/* 3. Các nút hành động chính */}
-      <div className="flex items-center gap-3 pt-2">
-        {totalAvailableAcrossBranches === 0 ? (
-          <a
-            href="tel:19006868"
-            className="flex-1 inline-flex items-center justify-center gap-2 h-13 px-6 rounded-full bg-brand text-white text-[14px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none"
-          >
-            <Phone className="w-4 h-4" />
-            <span>Gọi hotline 1900 6868 tư vấn đặt trước</span>
-          </a>
-        ) : (
-          <Button
-            onClick={handleOpenOrder}
-            disabled={availableQty === 0}
-            className="flex-1"
-            size="lg"
-            aria-label={availableQty > 0 ? 'Thêm vào giỏ hàng / Đặt mua ngay' : undefined}
-            data-testid="add-to-cart-btn"
-          >
-            {availableQty > 0 ? (
-              <>
-                <span className="sr-only">Thêm vào giỏ hàng · </span>
-                <span>Đặt mua ngay</span>
-              </>
-            ) : totalAvailableAcrossBranches > 0 ? (
-              'Chi nhánh này tạm hết (Hãy chọn chi nhánh còn hàng)'
-            ) : (
-              'Tạm hết hàng toàn hệ thống'
-            )}
-          </Button>
-        )}
+      {/* 3. CÁC NÚT HÀNH ĐỘNG CHÍNH (DUAL CTA: MUA NGAY + THÊM VÀO GIỎ) */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center gap-3">
+          {totalAvailableAcrossBranches === 0 ? (
+            <a
+              href="tel:19006868"
+              className="flex-1 inline-flex items-center justify-center gap-2 h-13 px-6 rounded-full bg-brand text-white text-[14px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Gọi hotline 1900 6868 tư vấn đặt trước</span>
+            </a>
+          ) : (
+            <div className="flex-1 flex flex-col sm:flex-row gap-2.5">
+              {/* Nút 1: MUA NGAY (Fast Checkout theo phong cách ShopVNB) */}
+              <Button
+                onClick={handleOpenOrder}
+                disabled={availableQty === 0}
+                className="flex-1 h-13 text-[14px] font-bold bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-98 transition-all"
+                size="lg"
+                aria-label={availableQty > 0 ? 'Mua ngay · Đặt hàng nhanh' : undefined}
+                data-testid="add-to-cart-btn"
+              >
+                {availableQty > 0 ? (
+                  <div className="flex flex-col items-center leading-tight">
+                    <span className="text-[14px] font-bold uppercase tracking-wide">MUA NGAY</span>
+                    <span className="text-[10px] font-normal opacity-90">Giao COD tận nơi hoặc nhận tại Showroom</span>
+                  </div>
+                ) : totalAvailableAcrossBranches > 0 ? (
+                  'Chi nhánh này tạm hết'
+                ) : (
+                  'Tạm hết hàng toàn hệ thống'
+                )}
+              </Button>
 
-        <button
-          type="button"
-          onClick={() => {
-            addToCompare({
-              id: product.slug,
-              slug: product.slug,
-              name: product.name,
-              brand: product.brand,
-              imageUrl: product.imageUrl,
-              priceFrom: selectedSku?.price || 0,
-              playerType: product.playerType,
-              balancePoint: selectedSku?.balance_point_mm || product.balancePoint,
-              stiffness: selectedSku?.stiffness || product.stiffness,
-              weight: `${selectedSku?.weight} · ${selectedSku?.grip_size}`,
-              maxTension: selectedSku ? `${selectedSku.max_tension_lbs} lbs` : '28 lbs',
-            });
-          }}
-          className={`h-13 px-4 rounded-full border transition-all text-[13px] font-medium flex items-center gap-1.5 cursor-pointer ${
-            compared
-              ? 'bg-ink text-bg border-ink'
-              : 'bg-surface text-ink border-line hover:border-ink/60'
-          }`}
-          title={compared ? 'Đang so sánh (Bấm để bỏ)' : 'Thêm vào so sánh'}
-        >
-          <Scale className="w-4 h-4" />
-          <span className="hidden sm:inline">
-            {compared ? 'Đã so sánh' : 'So sánh'}
-          </span>
-        </button>
+              {/* Nút 2: THÊM VÀO GIỎ HÀNG */}
+              {availableQty > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedSku) {
+                      const tensionText = selectedTension !== 'NONE' ? ` · Căng ${selectedTension}kg` : '';
+                      addItem({
+                        id: selectedSku.id,
+                        name: `${product.name} (${selectedSku.weight} - ${selectedSku.grip_size}${tensionText})`,
+                        sku: selectedSku.id,
+                        price: selectedSku.price,
+                        imageUrl: product.imageUrl,
+                        branchId: selectedBranchId,
+                      });
+                      setIsCartOpen(true);
+                    }
+                  }}
+                  className="h-13 px-6 rounded-full border border-brand bg-brand/5 hover:bg-brand/10 text-brand text-[14px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs shrink-0"
+                  title="Thêm vào giỏ hàng"
+                >
+                  <ShoppingBag className="w-4 h-4 text-brand" />
+                  <span>Thêm vào giỏ</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              addToCompare({
+                id: product.slug,
+                slug: product.slug,
+                name: product.name,
+                brand: product.brand,
+                imageUrl: product.imageUrl,
+                priceFrom: selectedSku?.price || 0,
+                playerType: product.playerType,
+                balancePoint: selectedSku?.balance_point_mm || product.balancePoint,
+                stiffness: selectedSku?.stiffness || product.stiffness,
+                weight: `${selectedSku?.weight} · ${selectedSku?.grip_size}`,
+                maxTension: selectedSku ? `${selectedSku.max_tension_lbs} lbs` : '28 lbs',
+              });
+            }}
+            className={`h-13 px-4 rounded-full border transition-all text-[13px] font-medium flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              compared
+                ? 'bg-ink text-bg border-ink'
+                : 'bg-surface text-ink border-line hover:border-ink/60'
+            }`}
+            title={compared ? 'Đang so sánh (Bấm để bỏ)' : 'Thêm vào so sánh'}
+          >
+            <Scale className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {compared ? 'Đã so sánh' : 'So sánh'}
+            </span>
+          </button>
+        </div>
+
+        {/* 4. DẢI CAM KẾT & BẢO HÀNH CHÍNH HÃNG (SHOPVNB DETAIL FOOTER) */}
+        <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] text-muted">
+          <div className="flex items-center gap-1.5 p-2 rounded-xl bg-bg border border-line">
+            <Truck className="w-3.5 h-3.5 text-brand shrink-0" />
+            <span>Giao COD kiểm tra trước khi trả</span>
+          </div>
+          <div className="flex items-center gap-1.5 p-2 rounded-xl bg-bg border border-line">
+            <ShieldCheck className="w-3.5 h-3.5 text-brand shrink-0" />
+            <span>100% Chính hãng · Bảo hành 12T</span>
+          </div>
+          <div className="flex items-center gap-1.5 p-2 rounded-xl bg-bg border border-line">
+            <RefreshCw className="w-3.5 h-3.5 text-brand shrink-0" />
+            <span>Đổi mới trong 7 ngày nếu lỗi</span>
+          </div>
+          <div className="flex items-center gap-1.5 p-2 rounded-xl bg-bg border border-line">
+            <Gift className="w-3.5 h-3.5 text-brand shrink-0" />
+            <span>Tặng cước BG65 & quấn cán sẵn</span>
+          </div>
+        </div>
       </div>
 
       {/* 4. Sticky Bottom Bar cho màn hình di động (Mobile Sticky Purchase Bar) */}
       <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-surface/95 backdrop-blur-md border-t border-line p-3 px-4 flex items-center justify-between gap-4 shadow-lg">
         <div>
-          <span className="text-[12px] text-muted block">Tổng tiền</span>
+          <span className="text-[13px] text-muted block">Tổng tiền</span>
           <PriceTag amount={selectedSku?.price || 0} size="md" />
         </div>
 
@@ -395,7 +514,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
             {!orderResult ? (
               <form onSubmit={handleSubmitOrder} className="space-y-4">
                 <div>
-                  <div className="text-[12px] text-muted font-normal">
+                  <div className="text-[13px] text-muted font-normal">
                     Xác nhận thông tin
                   </div>
                   <h2 className="text-xl font-medium text-ink mt-1">
@@ -556,13 +675,13 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
 
                 {orderResult.pickupCode && (
                   <div className="bg-bg border border-line p-3.5 rounded-xl text-left">
-                    <div className="text-[12px] text-muted">
+                    <div className="text-[13px] text-muted">
                       Mã nhận hàng tại quầy:
                     </div>
                     <div className="text-2xl font-medium text-ink mt-0.5 font-mono">
                       {orderResult.pickupCode}
                     </div>
-                    <div className="text-[12px] text-muted mt-1">
+                    <div className="text-[13px] text-muted mt-1">
                       Xuất trình mã này cho nhân viên chi nhánh khi nhận vợt.
                     </div>
                   </div>
@@ -607,7 +726,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                       </div>
                     </div>
 
-                    <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[12px] flex items-center gap-2">
+                    <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[13px] flex items-center gap-2">
                       <Clock className="w-4 h-4 shrink-0 text-muted" />
                       <span>Hàng được giữ kho trong <span className="font-medium text-ink">30 phút</span>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
                     </div>

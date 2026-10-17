@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
+import { resolveActorRole, checkPermission } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -37,14 +38,26 @@ export async function GET(request: NextRequest) {
 // POST: Tạo yêu cầu điều chuyển kho mới (R4 & R8)
 export async function POST(request: NextRequest) {
   try {
-    const { fromBranchId, toBranchId, sku, quantity, actor, actorBranchId, actorRole } = await request.json();
+    const { fromBranchId, toBranchId, sku, quantity, actor, actorBranchId } = await request.json();
+
+    const actorData = await resolveActorRole(request);
+    const effectiveRole = actorData?.role || 'STAFF';
+
+    const canCreate = await checkPermission(effectiveRole, 'inventory:transfer_create');
+    if (!canCreate) {
+      return NextResponse.json(
+        { error: 'Tài khoản không có thẩm quyền tạo phiếu điều chuyển kho (inventory:transfer_create)!' },
+        { status: 403 }
+      );
+    }
 
     // R4: Ràng buộc chi nhánh: Nhân viên và Quản lý chỉ được thao tác tại chi nhánh nguồn được phân công.
     // Quản trị viên (ADMIN) có toàn quyền trên toàn hệ thống (hoặc khi chọn chi nhánh ALL).
     const headerBranch = request.headers.get('x-branch-id');
     const effectiveBranch = headerBranch || actorBranchId;
+    const isGlobal = effectiveRole === 'ADMIN';
 
-    if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== fromBranchId) {
+    if (!isGlobal && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== fromBranchId) {
       return NextResponse.json(
         { error: 'QUY TẮC R4: Bạn không có quyền thao tác kho tại chi nhánh nguồn!' },
         { status: 403 }
@@ -59,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Chi nhánh nguồn và đích không được trùng nhau' }, { status: 400 });
     }
 
-    const transferId = `TRF-20261013-00${Math.floor(Math.random() * 900) + 100}`;
+    const transferId = `TRF-${Date.now()}-${Math.floor(Math.random() * 9000) + 1000}`;
 
     // R8: Điều chuyển: Hàng chưa trừ kho gửi khi mới tạo DRAFT/APPROVED.
     await queryDb(
@@ -80,7 +93,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const headerBranch = request.headers.get('x-branch-id');
-    const { transferId, action, receivedQty, discrepancyReason, actor, actorBranchId, actorRole } = await request.json();
+    const { transferId, action, receivedQty, discrepancyReason, actor, actorBranchId } = await request.json();
     const effectiveBranch = headerBranch || actorBranchId;
 
     const transferRows = await queryDb('inventory_db', `SELECT * FROM stock_transfers WHERE id = $1`, [transferId]);
@@ -89,9 +102,21 @@ export async function PATCH(request: NextRequest) {
     }
     const transfer = transferRows[0];
 
+    const actorData = await resolveActorRole(request);
+    const effectiveRole = actorData?.role || 'STAFF';
+    const isGlobal = effectiveRole === 'ADMIN';
+
     if (action === 'DISPATCH') {
+      const canDispatch = await checkPermission(effectiveRole, 'inventory:transfer_dispatch');
+      if (!canDispatch) {
+        return NextResponse.json(
+          { error: 'Tài khoản không có thẩm quyền xuất kho điều chuyển (inventory:transfer_dispatch)!' },
+          { status: 403 }
+        );
+      }
+
       // R4: Nhân viên và Quản lý chỉ được xuất kho điều chuyển tại chi nhánh gửi from_branch_id (ADMIN toàn quyền)
-      if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.from_branch_id) {
+      if (!isGlobal && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.from_branch_id) {
         return NextResponse.json(
           { error: 'QUY TẮC R4: Nhân viên chỉ được xuất kho điều chuyển tại chi nhánh được phân công!' },
           { status: 403 }
@@ -136,8 +161,16 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ success: true, status: 'IN_TRANSIT' });
       });
     } else if (action === 'RECEIVE') {
+      const canReceive = await checkPermission(effectiveRole, 'inventory:transfer_receive');
+      if (!canReceive) {
+        return NextResponse.json(
+          { error: 'Tài khoản không có thẩm quyền nhận kho điều chuyển (inventory:transfer_receive)!' },
+          { status: 403 }
+        );
+      }
+
       // R4: Nhân viên và Quản lý chỉ được nhận kho điều chuyển tại chi nhánh đích to_branch_id (ADMIN toàn quyền)
-      if (actorRole !== 'ADMIN' && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.to_branch_id) {
+      if (!isGlobal && effectiveBranch && effectiveBranch !== 'ALL' && effectiveBranch !== transfer.to_branch_id) {
         return NextResponse.json(
           { error: 'QUY TẮC R4: Nhân viên chỉ được nhận kho điều chuyển tại chi nhánh đích được phân công!' },
           { status: 403 }

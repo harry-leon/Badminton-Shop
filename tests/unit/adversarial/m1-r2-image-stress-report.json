@@ -1,0 +1,299 @@
+{
+  "timestamp": "2026-10-14T15:52:25.382Z",
+  "challenger": "teamwork_preview_challenger_m1_r2_1",
+  "milestone": "M1_R2",
+  "assertions": {
+    "total_products_gte_100": {
+      "passed": true,
+      "value": 106
+    },
+    "all_10_categories_present": {
+      "passed": true,
+      "value": 10
+    },
+    "cat_racket_count_10": {
+      "passed": true,
+      "value": 10
+    },
+    "sku_count_gte_products": {
+      "passed": true,
+      "skuCount": 126,
+      "productCount": 106
+    },
+    "catalog_zero_clones": {
+      "passed": true,
+      "uniqueCount": 106,
+      "duplicateCount": 0
+    },
+    "zero_cross_category_sharing": {
+      "passed": true,
+      "crossCatCount": 0
+    },
+    "provenance_domain_match": {
+      "passed": true,
+      "mismatchCount": 0
+    },
+    "secondhand_semantic_authenticity": {
+      "passed": true,
+      "mismatchCount": 0
+    },
+    "decommissioned_3_45mb_absent": {
+      "passed": true
+    },
+    "arcsaber_compressed": {
+      "passed": true,
+      "sizeBytes": 316640
+    },
+    "all_http_200": {
+      "passed": false,
+      "successCount": 105,
+      "total": 106
+    },
+    "all_payload_under_2_5mb": {
+      "passed": true,
+      "oversizedCount": 0
+    },
+    "zero_timeouts_under_5s": {
+      "passed": false,
+      "timeoutCount": 2
+    },
+    "valid_binary_magic_bytes": {
+      "passed": false,
+      "invalidCount": 1
+    }
+  },
+  "metrics": {
+    "totalTested": 106,
+    "localCount": 25,
+    "remoteCount": 81,
+    "minLatencyMs": 12,
+    "maxLatencyMs": 26800,
+    "avgLatencyMs": 851,
+    "p95LatencyMs": 2262,
+    "minSizeBytes": 552,
+    "maxSizeBytes": 1981700,
+    "maxSizeProduct": "Yonex Nanoflare 1000Z Lightning Yellow (1.89 MB)",
+    "avgSizeBytes": 383295
+  },
+  "failures": [
+    {
+      "check": "http_200_failure",
+      "non200Results": [
+        {
+          "product": "Lưới cầu lông ngoài trời Victor Outdoor Net C-7001",
+          "category": "cat_net",
+          "brand": "victor",
+          "rawUrl": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "testedUrl": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "isRemote": true,
+          "url": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "status": 502,
+          "latency": 240,
+          "size": 552,
+          "contentType": "text/html",
+          "magicFormat": "UNKNOWN_BYTES",
+          "validMagic": false,
+          "error": null,
+          "retried": true,
+          "firstTryStatus": 502,
+          "firstTryLatency": 3868
+        }
+      ]
+    },
+    {
+      "check": "timeouts",
+      "timeoutAssets": [
+        {
+          "product": "Áo đấu Victor All-England Championship T-3000",
+          "category": "cat_apparel",
+          "brand": "victor",
+          "rawUrl": "https://www.sakurasport.com/685-large_default/t-30002-ab-t-shirt-unisex-victor.jpg",
+          "testedUrl": "https://www.sakurasport.com/685-large_default/t-30002-ab-t-shirt-unisex-victor.jpg",
+          "isRemote": true,
+          "url": "https://www.sakurasport.com/685-large_default/t-30002-ab-t-shirt-unisex-victor.jpg",
+          "status": 200,
+          "latency": 26800,
+          "size": 163989,
+          "contentType": "image/jpeg",
+          "magicFormat": "PNG",
+          "validMagic": true,
+          "error": null,
+          "retried": true,
+          "firstTryStatus": 200,
+          "firstTryLatency": 23344
+        },
+        {
+          "product": "Lưới cầu lông Sodex Sport S25820 Thi đấu quốc gia",
+          "category": "cat_net",
+          "brand": "sodex",
+          "rawUrl": "https://www.sodexsport.vn/sodex_sport_library/Product-photos/VN/the-thao-dung-vot/cau-long/luoi-cau-long/S27875/luoi-cau-long-bwf-1.JPG",
+          "testedUrl": "https://www.sodexsport.vn/sodex_sport_library/Product-photos/VN/the-thao-dung-vot/cau-long/luoi-cau-long/S27875/luoi-cau-long-bwf-1.JPG",
+          "isRemote": true,
+          "url": "https://www.sodexsport.vn/sodex_sport_library/Product-photos/VN/the-thao-dung-vot/cau-long/luoi-cau-long/S27875/luoi-cau-long-bwf-1.JPG",
+          "status": 200,
+          "latency": 7036,
+          "size": 490774,
+          "contentType": "image/jpeg",
+          "magicFormat": "JPEG",
+          "validMagic": true,
+          "error": null,
+          "retried": true,
+          "firstTryStatus": 200,
+          "firstTryLatency": 8172
+        }
+      ]
+    },
+    {
+      "check": "invalid_magic_bytes",
+      "invalidMagicAssets": [
+        {
+          "product": "Lưới cầu lông ngoài trời Victor Outdoor Net C-7001",
+          "category": "cat_net",
+          "brand": "victor",
+          "rawUrl": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "testedUrl": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "isRemote": true,
+          "url": "https://assets.victor-shop.com/175500_3_k.jpg",
+          "status": 502,
+          "latency": 240,
+          "size": 552,
+          "contentType": "text/html",
+          "magicFormat": "UNKNOWN_BYTES",
+          "validMagic": false,
+          "error": null,
+          "retried": true,
+          "firstTryStatus": 502,
+          "firstTryLatency": 3868
+        }
+      ]
+    }
+  ],
+  "stressTests": [
+    {
+      "test": "storefront_vot_cau_long_render",
+      "passed": true,
+      "stats": {
+        "total": 20,
+        "productImgs": 20,
+        "allComplete": true,
+        "brokenCount": 0,
+        "samples": [
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2F...",
+            "naturalWidth": 359,
+            "naturalHeight": 359,
+            "ariaLabel": "Lining Axforce 80 Chen Long"
+          },
+          {
+            "src": "http://localhost:3000/images/products/lining-axfor...",
+            "naturalWidth": 3965,
+            "naturalHeight": 3965,
+            "ariaLabel": "Lining Axforce 80 Chen Long — Mặt sau"
+          },
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2F...",
+            "naturalWidth": 359,
+            "naturalHeight": 359,
+            "ariaLabel": "Lining Halbertec 8000 Yuta Watanabe"
+          },
+          {
+            "src": "http://localhost:3000/images/products/lining-halbe...",
+            "naturalWidth": 1000,
+            "naturalHeight": 1000,
+            "ariaLabel": "Lining Halbertec 8000 Yuta Watanabe — Mặt sau"
+          }
+        ]
+      }
+    },
+    {
+      "test": "storefront_secondhand_render",
+      "passed": true,
+      "stats": {
+        "total": 2,
+        "productImgs": 2,
+        "allComplete": true,
+        "brokenCount": 0,
+        "samples": [
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2F...",
+            "naturalWidth": 475,
+            "naturalHeight": 712,
+            "ariaLabel": "Yonex Astrox 88D Pro"
+          },
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2F...",
+            "naturalWidth": 475,
+            "naturalHeight": 712,
+            "ariaLabel": "Yonex Nanoflare 800 Pro"
+          }
+        ]
+      }
+    },
+    {
+      "test": "safeimage_404_fallback",
+      "passed": true,
+      "details": {
+        "found": true,
+        "count": 2,
+        "passed": true,
+        "samples": [
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 300,
+            "visibleAlt": "",
+            "ariaLabel": "Yonex Astrox 100ZZ Kurenai"
+          },
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 400,
+            "visibleAlt": "",
+            "ariaLabel": "Yonex Astrox 100ZZ Kurenai — Mặt sau"
+          }
+        ]
+      }
+    },
+    {
+      "test": "safeimage_corrupt_payload_fallback",
+      "passed": true,
+      "details": {
+        "found": true,
+        "count": 2,
+        "passed": true,
+        "samples": [
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 300,
+            "visibleAlt": ""
+          },
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 400,
+            "visibleAlt": ""
+          }
+        ]
+      }
+    },
+    {
+      "test": "safeimage_network_abort_fallback",
+      "passed": true,
+      "details": {
+        "found": true,
+        "count": 2,
+        "passed": true,
+        "samples": [
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 300,
+            "visibleAlt": ""
+          },
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 400,
+            "visibleAlt": ""
+          }
+        ]
+      }
+    }
+  ],
+  "verdict": "REQUEST_CHANGES"
+}

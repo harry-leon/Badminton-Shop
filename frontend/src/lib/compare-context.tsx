@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
 
 export interface CompareItem {
   id: string;
@@ -58,17 +57,14 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   const addToCompare = (item: CompareItem) => {
     if (items.some((i) => i.id === item.id)) {
       removeFromCompare(item.id);
-      toast.info(`Đã bỏ ${item.name} khỏi danh sách so sánh`);
       return;
     }
 
     if (items.length >= MAX_COMPARE) {
-      toast.warning(`Chỉ có thể so sánh tối đa ${MAX_COMPARE} cây vợt cùng lúc`);
       return;
     }
 
     setItems((prev) => [...prev, item]);
-    toast.success(`Đã thêm ${item.name} vào danh sách so sánh`);
   };
 
   const removeFromCompare = (id: string) => {
@@ -77,7 +73,6 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
 
   const clearCompare = () => {
     setItems([]);
-    toast.info('Đã xóa toàn bộ danh sách so sánh');
   };
 
   const isInCompare = (id: string) => {

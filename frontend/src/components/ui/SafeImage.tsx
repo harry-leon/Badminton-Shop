@@ -11,6 +11,41 @@ export interface SafeImageProps extends Omit<ImageProps, 'src' | 'alt' | 'onErro
   fetchPriority?: 'high' | 'low' | 'auto';
 }
 
+const IMAGEKIT_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/htqhun';
+
+/**
+ * Chuyển đổi đường dẫn ảnh cục bộ /images/... sang URL lưu trữ trên ImageKit.io CDN
+ */
+export function resolveImageKitUrl(src?: string | null): string {
+  if (!src) return '';
+  const trimmed = src.trim();
+
+  // Nếu là URL ImageKit banner cũ bị 404 (dạng ik.imagekit.io/htqhun/banners/banner-*.png), tự động chuyển sang ảnh cục bộ
+  if (trimmed.includes('ik.imagekit.io') && trimmed.includes('/banners/')) {
+    const filename = trimmed.split('/banners/')[1]?.split('?')[0];
+    if (filename) {
+      return `/images/banners/${filename}`;
+    }
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+  // Giữ nguyên file logo hoặc avatar cục bộ không chuyển hướng sang ImageKit
+  if (trimmed.startsWith('/images/logo-') || trimmed.startsWith('/images/avatars/')) {
+    return trimmed;
+  }
+  // Nếu là file banner cục bộ /images/banners/..., giữ nguyên để phục vụ từ Next.js public
+  if (trimmed.startsWith('/images/banners/')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/images/')) {
+    const base = IMAGEKIT_ENDPOINT.replace(/\/$/, '');
+    return `${base}/Badminton-shop${trimmed.replace(/^\/images/, '')}`;
+  }
+  return trimmed;
+}
+
 // Fallback SVG tỉ lệ 4:5 (400x500px), tự tải tức thì không phụ thuộc mạng
 const DEFAULT_4_5_PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
@@ -41,14 +76,16 @@ export function SafeImage({
   ...restProps
 }: SafeImageProps) {
   const effectiveFallback = fallbackSrc || DEFAULT_4_5_PLACEHOLDER;
-  const initialSrc = src && src.trim() !== '' ? src : effectiveFallback;
+  const initialResolved = resolveImageKitUrl(src);
+  const initialSrc = initialResolved || effectiveFallback;
 
   const [imgSrc, setImgSrc] = React.useState<string>(initialSrc);
   const [isError, setIsError] = React.useState<boolean>(!src || src.trim() === '');
 
   React.useEffect(() => {
-    if (src && src.trim() !== '') {
-      setImgSrc(src);
+    const resolved = resolveImageKitUrl(src);
+    if (resolved) {
+      setImgSrc(resolved);
       setIsError(false);
     } else {
       setImgSrc(effectiveFallback);
@@ -58,15 +95,32 @@ export function SafeImage({
 
   const handleError = () => {
     if (!isError) {
+      // 1. Nếu đang tải qua ImageKit CDN và bị lỗi, thử fallback về file local tương ứng
+      if (typeof imgSrc === 'string' && imgSrc.includes('ik.imagekit.io')) {
+        if (imgSrc.includes('/banners/')) {
+          const bannerName = imgSrc.split('/banners/')[1]?.split('?')[0];
+          if (bannerName) {
+            setImgSrc(`/images/banners/${bannerName}`);
+            return;
+          }
+        }
+      }
+      // 2. Nếu src là /images/... mà bị đổi sang CDN, thử quay về src gốc
+      if (src && src.startsWith('/images/') && imgSrc !== src) {
+        setImgSrc(src);
+        return;
+      }
+      // 3. Cuối cùng mới chuyển sang placeholder
       setIsError(true);
       setImgSrc(effectiveFallback);
     }
   };
 
-  // Tự động bật unoptimized cho URL bên ngoài (VietQR) hoặc Data URI để tránh lỗi hostname Next.js
+  // Tự động bật unoptimized cho URL bên ngoài (ImageKit, VietQR), Data URI hoặc URL có query string
+  const hasQuery = typeof imgSrc === 'string' && imgSrc.includes('?');
   const isExternalOrData =
     typeof imgSrc === 'string' &&
-    (imgSrc.startsWith('http://') || imgSrc.startsWith('https://') || imgSrc.startsWith('data:'));
+    (imgSrc.startsWith('http://') || imgSrc.startsWith('https://') || imgSrc.startsWith('data:') || hasQuery);
 
   const computedUnoptimized = unoptimized !== undefined ? unoptimized : isExternalOrData;
 

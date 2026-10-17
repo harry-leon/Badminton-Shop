@@ -22,7 +22,7 @@ const FORBIDDEN_RULES = [
   { name: 'font-weight-600+', regex: /\bfont-(semibold|bold|extrabold|black)\b/g, desc: 'Cấm font weight >= 600 ở storefront (chỉ dùng font-normal/400 hoặc font-medium/500)' },
   { name: 'uppercase-class', regex: /\buppercase\b/g, desc: 'Cấm class uppercase ở storefront (dùng sentence case)' },
   { name: 'wide-tracking', regex: /\btracking-(wide|wider|widest)\b/g, desc: 'Cấm tracking rộng ở nhãn/nút/tiêu đề' },
-  { name: 'tiny-text', regex: /\btext-\[(8|9|10|11|12)px\]\b/g, desc: 'Cấm chữ nhỏ dưới 13px (nội dung tối thiểu 13px)' },
+  { name: 'tiny-text', regex: /\btext-\[(8|9|10|11|12)px\]/g, desc: 'Cấm chữ nhỏ dưới 13px (nội dung tối thiểu 13px)' },
   { name: 'text-transparent', regex: /\btext-transparent\b/g, desc: 'Cấm text-transparent (không dùng chữ gradient)' },
   { name: 'bg-gradient', regex: /\bbg-gradient-[a-z0-9-]+\b/g, desc: 'Cấm gradient sặc sỡ (chỉ cho phép gradient rất nhẹ cùng tông ở nền hero có ignore comment)' },
 ];
@@ -60,6 +60,7 @@ function runAudit() {
       }
 
       for (const rule of FORBIDDEN_RULES) {
+        rule.regex.lastIndex = 0;
         if (rule.regex.test(line)) {
           const relativePath = path.relative(path.resolve(__dirname, '..'), filePath);
           violations.push({

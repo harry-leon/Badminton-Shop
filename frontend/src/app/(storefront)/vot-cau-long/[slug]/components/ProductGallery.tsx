@@ -34,8 +34,6 @@ const ANGLE_LABELS: Record<string, string> = {
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [mousePos, setMousePos] = React.useState({ x: 50, y: 50 });
 
   const displayImages = React.useMemo(() => {
     if (!images || images.length === 0) {
@@ -54,12 +52,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   const activeImage = displayImages[activeIndex] || displayImages[0];
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    setMousePos({ x, y });
-  };
 
   const slides = displayImages.map((img) => ({
     src: img.image_url,
@@ -106,16 +98,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           </div>
         )}
 
-        {/* Khung ảnh chính tỉ lệ 4:5 với inline lens zoom & lightbox trigger */}
+        {/* Khung ảnh chính — nhấn để mở lightbox, có thumbnail navigation */}
         <div
-          className="relative flex-1 w-full aspect-[4/5] bg-[#EFECE6] dark:bg-[#18201C] rounded-2xl overflow-hidden cursor-zoom-in group border border-line/60 flex items-center justify-center p-6 sm:p-10 select-none"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onMouseMove={handleMouseMove}
+          className="relative flex-1 w-full aspect-[4/5] bg-[#EFECE6] dark:bg-[#1C2620] rounded-2xl overflow-hidden cursor-pointer group border border-line/60 flex items-center justify-center p-6 sm:p-10 select-none"
           onClick={() => setIsLightboxOpen(true)}
           role="button"
           tabIndex={0}
-          aria-label="Nhấn để phóng to chi tiết vợt toàn màn hình"
+          aria-label="Nhấn để xem ảnh phóng to toàn màn hình"
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
@@ -123,14 +112,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             }
           }}
         >
-          {/* Lớp hiển thị ảnh chính với hover scale(1.85) */}
-          <div
-            className="relative w-full h-full transition-transform duration-100 ease-out"
-            style={{
-              transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
-              transform: isHovered ? 'scale(1.85)' : 'scale(1)',
-            }}
-          >
+          {/* Ảnh chính — hover scale nhẹ, không zoom lens */}
+          <div className="relative w-full h-full transition-transform duration-300 ease-out group-hover:scale-[1.04]">
             <SafeImage
               src={activeImage.image_url}
               alt={`${productName} — ${ANGLE_LABELS[activeImage.angle] || activeImage.angle}`}
@@ -144,15 +127,15 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           {/* Badges trang nhã */}
           <div className="absolute top-4 left-4 flex flex-col gap-1.5 pointer-events-none">
             <Badge variant="muted">Chính hãng</Badge>
-            <span className="text-[11px] font-medium text-ink/80 bg-surface/80 backdrop-blur-xs px-2 py-0.5 rounded-full border border-line">
+            <span className="text-[13px] font-medium text-ink/80 bg-surface/80 backdrop-blur-xs px-2 py-0.5 rounded-full border border-line">
               {ANGLE_LABELS[activeImage.angle] || activeImage.angle}
             </span>
           </div>
 
-          {/* Nút chỉ dẫn phóng to góc phải */}
-          <div className="absolute bottom-4 right-4 bg-surface/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-line text-[12px] text-ink font-medium flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity shadow-xs pointer-events-none">
+          {/* Hướng dẫn: nhấn để phóng to */}
+          <div className="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-line text-[13px] text-ink font-medium flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-xs pointer-events-none">
             <ZoomIn className="w-3.5 h-3.5 text-muted" />
-            <span>Phóng to</span>
+            <span>Xem ảnh lớn</span>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import ProductGallery, { GalleryImage } from './components/ProductGallery';
 import StickyAnchorBar from './components/StickyAnchorBar';
 import SanitizedMarkdown from './components/SanitizedMarkdown';
 import ProductSpecsTable from './components/ProductSpecsTable';
+import ProductReviews from './components/ProductReviews';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -201,6 +202,32 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     },
   };
 
+  // Bài viết mô tả chi tiết chuyên sâu sản phẩm
+  const detailedArticle = `
+### Tổng quan & Định vị người chơi
+
+Cây vợt **${productData.name}** là một trong những sản phẩm biểu tượng đỉnh cao của thương hiệu **${productData.brand}**, được phát triển dành riêng cho các vận động viên và người chơi phong trào tìm kiếm sự hoàn hảo giữa uy lực tấn công và độ chuẩn xác. Thiết kế khung khí động học kết hợp cùng nước sơn nhám cao cấp mang lại vẻ ngoài thể thao mạnh mẽ và bền bỉ theo thời gian.
+
+### Các công nghệ độc quyền cốt lõi
+
+- **Hệ thống phân bổ trọng lượng đối trọng**: Cân bằng lực tại đỉnh khung, khớp nối chữ T và đuôi cán cầm, giúp đầu vợt phục hồi tức thì sau mỗi cú vung vợt để sẵn sàng cho đường cầu tiếp theo.
+- **Vật liệu Carbon mô-đun cao**: Cấu trúc sợi carbon nano đa chiều gia tăng độ bền khung, tích lũy lực xoắn tối đa khi gập cổ tay và giải phóng năng lượng bộc phát trực tiếp vào quả cầu.
+- **Thân đũa Extra Slim Shaft**: Giảm thiểu sức cản của gió, tạo tốc độ vung vợt xé gió và giữ cho mặt vợt luôn ổn định, không bị rung lắc khi đón cầu nặng.
+- **Chụp mũ vợt thế hệ mới**: Hỗ trợ tối ưu điểm uốn thân vợt, mặt trước cho phép đũa uốn cong tối đa để trợ lực trong khi hai bên cố định mặt vợt chống xoắn.
+
+### Trải nghiệm thi đấu thực tế trên sân
+
+- **Sức mạnh đập cầu (Smash)**: Điểm cân bằng ${productData.balancePoint}mm (${productData.balancePoint >= 305 ? 'nặng đầu thiên công' : 'cân bằng linh hoạt'}) tạo lực đầm tay tuyệt vời. Những pha smash cuối sân có quỹ đạo bay cắm sâu, uy lực nặng và tiếng nổ đanh thép vang sân.
+- **Phản tạt & Kiểm soát tầm trung**: Khung vợt linh hoạt giúp người chơi dễ dàng tì đè lưới, chặn cầu và phản tạt đôi công chớp nhoáng mà không bị mỏi cổ tay.
+- **Phông cầu & Bỏ nhỏ trên lưới**: Khả năng cảm nhận mặt vợt rõ ràng giúp các pha bỏ nhỏ, cắt cầu sát lưới có độ xoáy cao, đồng thời trợ lực phông cầu cao sâu về cuối sân đối phương nhẹ nhàng.
+
+### Khuyến nghị phiên bản & Mức căng cước tối ưu
+
+- **Phiên bản 4U (80-84g)**: Thích hợp cho đại đa số người chơi phong trào, đánh đôi công thủ toàn diện và linh hoạt xoay xở.
+- **Phiên bản 3U (85-89g)**: Thích hợp cho người chơi có thể lực dồi dào, lực cổ tay khỏe và chuyên đập cầu dồn ép phía sau.
+- **Mức căng dây khuyến nghị**: Sức căng tối đa của khung là **${productData.maxTension}**. Nên căng cước Yonex BG65Ti (10.5kg - 11kg) cho độ bền bỉ cao, hoặc Yonex BG80 / Exbolt 65 (11kg - 11.5kg) để tối ưu tiếng nổ và độ nảy thoát cầu.
+`;
+
   return (
     <div className="py-8 sm:py-12">
       <script
@@ -244,7 +271,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="muted">Chính hãng</Badge>
                 <Badge variant="muted">Bảo hành {productData.warrantyMonths} tháng</Badge>
-                <span className="text-[12px] text-muted font-normal flex items-center gap-1 ml-1">
+                <span className="text-[13px] text-muted font-normal flex items-center gap-1 ml-1">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   <span className="font-medium text-ink">4.9</span>
                   <span>(128 đánh giá)</span>
@@ -283,7 +310,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <h2 className="text-xl font-medium text-ink tracking-tight mb-4">
               Mô tả chi tiết sản phẩm
             </h2>
-            <SanitizedMarkdown content={productData.description} />
+            <SanitizedMarkdown content={detailedArticle} />
           </section>
 
           {/* Mục 2: Bảng thông số kỹ thuật chuẩn hóa */}
@@ -294,31 +321,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <ProductSpecsTable product={productData} skus={skusData} />
           </section>
 
-          {/* Mục 3: Đánh giá từ người chơi */}
+          {/* Mục 3: Đánh giá từ người chơi với ProductReviews */}
           <section id="danh-gia" className="scroll-mt-32 py-8 border-b border-line">
             <h2 className="text-xl font-medium text-ink tracking-tight mb-6">
               Đánh giá từ người chơi đã xác thực
             </h2>
-            <div className="bg-surface p-6 rounded-2xl border border-line flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="text-3xl sm:text-4xl font-medium text-ink">4.9</div>
-                <div>
-                  <div className="flex items-center gap-1 text-amber-400">
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                  </div>
-                  <div className="text-[13px] text-muted mt-0.5 font-normal">
-                    Dựa trên 128 lượt đánh giá thực tế
-                  </div>
-                </div>
-              </div>
-              <div className="text-[13px] text-muted text-center sm:text-right font-normal">
-                100% đánh giá từ khách hàng đã mua và sử dụng vợt tại Smash Court
-              </div>
-            </div>
+            <ProductReviews productName={productData.name} productSlug={productData.slug} />
           </section>
 
           {/* Mục 4: Chính sách bảo hành & Giao nhận */}

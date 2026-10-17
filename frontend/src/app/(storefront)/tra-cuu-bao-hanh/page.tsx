@@ -231,7 +231,7 @@ function WarrantyLookupContent() {
                   {isRejectedState && <XCircle className="w-3.5 h-3.5 text-sale" />}
                   <span>{st.title}</span>
                 </div>
-                <div className="text-[12px] opacity-80 font-normal">{st.desc}</div>
+                <div className="text-[13px] opacity-80 font-normal">{st.desc}</div>
               </div>
             );
           })}
@@ -380,7 +380,7 @@ function WarrantyLookupContent() {
                     <div key={idx} className="bg-surface border border-line rounded-2xl p-5 space-y-3 shadow-xs">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
                         <div>
-                          <div className="text-[12px] text-muted">Mã đơn hàng:</div>
+                          <div className="text-[13px] text-muted">Mã đơn hàng:</div>
                           <span className="font-mono text-ink font-medium text-[14px]">{pw.order_code}</span>
                         </div>
                         <div className="text-[13px] text-muted">
@@ -390,19 +390,19 @@ function WarrantyLookupContent() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px]">
                         <div>
-                          <span className="text-muted block text-[12px]">Tên sản phẩm:</span>
+                          <span className="text-muted block text-[13px]">Tên sản phẩm:</span>
                           <span className="font-medium text-ink">{pw.product_name_snapshot}</span>
                         </div>
                         <div>
-                          <span className="text-muted block text-[12px]">Mã SKU:</span>
+                          <span className="text-muted block text-[13px]">Mã SKU:</span>
                           <span className="font-mono text-muted">{pw.sku}</span>
                         </div>
                         <div>
-                          <span className="text-muted block text-[12px]">Khách hàng:</span>
+                          <span className="text-muted block text-[13px]">Khách hàng:</span>
                           <span className="text-ink">{maskName(pw.customer_name)} ({maskPhone(pw.customer_phone)})</span>
                         </div>
                         <div>
-                          <span className="text-muted block text-[12px]">Chính sách cam kết:</span>
+                          <span className="text-muted block text-[13px]">Chính sách cam kết:</span>
                           <span className="text-brand font-medium">{pw.warranty_policy_snapshot || 'Bảo hành khung 12 tháng chính hãng'}</span>
                         </div>
                       </div>
@@ -435,12 +435,12 @@ function WarrantyLookupContent() {
                             <span className="font-mono text-ink font-medium text-[15px]">{claim.id}</span>
                             {getStatusBadge(claim.status)}
                           </div>
-                          <div className="text-[12px] text-muted mt-1">
+                          <div className="text-[13px] text-muted mt-1">
                             Sản phẩm: <span className="text-ink font-medium">{claim.product_name}</span> (Serial: <span className="font-mono">{claim.serial_number || 'Khớp hồ sơ'}</span>)
                           </div>
                         </div>
 
-                        <div className="text-[12px] text-muted">
+                        <div className="text-[13px] text-muted">
                           Ngày tạo: {new Date(claim.created_at).toLocaleDateString('vi-VN')}
                         </div>
                       </div>
@@ -451,12 +451,12 @@ function WarrantyLookupContent() {
                       {/* Chi tiết lỗi & Lý do từ chối nếu có */}
                       <div className="bg-bg rounded-xl p-4 text-[13px] space-y-2 border border-line">
                         <div>
-                          <span className="text-muted block text-[12px]">Mô tả lỗi từ khách hàng:</span>
+                          <span className="text-muted block text-[13px]">Mô tả lỗi từ khách hàng:</span>
                           <p className="text-ink mt-0.5 leading-relaxed">&ldquo;{claim.damage_description}&rdquo;</p>
                         </div>
 
                         {claim.status === 'REJECTED' && claim.rejection_reason && (
-                          <div className="p-3 bg-sale/5 border border-sale/20 rounded-lg text-sale text-[12px] mt-2 space-y-1">
+                          <div className="p-3 bg-sale/5 border border-sale/20 rounded-lg text-sale text-[13px] mt-2 space-y-1">
                             <div className="font-medium flex items-center gap-1.5">
                               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                               <span>Lý do từ chối bảo hành kèm căn cứ kỹ thuật:</span>
@@ -466,7 +466,7 @@ function WarrantyLookupContent() {
                         )}
 
                         {claim.assigned_technician && (
-                          <div className="text-[12px] text-muted pt-1">
+                          <div className="text-[13px] text-muted pt-1">
                             Kỹ thuật viên phụ trách: <span className="text-ink font-medium">{claim.assigned_technician}</span>
                           </div>
                         )}

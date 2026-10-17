@@ -32,19 +32,177 @@
   }
 
   .dark {
-    --bg: #0B0F0D;       /* nền gần đen xanh thể thao */
-    --surface: #141A17;  /* thẻ, popover nền tối */
-    --ink: #F5F4F0;      /* chữ chính sáng */
-    --muted: #9BA39F;    /* chữ phụ trung tính */
-    --line: #222B26;     /* đường kẻ mỏng 1px tối */
-    --brand: #16794C;    /* xanh sân sáng hơn chút cho nền tối */
-    --accent: #C8F31D;   /* xanh chanh */
-    --sale: #FF6B4A;     /* giá giảm nền tối */
+    --bg: #0D1110;       /* nền tối sâu, sang trọng (Obsidian Black) */
+    --surface: #161D1A;  /* thẻ, popover, modal — tương phản nổi bật rõ rệt */
+    --ink: #F2F4F3;      /* chữ chính trắng sáng rõ nét, đọc êm mắt */
+    --muted: #9BA7A1;    /* chữ phụ xám sáng chuẩn tương phản WCAG AAA */
+    --line: #222C28;     /* đường viền tinh tế, tách biệt ranh giới thẻ */
+    --brand: #22C55E;    /* xanh thể thao tươi sáng, hiển thị nổi bật trên nền tối */
+    --accent: #D4F932;   /* xanh chanh thể thao nổi bật */
+    --sale: #FF5A36;     /* giá giảm đỏ cam rực rỡ, bắt mắt */
+  }
+
+  /* Cưỡng chế Portal luôn sử dụng Light Theme chuẩn, độc lập với theme khách hàng/storefront */
+  .portal-root,
+  .portal-root * {
+    --bg: #F5F4F0 !important;
+    --surface: #FFFFFF !important;
+    --ink: #111613 !important;
+    --muted: #6A726E !important;
+    --line: #E4E3DD !important;
+    --brand: #0F5132 !important;
+    --accent: #C8F31D !important;
+    --sale: #E5532A !important;
+    color-scheme: light !important;
   }
 
   b, strong {
     font-weight: 500;
   }
+}
+
+/* ==========================================================================
+   Admin Portal Table Density Modes ('normal' / Chuẩn vs 'compact' / Đặc)
+   ========================================================================== */
+
+/* Smooth transitions for table cells when toggling density */
+.portal-root table th,
+.portal-root table td {
+  transition: padding 0.15s cubic-bezier(0.4, 0, 0.2, 1), font-size 0.15s cubic-bezier(0.4, 0, 0.2, 1), line-height 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.portal-root table td img {
+  transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1), height 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Compact / Đặc Mode: Tighter padding, compact font, high information density */
+.portal-root[data-density="compact"] table:not([data-density-ignore]) th:not([data-density-ignore]),
+.portal-root.density-compact table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-density="compact"] main table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-table-density="compact"] main table:not([data-density-ignore]) th:not([data-density-ignore]) {
+  padding-top: 0.375rem !important;    /* 6px (py-1.5) */
+  padding-bottom: 0.375rem !important; /* 6px (py-1.5) */
+  padding-left: 0.625rem !important;   /* 10px (px-2.5) */
+  padding-right: 0.625rem !important;  /* 10px (px-2.5) */
+  font-size: 0.6875rem !important;     /* 11px */
+  line-height: 1rem !important;
+  white-space: nowrap;
+}
+
+.portal-root[data-density="compact"] table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+.portal-root.density-compact table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-density="compact"] main table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-table-density="compact"] main table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]) {
+  padding-top: 0.375rem !important;    /* 6px (py-1.5) */
+  padding-bottom: 0.375rem !important; /* 6px (py-1.5) */
+  padding-left: 0.625rem !important;   /* 10px (px-2.5) */
+  padding-right: 0.625rem !important;  /* 10px (px-2.5) */
+  font-size: 0.75rem !important;       /* 12px (text-xs) */
+  line-height: 1.15rem !important;
+  vertical-align: middle;
+}
+
+/* Compact images / avatars inside table rows */
+.portal-root[data-density="compact"] table:not([data-density-ignore]) td:not([data-density-ignore]) img,
+.portal-root.density-compact table:not([data-density-ignore]) td:not([data-density-ignore]) img,
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) img {
+  width: 1.75rem !important;  /* 28px */
+  height: 1.75rem !important; /* 28px */
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+}
+
+/* Compact badges, tags, and status chips inside table rows */
+.portal-root[data-density="compact"] table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+.portal-root.density-compact table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+.portal-root[data-density="compact"] table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"],
+.portal-root.density-compact table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"],
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  padding-left: 0.375rem !important;
+  padding-right: 0.375rem !important;
+  font-size: 0.625rem !important;      /* 10px */
+  line-height: 0.85rem !important;
+}
+
+/* Compact action buttons inside table cells */
+.portal-root[data-density="compact"] table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]),
+.portal-root.density-compact table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]),
+[data-table-density="compact"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]) {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 0.6875rem !important;
+  min-height: 1.5rem !important;
+}
+
+/* Standard / Chuẩn Mode: Spacing reset to comfortable view with high specificity */
+.portal-root[data-density="normal"] table:not([data-density-ignore]) th:not([data-density-ignore]),
+.portal-root.density-normal table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-density="normal"] main table:not([data-density-ignore]) th:not([data-density-ignore]),
+[data-table-density="normal"] main table:not([data-density-ignore]) th:not([data-density-ignore]) {
+  padding-top: 0.75rem !important;    /* 12px (py-3) */
+  padding-bottom: 0.75rem !important; /* 12px (py-3) */
+  padding-left: 1rem !important;      /* 16px (px-4) */
+  padding-right: 1rem !important;     /* 16px (px-4) */
+  font-size: 0.75rem !important;      /* 12px */
+  line-height: 1.25rem !important;
+}
+
+.portal-root[data-density="normal"] table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+.portal-root.density-normal table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-density="normal"] main table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]),
+[data-table-density="normal"] main table:not([data-density-ignore]) td:not([data-density-ignore]):not([colspan]) {
+  padding-top: 0.75rem !important;    /* 12px (py-3) */
+  padding-bottom: 0.75rem !important; /* 12px (py-3) */
+  padding-left: 1rem !important;      /* 16px (px-4) */
+  padding-right: 1rem !important;     /* 16px (px-4) */
+  font-size: 0.8125rem !important;    /* 13px */
+  line-height: 1.35rem !important;
+  vertical-align: middle;
+}
+
+/* Standard images / avatars inside table rows */
+.portal-root[data-density="normal"] table:not([data-density-ignore]) td:not([data-density-ignore]) img,
+.portal-root.density-normal table:not([data-density-ignore]) td:not([data-density-ignore]) img,
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) img {
+  width: 2.5rem !important;  /* 40px */
+  height: 2.5rem !important; /* 40px */
+  min-width: 2.5rem !important;
+  min-height: 2.5rem !important;
+}
+
+/* Standard badges, tags, and status chips inside table rows */
+.portal-root[data-density="normal"] table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+.portal-root.density-normal table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+.portal-root[data-density="normal"] table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"],
+.portal-root.density-normal table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"],
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-full"],
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) span[class*="rounded-md"] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 0.6875rem !important;    /* 11px */
+  line-height: 1rem !important;
+}
+
+/* Standard action buttons inside table cells */
+.portal-root[data-density="normal"] table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]),
+.portal-root.density-normal table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]),
+[data-table-density="normal"] .portal-root table:not([data-density-ignore]) td:not([data-density-ignore]) button:not([data-density-ignore]) {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  font-size: 0.75rem !important;
+  min-height: 1.875rem !important;
 }
 
 @theme {
@@ -83,6 +241,108 @@ body {
   display: none;
 }
 
+/* Rung động nhẹ nhàng thu hút sự chú ý định kỳ cho Menu Badge / Callout */
+@keyframes badge-shake {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  15% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+  30% {
+    transform: rotate(9deg) scale(1.08);
+  }
+  45% {
+    transform: rotate(-7deg) scale(1.04);
+  }
+  60% {
+    transform: rotate(5deg) scale(1.04);
+  }
+  75% {
+    transform: rotate(-2deg) scale(1.02);
+  }
+}
+
+.animate-badge-shake {
+  animation: badge-shake 2.2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Hiệu ứng sấm sét nhấp nháy năng lượng cho Top Trending */
+@keyframes lightning-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+  20% {
+    transform: scale(1.18) rotate(-4deg);
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  40% {
+    transform: scale(0.95) rotate(3deg);
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  60% {
+    transform: scale(1.12) rotate(-2deg);
+    filter: drop-shadow(0 0 7px currentColor);
+  }
+  80% {
+    transform: scale(1.02) rotate(1deg);
+  }
+}
+
+.animate-lightning {
+  animation: lightning-pulse 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Hiệu ứng rung nhẹ + đung đưa thu hút chú ý cho icon liên hệ */
+@keyframes contact-wiggle {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  15% {
+    transform: rotate(-14deg) scale(1.12);
+  }
+  30% {
+    transform: rotate(12deg) scale(1.12);
+  }
+  45% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(6deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.animate-contact-wiggle {
+  animation: contact-wiggle 2.2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Hiệu ứng chạy ngang vô tận (Continuous Brand Marquee) */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 /* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -92,3 +352,4 @@ body {
     scroll-behavior: auto !important;
   }
 }
+

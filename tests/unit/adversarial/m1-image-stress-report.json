@@ -1,0 +1,160 @@
+{
+  "summary": {
+    "totalProducts": 106,
+    "checkedImages": 106,
+    "passCount": 105,
+    "failCount": 1,
+    "remoteCount": 96,
+    "localCount": 10,
+    "domains": {
+      "www.yonex.com": 92,
+      "www.starbalm.com": 4,
+      "local": 10
+    },
+    "categories": {
+      "cat_accessory": 11,
+      "cat_apparel": 11,
+      "cat_bag": 10,
+      "cat_grip": 11,
+      "cat_net": 10,
+      "cat_racket": 10,
+      "cat_secondhand": 10,
+      "cat_shoes": 12,
+      "cat_shuttle": 10,
+      "cat_string": 11
+    }
+  },
+  "findings": [
+    {
+      "type": "HTTP_STATUS_FAILURE",
+      "product": "Balo cầu lông đa năng Victor BR3029",
+      "url": "https://www.yonex.com/media/catalog/product/i/n/int_ac102-3_011-5.png",
+      "details": "GET status: 0, HEAD status: 200, error: TIMEOUT_12S"
+    },
+    {
+      "type": "INVALID_CONTENT_TYPE",
+      "product": "Balo cầu lông đa năng Victor BR3029",
+      "url": "https://www.yonex.com/media/catalog/product/i/n/int_ac102-3_011-5.png"
+    },
+    {
+      "type": "MAGIC_BYTE_MISMATCH",
+      "product": "Balo cầu lông đa năng Victor BR3029",
+      "url": "https://www.yonex.com/media/catalog/product/i/n/int_ac102-3_011-5.png",
+      "reason": "No buffer"
+    }
+  ],
+  "stressTests": [
+    {
+      "scenario": "Next.js optimizer with remote yonex.com URL",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fwww.yonex.com%2Fmedia%2Fcatalog%2Fproduct%2Fa%2Fc%2Fac489_011_1.png&w=640&q=75",
+      "status": 200,
+      "contentType": "image/webp",
+      "passed": true
+    },
+    {
+      "scenario": "Next.js optimizer with remote starbalm.com URL",
+      "url": "http://localhost:3000/_next/image?url=https%3A%2F%2Fwww.starbalm.com%2Fbestanden%2Fartikelen%2F9%2F221_afb_1.jpg&w=640&q=75",
+      "status": 200,
+      "contentType": "image/webp",
+      "passed": true
+    },
+    {
+      "scenario": "Next.js optimizer with local public image URL",
+      "url": "http://localhost:3000/_next/image?url=%2Fimages%2Fproducts%2Flining-axforce-80.jpg&w=640&q=75",
+      "status": 200,
+      "contentType": "image/webp",
+      "passed": true
+    },
+    {
+      "scenario": "Storefront /vot-cau-long image rendering",
+      "passed": true,
+      "details": {
+        "totalImgs": 20,
+        "productImgs": 20,
+        "allComplete": true,
+        "brokenCount": 0,
+        "renderedSample": [
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2Fproducts%2...",
+            "naturalWidth": 359,
+            "naturalHeight": 359,
+            "alt": "Lining Axforce 80 Chen Long",
+            "ariaLabel": "Lining Axforce 80 Chen Long"
+          },
+          {
+            "src": "http://localhost:3000/images/products/lining-axforce-80.jpg?...",
+            "naturalWidth": 3965,
+            "naturalHeight": 3965,
+            "alt": "Lining Axforce 80 Chen Long — Mặt sau",
+            "ariaLabel": "Lining Axforce 80 Chen Long — Mặt sau"
+          },
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2Fproducts%2...",
+            "naturalWidth": 359,
+            "naturalHeight": 359,
+            "alt": "Lining Halbertec 8000 Yuta Watanabe",
+            "ariaLabel": "Lining Halbertec 8000 Yuta Watanabe"
+          },
+          {
+            "src": "http://localhost:3000/images/products/lining-halbertec-8000....",
+            "naturalWidth": 1000,
+            "naturalHeight": 1000,
+            "alt": "Lining Halbertec 8000 Yuta Watanabe — Mặt sau",
+            "ariaLabel": "Lining Halbertec 8000 Yuta Watanabe — Mặt sau"
+          },
+          {
+            "src": "http://localhost:3000/_next/image?url=%2Fimages%2Fproducts%2...",
+            "naturalWidth": 359,
+            "naturalHeight": 359,
+            "alt": "Victor Auraspeed 100X Mohammad Ahsan",
+            "ariaLabel": "Victor Auraspeed 100X Mohammad Ahsan"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "SafeImage HTTP 404 Fallback to inline SVG",
+      "passed": true,
+      "details": {
+        "found": true,
+        "count": 2,
+        "passed": true,
+        "samples": [
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 300,
+            "visibleAlt": "",
+            "ariaLabel": "Yonex Astrox 99 Pro Cherry Sunburst"
+          },
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 400,
+            "visibleAlt": "",
+            "ariaLabel": "Yonex Astrox 99 Pro Cherry Sunburst — Mặt sau"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "SafeImage corrupt HTML payload fallback",
+      "passed": true,
+      "details": {
+        "found": true,
+        "count": 2,
+        "passed": true,
+        "samples": [
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 300,
+            "visibleAlt": ""
+          },
+          {
+            "srcPrefix": "data:image/svg+xml;utf8,%3Csvg",
+            "naturalWidth": 400,
+            "visibleAlt": ""
+          }
+        ]
+      }
+    }
+  ]
+}

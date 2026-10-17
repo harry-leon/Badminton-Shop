@@ -104,7 +104,7 @@ export default function CheckoutPage() {
               <div className="text-2xl font-medium text-ink font-mono">
                 {orderResult.pickupCode}
               </div>
-              <div className="text-[12px] text-muted">
+              <div className="text-[13px] text-muted">
                 Chi nhánh nhận: {BRANCHES.find((b) => b.id === branchId)?.name}
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[12px] flex items-center gap-2">
+              <div className="p-2.5 bg-surface border border-line text-muted rounded-lg text-[13px] flex items-center gap-2">
                 <Clock className="w-4 h-4 shrink-0 text-muted" />
                 <span>Hàng được giữ kho trong <span className="font-medium text-ink">30 phút</span>. Vui lòng hoàn tất thanh toán trước khi hết hạn.</span>
               </div>
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                         }`}
                       >
                         <div className="text-ink text-[13px]">{b.name}</div>
-                        <div className="text-[12px] text-muted font-normal">{b.address}</div>
+                        <div className="text-[13px] text-muted font-normal">{b.address}</div>
                       </div>
                     ))}
                   </div>
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
                   >
                     <QrCode className="w-4 h-4 text-brand" />
                     <span>Chuyển khoản VietQR</span>
-                    <span className="text-[11px] text-muted">Giữ kho 30 phút</span>
+                    <span className="text-[13px] text-muted">Giữ kho 30 phút</span>
                   </button>
                   <button
                     type="button"
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
                   >
                     <Clock className="w-4 h-4 text-muted" />
                     <span>Thanh toán khi nhận (COD)</span>
-                    <span className="text-[11px] text-muted">Giữ kho 12 giờ</span>
+                    <span className="text-[13px] text-muted">Giữ kho 12 giờ</span>
                   </button>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0 text-[13px]">
                       <div className="text-ink font-medium truncate">{item.name}</div>
-                      <div className="text-muted text-[12px]">SL: {item.quantity} · {item.sku}</div>
+                      <div className="text-muted text-[13px]">SL: {item.quantity} · {item.sku}</div>
                     </div>
                     <div className="text-right shrink-0">
                       <PriceTag amount={item.price * item.quantity} size="sm" />
@@ -410,7 +410,7 @@ export default function CheckoutPage() {
                 Xác nhận đặt hàng
               </Button>
 
-              <div className="text-[12px] text-muted text-center flex items-center justify-center gap-1.5">
+              <div className="text-[13px] text-muted text-center flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand" />
                 <span>Giữ hàng tự động · Cam kết chính xác theo tồn kho</span>
               </div>

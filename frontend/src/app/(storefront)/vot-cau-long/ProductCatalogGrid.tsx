@@ -25,11 +25,41 @@ export interface ProductItem {
   maxTension?: string;
   inStockBranches: string[];
   rating?: number;
+  salesCount?: number;
+  isBestSeller?: boolean;
 }
+
+export const CATEGORY_FACETS = [
+  { id: 'cat_racket', label: 'Vợt cầu lông', href: '/vot-cau-long' },
+  { id: 'cat_string', label: 'Dây cước', href: '/day-cuoc' },
+  { id: 'cat_shoes', label: 'Giày cầu lông', href: '/giay-cau-long' },
+  { id: 'cat_shuttle', label: 'Quả cầu lông', href: '/qua-cau-long' },
+  { id: 'cat_bag', label: 'Túi & Bao vợt', href: '/tui-bao-vot' },
+  { id: 'cat_grip', label: 'Quấn cán vợt', href: '/quan-can' },
+  { id: 'cat_net', label: 'Lưới cầu lông', href: '/luoi-cau-long' },
+  { id: 'cat_apparel', label: 'Quần áo thể thao', href: '/quan-ao' },
+  { id: 'cat_accessory', label: 'Phụ kiện', href: '/phu-kien' },
+  { id: 'cat_secondhand', label: 'Vợt cũ đã kiểm định', href: '/second-hand' },
+];
+
+export const DEFAULT_CATEGORY_COUNTS: Record<string, number> = {
+  cat_racket: 10,
+  cat_string: 11,
+  cat_shoes: 12,
+  cat_shuttle: 10,
+  cat_bag: 10,
+  cat_grip: 11,
+  cat_net: 10,
+  cat_apparel: 11,
+  cat_accessory: 11,
+  cat_secondhand: 10,
+};
 
 interface ProductCatalogGridProps {
   initialProducts: ProductItem[];
   initialSearchParams?: { [key: string]: string | string[] | undefined };
+  currentCategory?: string;
+  categoryCounts?: Record<string, number>;
 }
 
 const BRANCHES = [
@@ -42,6 +72,8 @@ const BRANCHES = [
 export default function ProductCatalogGrid({
   initialProducts,
   initialSearchParams,
+  currentCategory = 'cat_racket',
+  categoryCounts = DEFAULT_CATEGORY_COUNTS,
 }: ProductCatalogGridProps) {
   // 1. Initial State from URL searchParams
   const getInitialBrand = () => {
@@ -63,19 +95,25 @@ export default function ProductCatalogGrid({
     return null;
   };
 
+  const getInitialOnlySale = () => {
+    const s = initialSearchParams?.sale;
+    return s === 'true' || s === '1';
+  };
+
   const [selectedBrands, setSelectedBrands] = useState<string[]>(getInitialBrand);
   const [selectedBalances, setSelectedBalances] = useState<string[]>([]);
   const [selectedStiffness, setSelectedStiffness] = useState<string[]>([]);
   const [selectedPlaystyles, setSelectedPlaystyles] = useState<string[]>([]);
   const [selectedWeights, setSelectedWeights] = useState<string[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>('ALL');
+  const [onlySale, setOnlySale] = useState<boolean>(getInitialOnlySale);
   const [minPrice, setMinPrice] = useState<number | null>(getInitialMinPrice);
   const [maxPrice, setMaxPrice] = useState<number | null>(getInitialMaxPrice);
-  const [sortBy, setSortBy] = useState<'NAME_ASC' | 'PRICE_ASC' | 'PRICE_DESC'>('NAME_ASC');
+  const [sortBy, setSortBy] = useState<'NAME_ASC' | 'PRICE_ASC' | 'PRICE_DESC' | 'BEST_SELLERS'>('NAME_ASC');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Sync state to URL without page reload
-  const updateUrl = useCallback((brands: string[], minP: number | null, maxP: number | null) => {
+  const updateUrl = useCallback((brands: string[], minP: number | null, maxP: number | null, isSale?: boolean) => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams();
     if (brands.length > 0) {
@@ -87,6 +125,9 @@ export default function ProductCatalogGrid({
     if (maxP !== null && maxP > 0) {
       params.set('maxPrice', maxP.toString());
     }
+    if (isSale) {
+      params.set('sale', 'true');
+    }
 
     const query = params.toString();
     const newUrl = query ? `/vot-cau-long?${query}` : '/vot-cau-long';
@@ -96,7 +137,7 @@ export default function ProductCatalogGrid({
   const handleBrandToggle = (brand: string) => {
     setSelectedBrands((prev) => {
       const next = prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand];
-      updateUrl(next, minPrice, maxPrice);
+      updateUrl(next, minPrice, maxPrice, onlySale);
       return next;
     });
   };
@@ -130,6 +171,7 @@ export default function ProductCatalogGrid({
     setSelectedPlaystyles([]);
     setSelectedWeights([]);
     setSelectedBranch('ALL');
+    setOnlySale(false);
     setMinPrice(null);
     setMaxPrice(null);
     if (typeof window !== 'undefined') {
@@ -144,12 +186,19 @@ export default function ProductCatalogGrid({
     selectedPlaystyles.length > 0 ||
     selectedWeights.length > 0 ||
     selectedBranch !== 'ALL' ||
+    onlySale ||
     minPrice !== null ||
     maxPrice !== null;
 
   // Filter products
   const filteredProducts = useMemo(() => {
     let result = initialProducts.filter((product) => {
+      // 0. Sale filter (Đang giảm giá / Sale off)
+      if (onlySale) {
+        const isDiscounted = Boolean(product.originalPrice && product.originalPrice > product.priceFrom);
+        if (!isDiscounted) return false;
+      }
+
       // 1. Brand filter
       if (selectedBrands.length > 0) {
         const matchesBrand = selectedBrands.some(
@@ -212,6 +261,7 @@ export default function ProductCatalogGrid({
     });
 
     result.sort((a, b) => {
+      if (sortBy === 'BEST_SELLERS') return (b.salesCount || 0) - (a.salesCount || 0);
       if (sortBy === 'PRICE_ASC') return a.priceFrom - b.priceFrom;
       if (sortBy === 'PRICE_DESC') return b.priceFrom - a.priceFrom;
       return a.name.localeCompare(b.name, 'vi');
@@ -226,6 +276,7 @@ export default function ProductCatalogGrid({
     selectedPlaystyles,
     selectedWeights,
     selectedBranch,
+    onlySale,
     minPrice,
     maxPrice,
     sortBy,
@@ -270,7 +321,62 @@ export default function ProductCatalogGrid({
   // Facet Content Component for Sidebar & Mobile Drawer
   const renderFacetFilters = () => (
     <div className="space-y-6 text-[13px]">
-      {/* 1. Hãng sản xuất (Brand checkboxes & buttons) */}
+      {/* 0. Nhóm danh mục (Faceted Sidebar Category with live counts) */}
+      <div className="border-b border-line pb-5">
+        <h3 className="font-medium text-ink mb-3 text-[14px]">Nhóm danh mục</h3>
+        <div className="space-y-1">
+          {CATEGORY_FACETS.map((cat) => {
+            const isCurrent = currentCategory === cat.id;
+            const count = categoryCounts[cat.id] ?? DEFAULT_CATEGORY_COUNTS[cat.id] ?? 0;
+            return (
+              <a
+                key={cat.id}
+                href={cat.href}
+                className={`flex items-center justify-between py-1.5 px-2.5 rounded-xl transition-colors text-[13px] ${
+                  isCurrent
+                    ? 'bg-ink text-bg font-medium'
+                    : 'text-muted hover:text-ink hover:bg-surface font-normal'
+                }`}
+              >
+                <span>{cat.label}</span>
+                <span className={`text-[13px] ${isCurrent ? 'text-bg/80' : 'text-muted font-normal'}`}>
+                  ({count})
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 1. Chương trình ưu đãi (SALE OFF Filter) */}
+      <div className="border-b border-line pb-5">
+        <h3 className="font-medium text-ink mb-3 text-[14px] flex items-center justify-between">
+          <span>Chương trình ưu đãi</span>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+            HOT
+          </span>
+        </h3>
+        <label className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group">
+          <div className="flex items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={onlySale}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setOnlySale(checked);
+                updateUrl(selectedBrands, minPrice, maxPrice, checked);
+              }}
+              className="w-4 h-4 rounded border-line text-rose-500 focus:ring-0 cursor-pointer accent-rose-500"
+            />
+            <span className={`text-[13px] ${onlySale ? 'font-bold text-rose-600 dark:text-rose-400' : 'text-muted group-hover:text-ink'}`}>
+              Đang giảm giá (SALE OFF)
+            </span>
+          </div>
+          <span className="text-[13px] text-rose-500 font-semibold">
+            ({initialProducts.filter((p) => p.originalPrice && p.originalPrice > p.priceFrom).length})
+          </span>
+        </label>
+      </div>
       <div className="border-b border-line pb-5">
         <h3 className="font-medium text-ink mb-3 text-[14px]">Hãng sản xuất</h3>
         <div className="space-y-2">
@@ -297,7 +403,7 @@ export default function ProductCatalogGrid({
                     {b.label}
                   </span>
                 </div>
-                <span className="text-[12px] text-muted font-normal">({b.count})</span>
+                <span className="text-[13px] text-muted font-normal">({b.count})</span>
               </label>
             );
           })}
@@ -330,7 +436,7 @@ export default function ProductCatalogGrid({
                     updateUrl(selectedBrands, preset.min, preset.max);
                   }
                 }}
-                className={`text-[12px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                className={`text-[13px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-ink text-bg border-ink font-medium'
                     : 'bg-bg text-muted border-line hover:border-ink/50 hover:text-ink font-normal'
@@ -345,7 +451,7 @@ export default function ProductCatalogGrid({
         {/* Custom Min/Max Input */}
         <div className="grid grid-cols-2 gap-2 pt-1">
           <div>
-            <label className="text-[11px] text-muted block mb-1">Từ (₫)</label>
+            <label className="text-[13px] text-muted block mb-1">Từ (₫)</label>
             <input
               type="number"
               placeholder="0"
@@ -355,7 +461,7 @@ export default function ProductCatalogGrid({
             />
           </div>
           <div>
-            <label className="text-[11px] text-muted block mb-1">Đến (₫)</label>
+            <label className="text-[13px] text-muted block mb-1">Đến (₫)</label>
             <input
               type="number"
               placeholder="5.000.000"
@@ -367,151 +473,156 @@ export default function ProductCatalogGrid({
         </div>
       </div>
 
-      {/* 3. Điểm cân bằng (Balance) */}
-      <div className="border-b border-line pb-5">
-        <h3 className="font-medium text-ink mb-3 text-[14px]">Điểm cân bằng</h3>
-        <div className="space-y-2">
-          {[
-            { id: 'HEAD_HEAVY', label: 'Nặng đầu (> 300 mm)', count: facetCounts.balance.HEAD_HEAVY },
-            { id: 'EVEN_BALANCE', label: 'Cân bằng (295 - 300 mm)', count: facetCounts.balance.EVEN_BALANCE },
-            { id: 'HEAD_LIGHT', label: 'Nhẹ đầu (< 295 mm)', count: facetCounts.balance.HEAD_LIGHT },
-          ].map((bal) => {
-            const isChecked = selectedBalances.includes(bal.id);
-            return (
-              <label
-                key={bal.id}
-                className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    value={bal.id}
-                    checked={isChecked}
-                    onChange={() => {
-                      setSelectedBalances((prev) =>
-                        prev.includes(bal.id) ? prev.filter((b) => b !== bal.id) : [...prev, bal.id]
+      {/* Racket-specific facets (Chỉ hiển thị cho danh mục vợt cầu lông) */}
+      {currentCategory === 'cat_racket' && (
+        <>
+          {/* 3. Điểm cân bằng (Balance) */}
+          <div className="border-b border-line pb-5">
+            <h3 className="font-medium text-ink mb-3 text-[14px]">Điểm cân bằng</h3>
+            <div className="space-y-2">
+              {[
+                { id: 'HEAD_HEAVY', label: 'Nặng đầu (> 300 mm)', count: facetCounts.balance.HEAD_HEAVY },
+                { id: 'EVEN_BALANCE', label: 'Cân bằng (295 - 300 mm)', count: facetCounts.balance.EVEN_BALANCE },
+                { id: 'HEAD_LIGHT', label: 'Nhẹ đầu (< 295 mm)', count: facetCounts.balance.HEAD_LIGHT },
+              ].map((bal) => {
+                const isChecked = selectedBalances.includes(bal.id);
+                return (
+                  <label
+                    key={bal.id}
+                    className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        value={bal.id}
+                        checked={isChecked}
+                        onChange={() => {
+                          setSelectedBalances((prev) =>
+                            prev.includes(bal.id) ? prev.filter((b) => b !== bal.id) : [...prev, bal.id]
+                          );
+                        }}
+                        className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
+                      />
+                      <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
+                        {bal.label}
+                      </span>
+                    </div>
+                    <span className="text-[13px] text-muted font-normal">({bal.count})</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4. Trọng lượng (Weight Class) */}
+          <div className="border-b border-line pb-5">
+            <h3 className="font-medium text-ink mb-3 text-[14px]">Trọng lượng</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: '3U', label: '3U (85-89g)', count: facetCounts.weights['3U'] },
+                { id: '4U', label: '4U (80-84g)', count: facetCounts.weights['4U'] },
+                { id: '5U', label: '5U (75-79g)', count: facetCounts.weights['5U'] },
+              ].map((w) => {
+                const isSelected = selectedWeights.includes(w.id);
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedWeights((prev) =>
+                        prev.includes(w.id) ? prev.filter((x) => x !== w.id) : [...prev, w.id]
                       );
                     }}
-                    className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
-                  />
-                  <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
-                    {bal.label}
-                  </span>
-                </div>
-                <span className="text-[12px] text-muted font-normal">({bal.count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+                    className={`text-[13px] px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-ink text-bg border-ink font-medium shadow-xs'
+                        : 'bg-bg text-muted border-line hover:border-ink/50 hover:text-ink font-normal'
+                    }`}
+                  >
+                    {w.label} ({w.count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* 4. Trọng lượng (Weight Class) */}
-      <div className="border-b border-line pb-5">
-        <h3 className="font-medium text-ink mb-3 text-[14px]">Trọng lượng</h3>
-        <div className="flex flex-wrap gap-1.5">
-          {[
-            { id: '3U', label: '3U (85-89g)', count: facetCounts.weights['3U'] },
-            { id: '4U', label: '4U (80-84g)', count: facetCounts.weights['4U'] },
-            { id: '5U', label: '5U (75-79g)', count: facetCounts.weights['5U'] },
-          ].map((w) => {
-            const isSelected = selectedWeights.includes(w.id);
-            return (
-              <button
-                key={w.id}
-                type="button"
-                onClick={() => {
-                  setSelectedWeights((prev) =>
-                    prev.includes(w.id) ? prev.filter((x) => x !== w.id) : [...prev, w.id]
-                  );
-                }}
-                className={`text-[12px] px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-ink text-bg border-ink font-medium shadow-xs'
-                    : 'bg-bg text-muted border-line hover:border-ink/50 hover:text-ink font-normal'
-                }`}
-              >
-                {w.label} ({w.count})
-              </button>
-            );
-          })}
-        </div>
-      </div>
+          {/* 5. Độ cứng đũa (Stiffness) */}
+          <div className="border-b border-line pb-5">
+            <h3 className="font-medium text-ink mb-3 text-[14px]">Độ cứng đũa</h3>
+            <div className="space-y-2">
+              {[
+                { id: 'cứng', label: 'Cứng', count: facetCounts.stiffness['Cứng'] },
+                { id: 'trung bình', label: 'Trung bình', count: facetCounts.stiffness['Trung bình'] },
+                { id: 'dẻo', label: 'Dẻo', count: facetCounts.stiffness['Dẻo'] },
+              ].map((stiff) => {
+                const isChecked = selectedStiffness.includes(stiff.id);
+                return (
+                  <label
+                    key={stiff.id}
+                    className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        value={stiff.id}
+                        checked={isChecked}
+                        onChange={() => {
+                          setSelectedStiffness((prev) =>
+                            prev.includes(stiff.id) ? prev.filter((s) => s !== stiff.id) : [...prev, stiff.id]
+                          );
+                        }}
+                        className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
+                      />
+                      <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
+                        {stiff.label}
+                      </span>
+                    </div>
+                    <span className="text-[13px] text-muted font-normal">({stiff.count})</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* 5. Độ cứng đũa (Stiffness) */}
-      <div className="border-b border-line pb-5">
-        <h3 className="font-medium text-ink mb-3 text-[14px]">Độ cứng đũa</h3>
-        <div className="space-y-2">
-          {[
-            { id: 'cứng', label: 'Cứng', count: facetCounts.stiffness['Cứng'] },
-            { id: 'trung bình', label: 'Trung bình', count: facetCounts.stiffness['Trung bình'] },
-            { id: 'dẻo', label: 'Dẻo', count: facetCounts.stiffness['Dẻo'] },
-          ].map((stiff) => {
-            const isChecked = selectedStiffness.includes(stiff.id);
-            return (
-              <label
-                key={stiff.id}
-                className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    value={stiff.id}
-                    checked={isChecked}
-                    onChange={() => {
-                      setSelectedStiffness((prev) =>
-                        prev.includes(stiff.id) ? prev.filter((s) => s !== stiff.id) : [...prev, stiff.id]
-                      );
-                    }}
-                    className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
-                  />
-                  <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
-                    {stiff.label}
-                  </span>
-                </div>
-                <span className="text-[12px] text-muted font-normal">({stiff.count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 6. Lối chơi (Play style) */}
-      <div className="border-b border-line pb-5">
-        <h3 className="font-medium text-ink mb-3 text-[14px]">Lối chơi</h3>
-        <div className="space-y-2">
-          {[
-            { id: 'tấn công', label: 'Tấn công', count: facetCounts.playStyles['Tấn công'] },
-            { id: 'phòng thủ', label: 'Phòng thủ / Phản tạt', count: facetCounts.playStyles['Phòng thủ'] },
-            { id: 'công thủ', label: 'Công thủ toàn diện', count: facetCounts.playStyles['Công thủ toàn diện'] },
-          ].map((style) => {
-            const isChecked = selectedPlaystyles.includes(style.id);
-            return (
-              <label
-                key={style.id}
-                className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    value={style.id}
-                    checked={isChecked}
-                    onChange={() => {
-                      setSelectedPlaystyles((prev) =>
-                        prev.includes(style.id) ? prev.filter((s) => s !== style.id) : [...prev, style.id]
-                      );
-                    }}
-                    className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
-                  />
-                  <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
-                    {style.label}
-                  </span>
-                </div>
-                <span className="text-[12px] text-muted font-normal">({style.count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+          {/* 6. Lối chơi (Play style) */}
+          <div className="border-b border-line pb-5">
+            <h3 className="font-medium text-ink mb-3 text-[14px]">Lối chơi</h3>
+            <div className="space-y-2">
+              {[
+                { id: 'tấn công', label: 'Tấn công', count: facetCounts.playStyles['Tấn công'] },
+                { id: 'phòng thủ', label: 'Phòng thủ / Phản tạt', count: facetCounts.playStyles['Phòng thủ'] },
+                { id: 'công thủ', label: 'Công thủ toàn diện', count: facetCounts.playStyles['Công thủ toàn diện'] },
+              ].map((style) => {
+                const isChecked = selectedPlaystyles.includes(style.id);
+                return (
+                  <label
+                    key={style.id}
+                    className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        value={style.id}
+                        checked={isChecked}
+                        onChange={() => {
+                          setSelectedPlaystyles((prev) =>
+                            prev.includes(style.id) ? prev.filter((s) => s !== style.id) : [...prev, style.id]
+                          );
+                        }}
+                        className="w-4 h-4 rounded border-line text-ink focus:ring-0 cursor-pointer accent-ink"
+                      />
+                      <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
+                        {style.label}
+                      </span>
+                    </div>
+                    <span className="text-[13px] text-muted font-normal">({style.count})</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 7. Chi nhánh còn hàng (Branch Availability) */}
       <div className="pb-2">
@@ -538,7 +649,7 @@ export default function ProductCatalogGrid({
                     {b.label}
                   </span>
                 </div>
-                <span className="text-[12px] text-muted font-normal">({count})</span>
+                <span className="text-[13px] text-muted font-normal">({count})</span>
               </label>
             );
           })}
@@ -584,6 +695,7 @@ export default function ProductCatalogGrid({
 
       {/* 2. MAIN CATALOG SECTION */}
       <main className="flex-1 min-w-0 space-y-6">
+
         {/* Mobile Toolbar: Filter Trigger Button & Match Counter */}
         <div className="lg:hidden flex items-center justify-between pb-4 border-b border-line">
           <button
@@ -599,16 +711,43 @@ export default function ProductCatalogGrid({
             )}
           </button>
 
-          <span className="text-[13px] text-muted font-normal">
-            Hiển thị <span className="font-medium text-ink">{filteredProducts.length}</span> sản phẩm
-          </span>
+          <div className="flex items-center gap-2">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-bg border border-line rounded-lg px-2.5 py-1 text-[13px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer"
+            >
+              <option value="NAME_ASC">Tên A → Z</option>
+              <option value="BEST_SELLERS">Bán chạy nhất</option>
+              <option value="PRICE_ASC">Giá tăng</option>
+              <option value="PRICE_DESC">Giá giảm</option>
+            </select>
+          </div>
         </div>
 
         {/* Desktop Sorting & Status Bar */}
         <div className="hidden lg:flex items-center justify-between pb-4 border-b border-line text-[13px]">
-          <span className="text-muted font-normal">
-            Hiển thị <span className="text-ink font-medium">{filteredProducts.length}</span> / {initialProducts.length} sản phẩm
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-muted font-normal">
+              Hiển thị <span className="text-ink font-medium">{filteredProducts.length}</span> / {initialProducts.length} sản phẩm
+            </span>
+            {onlySale && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[12px] font-semibold">
+                <span>🔥 Đang giảm giá (SALE OFF)</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOnlySale(false);
+                    updateUrl(selectedBrands, minPrice, maxPrice, false);
+                  }}
+                  className="hover:text-rose-700 ml-0.5"
+                  title="Bỏ lọc sale"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="text-muted font-normal flex items-center gap-1">
@@ -620,6 +759,7 @@ export default function ProductCatalogGrid({
               className="bg-bg border border-line rounded-lg px-3 py-1.5 text-[13px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer"
             >
               <option value="NAME_ASC">Tên: A → Z</option>
+              <option value="BEST_SELLERS">Bán chạy nhất</option>
               <option value="PRICE_ASC">Giá: Thấp đến cao</option>
               <option value="PRICE_DESC">Giá: Cao đến thấp</option>
             </select>
@@ -651,6 +791,8 @@ export default function ProductCatalogGrid({
                 specSummary={product.weight ? `${product.weight.split(',')[0].trim()} · ${product.playerType}` : product.playerType}
                 showCompare={true}
                 rating={product.rating}
+                salesCount={product.salesCount}
+                isBestSeller={product.isBestSeller}
                 inStock={true}
                 compareData={{
                   balancePoint: product.balancePoint,

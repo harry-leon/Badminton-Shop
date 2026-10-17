@@ -8,7 +8,7 @@ import { useCart } from '@/lib/cart-context';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ChevronRight, Gift } from 'lucide-react';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, cartTotal } = useCart();
@@ -121,6 +121,11 @@ export default function CartPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[13px] text-amber-900 dark:text-amber-200 flex items-center gap-2 font-medium">
+                <Gift className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Mỗi cây vợt trong đơn được tặng kèm 01 cước Yonex BG65 + Miễn phí đan máy điện tử + Quấn cán AC102EX.</span>
               </div>
 
               <div className="p-4 rounded-xl bg-bg border border-line text-[13px] text-muted flex items-center gap-2 font-normal">

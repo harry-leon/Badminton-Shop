@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
+import { createOrderApi } from '@/lib/api';
 import crypto from 'crypto';
 
 function crc16_ccitt(str: string): string {
@@ -56,6 +57,49 @@ export async function POST(request: NextRequest) {
       items,
       idempotencyKey,
     } = body;
+
+    // 0. Delegate to Spring Boot Backend API if configured / reachable
+    try {
+      if (customerName && customerPhone && items && Array.isArray(items) && items.length > 0) {
+        const backendOrder = await createOrderApi({
+          customerId,
+          customerName,
+          customerPhone,
+          shippingAddress,
+          fulfillmentType,
+          branchId,
+          paymentMethod,
+          idempotencyKey,
+          items,
+          lines: items.map((i: any) => ({
+            sku: i.sku || i.id,
+            quantity: i.quantity || 1,
+          })),
+        }, idempotencyKey);
+
+        if (backendOrder && (backendOrder.data || backendOrder.id || backendOrder.orderId)) {
+          const o = backendOrder.data || backendOrder;
+          return NextResponse.json({
+            success: true,
+            orderId: o.id || o.orderId,
+            totalAmount: o.totalAmount,
+            status: o.status || 'CONFIRMED',
+            pickupCode: o.pickupCode,
+            vietqr: o.vietqr || (o.vietqrUrl ? {
+              payload: o.vietqrPayload,
+              qrUrl: o.vietqrUrl,
+              bankName: 'MB Bank (Quân Đội)',
+              accountNumber: '9999888877',
+              accountName: 'BADMINTON SHOP',
+              amount: o.totalAmount,
+              transferContent: o.id || o.orderId,
+            } : null),
+          });
+        }
+      }
+    } catch {
+      // Backend not running / fallback to local DB transaction below
+    }
 
     // 0. Upfront Idempotency Check
     if (idempotencyKey) {
@@ -148,27 +192,30 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        // C2: Khóa nguyên tử trạng thái RESERVED cho vợt cũ trong secondhand_db
         const unitRows = await queryDb(
           'secondhand_db',
-          `SELECT * FROM secondhand_units WHERE id = $1 AND status = 'APPROVED_FOR_SALE'`,
+          `UPDATE secondhand_units 
+           SET status = 'RESERVED', updated_at = CURRENT_TIMESTAMP 
+           WHERE id = $1 AND status = 'APPROVED_FOR_SALE' 
+           RETURNING *`,
           [sku]
         );
 
         if (unitRows.length === 0) {
-          return NextResponse.json(
-            { error: `Vợt cũ ${sku} hiện không có sẵn hoặc đã được người khác đặt mua!` },
-            { status: 400 }
-          );
+          throw new Error(`Vợt cũ ${sku} hiện không có sẵn hoặc đã được người khác đặt mua!`);
         }
 
         const unit = unitRows[0];
+        secondhandReserved.push(sku);
+
         const unitPrice = parseInt(unit.resale_price, 10);
         const subtotal = unitPrice * qty;
         totalAmount += subtotal;
 
         lineSnapshots.push({
           sku,
-          branchId: unit.branch_id, // Đơn vị duy nhất nằm tại chi nhánh sở tại của nó
+          branchId: unit.branch_id, // C7: Đơn vị duy nhất nằm tại chi nhánh sở tại của nó
           productName: `[Cũ Hạng ${unit.grade}] ${unit.model_name}`,
           unitPrice,
           quantity: qty,
@@ -210,10 +257,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Khóa tồn kho nguyên tử bằng Transaction (R1 & R2)
-    // Atomic update: UPDATE stock_levels SET reserved = reserved + :q WHERE (on_hand - reserved) >= :q
+    // Sắp xếp items theo branchId và sku để đảm bảo thứ tự khóa nhất quán (chống Deadlock - C1)
     await withTransaction('inventory_db', async (client) => {
-      for (let i = 0; i < lineSnapshots.length; i++) {
-        const line = lineSnapshots[i];
+      const sortedLines = [...lineSnapshots].sort((a, b) =>
+        (a.branchId + a.sku).localeCompare(b.branchId + b.sku)
+      );
+
+      for (let i = 0; i < sortedLines.length; i++) {
+        const line = sortedLines[i];
         const res = await client.query(
           `UPDATE stock_levels 
            SET reserved = reserved + $1, updated_at = CURRENT_TIMESTAMP 
@@ -243,18 +294,6 @@ export async function POST(request: NextRequest) {
       }
     });
     inventoryCommitted = true;
-
-    // 4. Nếu là vợt cũ (Unique Unit): Cập nhật trạng thái RESERVED trong secondhand_db
-    for (const line of lineSnapshots) {
-      if (line.isUnique) {
-        await queryDb(
-          'secondhand_db',
-          `UPDATE secondhand_units SET status = 'RESERVED', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-          [line.sku]
-        );
-        secondhandReserved.push(line.sku);
-      }
-    }
 
     // 5. Tạo đơn hàng và snapshot bất biến trong order_db (R9)
     await withTransaction('order_db', async (client) => {
@@ -344,7 +383,7 @@ export async function POST(request: NextRequest) {
         for (const sku of secondhandReserved) {
           await queryDb(
             'secondhand_db',
-            `UPDATE secondhand_units SET status = 'APPROVED_FOR_SALE', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            `UPDATE secondhand_units SET status = 'APPROVED_FOR_SALE', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'RESERVED'`,
             [sku]
           );
         }

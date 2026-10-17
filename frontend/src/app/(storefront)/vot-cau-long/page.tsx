@@ -62,10 +62,21 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
             ) as second_image_url
      FROM products p
      LEFT JOIN skus s ON p.id = s.product_id
-     WHERE p.is_active = true
+     WHERE p.is_active = true AND p.category_id = 'cat_racket'
      GROUP BY p.id
      ORDER BY p.name ASC`
   );
+
+  let categoryCounts: Record<string, number> = {};
+  try {
+    const countRows = await queryDb<{ category_id: string; count: string }>(
+      'catalog_db',
+      `SELECT category_id, COUNT(*) as count FROM products WHERE is_active = true GROUP BY category_id`
+    );
+    countRows.forEach((r) => {
+      categoryCounts[r.category_id] = parseInt(r.count, 10);
+    });
+  } catch {}
 
   // 2. Lấy danh sách tồn kho theo chi nhánh từ inventory_db
   let stockByProduct: Record<string, string[]> = {};
@@ -119,8 +130,14 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
     const displayBrand = normalizedBrand === 'LINING' ? 'Li-Ning' : normalizedBrand === 'VICTOR' ? 'Victor' : 'Yonex';
 
     const price = parseInt(p.price_from as string, 10);
-    // Sản phẩm Halbertec 8000 hoặc Astrox 100ZZ có giá gốc cao hơn làm mẫu chiết khấu
-    const originalPrice = p.slug === 'lining-halbertec-8000' ? 4400000 : undefined;
+    // Sản phẩm có giá niêm yết ban đầu để tính % giảm giá và hiển thị giá gốc gạch ngang
+    const discountMap: Record<string, number> = {
+      'lining-halbertec-8000': 4400000,
+      'yonex-astrox-100zz': 4800000,
+      'yonex-arcsaber-11-pro': 4300000,
+      'victor-thruster-ryuga-ii': 4100000,
+    };
+    const originalPrice = discountMap[p.slug] || undefined;
 
     return {
       id: p.id,
@@ -133,14 +150,18 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
       priceFrom: price,
       originalPrice,
       imageUrl: p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
-      secondImageUrl: p.second_image_url || p.image_url || '/images/products/yonex-astrox-99-pro.jpg',
+      secondImageUrl: p.second_image_url && p.second_image_url !== p.image_url
+        ? p.second_image_url
+        : `${p.image_url || '/images/products/yonex-astrox-99-pro.jpg'}?angle=back`,
       balancePoint: Math.round(Number(p.balance_point || 305)),
       balanceCategory: p.balance_category || (Number(p.balance_point) >= 305 ? 'Nặng đầu' : 'Cân bằng'),
       stiffness: p.shaft_stiffness || p.sku_stiffness || 'Cứng',
       weight: p.weight_classes || p.sku_weights || '3U, 4U',
       maxTension: p.max_tension_lbs ? `${p.max_tension_lbs} lbs` : (p.sku_max_tension ? `${p.sku_max_tension} lbs` : '28 lbs'),
-      inStockBranches: stockByProduct[p.id] || ['BR_HCM_01', 'BR_HN_01', 'BR_DN_01'],
+      inStockBranches: stockByProduct[p.id] || [],
       rating: p.slug === 'yonex-astrox-99-pro' ? 4.9 : 4.8,
+      salesCount: p.slug === 'yonex-astrox-99-pro' ? 142 : p.slug === 'yonex-astrox-100zz' ? 128 : p.slug === 'yonex-arcsaber-11-pro' ? 95 : 36,
+      isBestSeller: ['yonex-astrox-99-pro', 'yonex-astrox-100zz', 'yonex-arcsaber-11-pro', 'lining-axforce-80'].includes(p.slug),
     };
   });
 
@@ -148,36 +169,18 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
     <div className="py-8 sm:py-12">
       <Container>
         {/* Breadcrumb */}
-        <nav className="text-[13px] text-muted mb-4 flex items-center gap-1.5 font-normal">
+        <nav className="text-[13px] text-muted mb-6 flex items-center gap-1.5 font-normal">
           <Link href="/" className="hover:text-ink transition-colors">Trang chủ</Link>
           <ChevronRight className="w-3.5 h-3.5 opacity-50" />
           <span className="text-ink">Vợt cầu lông chính hãng</span>
         </nav>
 
-        {/* Header trang danh mục */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 mb-8 border-b border-line">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 text-[13px] text-brand font-normal">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Phân phối chính hãng 100% · Bảo hành khung 12 tháng</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-ink">
-              Vợt cầu lông chính hãng
-            </h1>
-            <p className="text-[14px] text-muted leading-relaxed font-normal">
-              Bộ sưu tập vợt thi đấu từ Yonex, Li-Ning và Victor. Tồn kho thời gian thực tại các chi nhánh, hỗ trợ đan cước lấy ngay và dịch vụ căng vợt điện tử.
-            </p>
-          </div>
-
-          <div className="text-[13px] text-muted font-normal self-start md:self-auto bg-surface border border-line rounded-full px-4 py-1.5">
-            Hiện có <span className="text-ink font-medium">{products.length}</span> mẫu vợt
-          </div>
-        </div>
-
         {/* Catalog Grid with 280px left sidebar and Mobile Vaul Bottom Sheet */}
         <ProductCatalogGrid
           initialProducts={products}
           initialSearchParams={resolvedSearchParams}
+          currentCategory="cat_racket"
+          categoryCounts={categoryCounts}
         />
       </Container>
     </div>

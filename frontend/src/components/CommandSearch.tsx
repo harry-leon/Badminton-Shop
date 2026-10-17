@@ -61,7 +61,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
               Không tìm thấy sản phẩm hoặc thông tin phù hợp.
             </Command.Empty>
 
-            <Command.Group heading="Vợt nổi bật" className="px-2 py-1.5 text-[12px] text-muted font-medium uppercase tracking-wider">
+            <Command.Group heading="Vợt nổi bật" className="px-2 py-1.5 text-[13px] text-muted font-medium">
               <Command.Item
                 onSelect={() => navigateTo('/vot-cau-long/yonex-astrox-99-pro')}
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] text-ink hover:bg-bg cursor-pointer select-none transition-colors"
@@ -99,7 +99,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
               </Command.Item>
             </Command.Group>
 
-            <Command.Group heading="Sàn vợt cũ kiểm định" className="px-2 py-1.5 text-[12px] text-muted font-medium uppercase tracking-wider pt-2">
+            <Command.Group heading="Sàn vợt cũ kiểm định" className="px-2 py-1.5 text-[13px] text-muted font-medium pt-2">
               <Command.Item
                 onSelect={() => navigateTo('/second-hand')}
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] text-ink hover:bg-bg cursor-pointer select-none transition-colors"
@@ -112,7 +112,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
               </Command.Item>
             </Command.Group>
 
-            <Command.Group heading="Dịch vụ & Bảo hành" className="px-2 py-1.5 text-[12px] text-muted font-medium uppercase tracking-wider pt-2">
+            <Command.Group heading="Dịch vụ & Bảo hành" className="px-2 py-1.5 text-[13px] text-muted font-medium pt-2">
               <Command.Item
                 onSelect={() => navigateTo('/tra-cuu-bao-hanh')}
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] text-ink hover:bg-bg cursor-pointer select-none transition-colors"
@@ -126,7 +126,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
             </Command.Group>
           </Command.List>
 
-          <div className="p-3 bg-bg border-t border-line flex items-center justify-between text-[12px] text-muted font-normal">
+          <div className="p-3 bg-bg border-t border-line flex items-center justify-between text-[13px] text-muted font-normal">
             <span>Dùng phím <kbd className="px-1.5 py-0.5 rounded bg-surface border border-line text-ink">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-surface border border-line text-ink">↓</kbd> để di chuyển</span>
             <span><kbd className="px-1.5 py-0.5 rounded bg-surface border border-line text-ink">ESC</kbd> để đóng</span>
           </div>

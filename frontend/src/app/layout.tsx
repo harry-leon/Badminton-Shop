@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Toaster } from 'sonner';
 import './globals.css';
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -21,6 +20,14 @@ export const metadata: Metadata = {
     locale: 'vi_VN',
     type: 'website',
   },
+  icons: {
+    icon: [
+      { url: '/images/logo-shuttlecock-green-transparent.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    shortcut: '/images/logo-shuttlecock-green-transparent.png',
+    apple: '/images/logo-shuttlecock-green-transparent.png',
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +40,6 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col font-sans antialiased bg-bg text-ink">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
-          <Toaster position="top-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

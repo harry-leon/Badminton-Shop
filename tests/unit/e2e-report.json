@@ -1,0 +1,933 @@
+{
+  "total": 100,
+  "passed": 100,
+  "failed": 0,
+  "skipped": 0,
+  "startTime": "2026-10-14T11:09:57.835Z",
+  "tests": [
+    {
+      "id": "F01-T1-01",
+      "feature": "F01",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Valid product image loads with naturalWidth > 0 and no broken state",
+      "status": "PASS",
+      "durationMs": 5933
+    },
+    {
+      "id": "F01-T1-02",
+      "feature": "F01",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "ProductCard image container adheres to 4:5 aspect ratio",
+      "status": "PASS",
+      "durationMs": 6664
+    },
+    {
+      "id": "F01-T1-03",
+      "feature": "F01",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Priority images on hero/PDP load eagerly with high fetch priority",
+      "status": "PASS",
+      "durationMs": 3458
+    },
+    {
+      "id": "F01-T1-04",
+      "feature": "F01",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Image component provides descriptive alt text for accessibility",
+      "status": "PASS",
+      "durationMs": 2798
+    },
+    {
+      "id": "F01-T1-05",
+      "feature": "F01",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Fallback placeholder is rendered without leaking raw alt text on UI",
+      "status": "PASS",
+      "durationMs": 4577
+    },
+    {
+      "id": "F02-T1-01",
+      "feature": "F02",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Storefront Homepage contains zero forbidden internal text tokens",
+      "status": "PASS",
+      "durationMs": 694
+    },
+    {
+      "id": "F02-T1-02",
+      "feature": "F02",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Catalog page contains zero forbidden internal text tokens",
+      "status": "PASS",
+      "durationMs": 594
+    },
+    {
+      "id": "F02-T1-03",
+      "feature": "F02",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Flagship PDP (/vot-cau-long/yonex-astrox-99-pro) contains clean text",
+      "status": "PASS",
+      "durationMs": 799
+    },
+    {
+      "id": "F02-T1-04",
+      "feature": "F02",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand listing page contains clean customer-facing text",
+      "status": "PASS",
+      "durationMs": 586
+    },
+    {
+      "id": "F02-T1-05",
+      "feature": "F02",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Warranty lookup page contains clean customer-facing text",
+      "status": "PASS",
+      "durationMs": 158
+    },
+    {
+      "id": "F03-T1-01",
+      "feature": "F03",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Storefront Header navigation has no link to Design System /_design",
+      "status": "PASS",
+      "durationMs": 3383
+    },
+    {
+      "id": "F03-T1-02",
+      "feature": "F03",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Storefront Footer navigation has no link to Design System /_design",
+      "status": "PASS",
+      "durationMs": 3976
+    },
+    {
+      "id": "F03-T1-03",
+      "feature": "F03",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "/_design page carries noindex, nofollow robots meta tag",
+      "status": "PASS",
+      "durationMs": 562
+    },
+    {
+      "id": "F03-T1-04",
+      "feature": "F03",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "CommandSearch (Cmd+K) does not expose Design System to guest users",
+      "status": "PASS",
+      "durationMs": 4417
+    },
+    {
+      "id": "F03-T1-05",
+      "feature": "F03",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Mobile drawer navigation menu does not expose Design System",
+      "status": "PASS",
+      "durationMs": 5393
+    },
+    {
+      "id": "F04-T1-01",
+      "feature": "F04",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Branch page displays canonical address: 123 Nguyễn Thị Minh Khai, P. Bến Thành, Q1",
+      "status": "PASS",
+      "durationMs": 830
+    },
+    {
+      "id": "F04-T1-02",
+      "feature": "F04",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Branch page displays canonical address: 78 Nguyễn Văn Linh, Đà Nẵng",
+      "status": "PASS",
+      "durationMs": 252
+    },
+    {
+      "id": "F04-T1-03",
+      "feature": "F04",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Hero Astrox 99 Pro displays canonical listed price 4.250.000 ₫",
+      "status": "PASS",
+      "durationMs": 554
+    },
+    {
+      "id": "F04-T1-04",
+      "feature": "F04",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Brand filters do NOT list Mizuno (removed due to zero inventory)",
+      "status": "PASS",
+      "durationMs": 2656
+    },
+    {
+      "id": "F04-T1-05",
+      "feature": "F04",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Branches in database match storefront display count and metadata",
+      "status": "PASS",
+      "durationMs": 134
+    },
+    {
+      "id": "F05-T1-01",
+      "feature": "F05",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Valid orderCode + matching phone returns 200 OK with claim data",
+      "status": "PASS",
+      "durationMs": 145
+    },
+    {
+      "id": "F05-T1-02",
+      "feature": "F05",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Returned customer name in warranty lookup response is masked",
+      "status": "PASS",
+      "durationMs": 104
+    },
+    {
+      "id": "F05-T1-03",
+      "feature": "F05",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Returned customer phone in warranty lookup response is masked",
+      "status": "PASS",
+      "durationMs": 93
+    },
+    {
+      "id": "F05-T1-04",
+      "feature": "F05",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Serial number lookup returns masked PII when query parameter serial is provided",
+      "status": "PASS",
+      "durationMs": 206
+    },
+    {
+      "id": "F05-T1-05",
+      "feature": "F05",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Warranty lookup UI renders form requiring both Order Code and Phone inputs",
+      "status": "PASS",
+      "durationMs": 1946
+    },
+    {
+      "id": "F06-T1-01",
+      "feature": "F06",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand product cards display masked serials (format SN-...-***-...)",
+      "status": "PASS",
+      "durationMs": 2577
+    },
+    {
+      "id": "F06-T1-02",
+      "feature": "F06",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand API endpoint returns masked serials for public consumers",
+      "status": "PASS",
+      "durationMs": 99
+    },
+    {
+      "id": "F06-T1-03",
+      "feature": "F06",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand detail view shows masked serial in racket specification summary",
+      "status": "PASS",
+      "durationMs": 2119
+    },
+    {
+      "id": "F06-T1-04",
+      "feature": "F06",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Cart drawer displays masked serial for added secondhand racket",
+      "status": "PASS",
+      "durationMs": 2024
+    },
+    {
+      "id": "F06-T1-05",
+      "feature": "F06",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand database contains intact serials while presentation layer masks them",
+      "status": "PASS",
+      "durationMs": 78
+    },
+    {
+      "id": "F07-T1-01",
+      "feature": "F07",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Documentation file docs/ui/claims-to-confirm.md exists at project root",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F07-T1-02",
+      "feature": "F07",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Claims document contains markdown audit table with claim classification",
+      "status": "PASS",
+      "durationMs": 4
+    },
+    {
+      "id": "F07-T1-03",
+      "feature": "F07",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Claims document audits 16-point secondhand inspection guarantee",
+      "status": "PASS",
+      "durationMs": 3
+    },
+    {
+      "id": "F07-T1-04",
+      "feature": "F07",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Storefront footer contains no exaggerated marketing superlatives",
+      "status": "PASS",
+      "durationMs": 343
+    },
+    {
+      "id": "F07-T1-05",
+      "feature": "F07",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Claims document has valid markdown headings and structured rationale",
+      "status": "PASS",
+      "durationMs": 3
+    },
+    {
+      "id": "F08-T1-01",
+      "feature": "F08",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Homepage has zero horizontal scroll on mobile 360px viewport",
+      "status": "PASS",
+      "durationMs": 2247
+    },
+    {
+      "id": "F08-T1-02",
+      "feature": "F08",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Catalog page has zero horizontal scroll on mobile 360px viewport",
+      "status": "PASS",
+      "durationMs": 2481
+    },
+    {
+      "id": "F08-T1-03",
+      "feature": "F08",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Flagship PDP has zero horizontal scroll on mobile 360px viewport",
+      "status": "PASS",
+      "durationMs": 2776
+    },
+    {
+      "id": "F08-T1-04",
+      "feature": "F08",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand page has zero horizontal scroll on mobile 360px viewport",
+      "status": "PASS",
+      "durationMs": 2000
+    },
+    {
+      "id": "F08-T1-05",
+      "feature": "F08",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Container component defines standard page padding across viewports",
+      "status": "PASS",
+      "durationMs": 2598
+    },
+    {
+      "id": "F09-T1-01",
+      "feature": "F09",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Visiting Halbertec 8000 PDP auto-selects available 4U variant (20 in stock)",
+      "status": "PASS",
+      "durationMs": 3121
+    },
+    {
+      "id": "F09-T1-02",
+      "feature": "F09",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "In-stock badge indicates positive inventory for Halbertec 8000 4U",
+      "status": "PASS",
+      "durationMs": 157
+    },
+    {
+      "id": "F09-T1-03",
+      "feature": "F09",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Add-to-cart button is enabled for in-stock variant on Halbertec 8000 PDP",
+      "status": "PASS",
+      "durationMs": 2966
+    },
+    {
+      "id": "F09-T1-04",
+      "feature": "F09",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Out-of-stock variant disables add-to-cart and shows hotline consultation button",
+      "status": "PASS",
+      "durationMs": 4058
+    },
+    {
+      "id": "F09-T1-05",
+      "feature": "F09",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "When entire system is out of stock, displays single merged row + tel: hotline link",
+      "status": "PASS",
+      "durationMs": 3336
+    },
+    {
+      "id": "F10-T1-01",
+      "feature": "F10",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Homepage DOM contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 3035
+    },
+    {
+      "id": "F10-T1-02",
+      "feature": "F10",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Catalog page (/vot-cau-long) DOM contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 2193
+    },
+    {
+      "id": "F10-T1-03",
+      "feature": "F10",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Product detail page DOM contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 2556
+    },
+    {
+      "id": "F10-T1-04",
+      "feature": "F10",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Secondhand page (/second-hand) DOM contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 2586
+    },
+    {
+      "id": "F10-T1-05",
+      "feature": "F10",
+      "tier": 1,
+      "milestone": "M0",
+      "title": "Computed font-weight across storefront text elements does not exceed 500",
+      "status": "PASS",
+      "durationMs": 2223
+    },
+    {
+      "id": "F01-T2-01",
+      "feature": "F01",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "SafeImage handles 404 broken image URL by rendering fallback without crashing DOM",
+      "status": "PASS",
+      "durationMs": 1227
+    },
+    {
+      "id": "F01-T2-02",
+      "feature": "F01",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "SafeImage with empty string src renders fallback placeholder immediately",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F01-T2-03",
+      "feature": "F01",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Extremely long URL (>2000 chars) in image source does not break page layout",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F01-T2-04",
+      "feature": "F01",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Raw alt text is NEVER exposed as visible text node when image loading fails",
+      "status": "PASS",
+      "durationMs": 3407
+    },
+    {
+      "id": "F01-T2-05",
+      "feature": "F01",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Script tags inside alt text attribute are safely escaped and not executed",
+      "status": "PASS",
+      "durationMs": 2253
+    },
+    {
+      "id": "F02-T2-01",
+      "feature": "F02",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Regex boundary: no variation of Quy tac R (any spacing/case) in storefront HTML",
+      "status": "PASS",
+      "durationMs": 222
+    },
+    {
+      "id": "F02-T2-02",
+      "feature": "F02",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Case-insensitive scan: SNAPSHOT IMMUTABILITY in all cases forbidden on public routes",
+      "status": "PASS",
+      "durationMs": 446
+    },
+    {
+      "id": "F02-T2-03",
+      "feature": "F02",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Case-insensitive scan: UNIQUE UNIT forbidden on secondhand storefront",
+      "status": "PASS",
+      "durationMs": 301
+    },
+    {
+      "id": "F02-T2-04",
+      "feature": "F02",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "HTML title, aria-labels, and tooltip attributes do not contain forbidden internal tokens",
+      "status": "PASS",
+      "durationMs": 2743
+    },
+    {
+      "id": "F02-T2-05",
+      "feature": "F02",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Public API 400/404 error payloads do not expose internal architecture rule names",
+      "status": "PASS",
+      "durationMs": 280
+    },
+    {
+      "id": "F03-T2-01",
+      "feature": "F03",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Crawler User-Agent (Googlebot) requesting /_design receives noindex response",
+      "status": "PASS",
+      "durationMs": 275
+    },
+    {
+      "id": "F03-T2-02",
+      "feature": "F03",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Deep subpath /_design/components is guarded with noindex or redirected",
+      "status": "PASS",
+      "durationMs": 160
+    },
+    {
+      "id": "F03-T2-03",
+      "feature": "F03",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Case manipulation /_DESIGN or /_Design is normalized and guarded",
+      "status": "PASS",
+      "durationMs": 132
+    },
+    {
+      "id": "F03-T2-04",
+      "feature": "F03",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Public sitemap /sitemap.xml does not contain /_design URL",
+      "status": "PASS",
+      "durationMs": 135
+    },
+    {
+      "id": "F03-T2-05",
+      "feature": "F03",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "robots.txt disallows crawling of /_design route",
+      "status": "PASS",
+      "durationMs": 120
+    },
+    {
+      "id": "F04-T2-01",
+      "feature": "F04",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Direct query ?brand=Mizuno returns empty product list with friendly message, NOT 500",
+      "status": "PASS",
+      "durationMs": 229
+    },
+    {
+      "id": "F04-T2-02",
+      "feature": "F04",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Searching for Mizuno in search bar returns clean zero-results without crashing",
+      "status": "PASS",
+      "durationMs": 143
+    },
+    {
+      "id": "F04-T2-03",
+      "feature": "F04",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Extreme price range query ?minPrice=999999999 returns empty list cleanly",
+      "status": "PASS",
+      "durationMs": 205
+    },
+    {
+      "id": "F04-T2-04",
+      "feature": "F04",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Invalid branch ID in pickup selector is rejected by validation",
+      "status": "PASS",
+      "durationMs": 130
+    },
+    {
+      "id": "F04-T2-05",
+      "feature": "F04",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Price formatting handles 0 VND and large values up to 50.000.000 VND without NaN",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F05-T2-01",
+      "feature": "F05",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Anti-IDOR Gate: Request with ONLY phone number returns 400 Bad Request",
+      "status": "PASS",
+      "durationMs": 45
+    },
+    {
+      "id": "F05-T2-02",
+      "feature": "F05",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Anti-IDOR Gate: Request with ONLY orderCode returns 400 Bad Request",
+      "status": "PASS",
+      "durationMs": 35
+    },
+    {
+      "id": "F05-T2-03",
+      "feature": "F05",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Valid orderCode with WRONG phone returns empty or 404, never disclosing PII",
+      "status": "PASS",
+      "durationMs": 285
+    },
+    {
+      "id": "F05-T2-04",
+      "feature": "F05",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "SQL injection payload in orderCode or phone parameter is safely handled",
+      "status": "PASS",
+      "durationMs": 28
+    },
+    {
+      "id": "F05-T2-05",
+      "feature": "F05",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Arbitrary SKU query q=YONEX-ASTROX-99 is rejected with 400 Bad Request",
+      "status": "PASS",
+      "durationMs": 29
+    },
+    {
+      "id": "F06-T2-01",
+      "feature": "F06",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "HTML attributes (data-*, title, aria-*) do not contain raw unmasked serial numbers",
+      "status": "PASS",
+      "durationMs": 2208
+    },
+    {
+      "id": "F06-T2-02",
+      "feature": "F06",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Short serials (e.g. SN-88-1) mask at least the middle characters",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F06-T2-03",
+      "feature": "F06",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Long serial numbers (>25 chars) mask middle block with asterisks",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F06-T2-04",
+      "feature": "F06",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Search bar lookup with full raw serial does not disclose unmasked customer info",
+      "status": "PASS",
+      "durationMs": 117
+    },
+    {
+      "id": "F06-T2-05",
+      "feature": "F06",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Null or missing serial number displays fallback indicator SN-***",
+      "status": "PASS",
+      "durationMs": 1
+    },
+    {
+      "id": "F07-T2-01",
+      "feature": "F07",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "No unsubstantiated return policy claims exceed standard 7-day window on UI",
+      "status": "PASS",
+      "durationMs": 356
+    },
+    {
+      "id": "F07-T2-02",
+      "feature": "F07",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Warranty policy claim strictly reflects standard warranty_db duration (90 days / 180 days)",
+      "status": "PASS",
+      "durationMs": 122
+    },
+    {
+      "id": "F07-T2-03",
+      "feature": "F07",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Authentication claim matches 16-standard checklist rather than generic 100% guarantee",
+      "status": "PASS",
+      "durationMs": 178
+    },
+    {
+      "id": "F07-T2-04",
+      "feature": "F07",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Claims markdown file has zero broken relative markdown links",
+      "status": "PASS",
+      "durationMs": 0
+    },
+    {
+      "id": "F07-T2-05",
+      "feature": "F07",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Trust badges on PDP reflect verified claims only",
+      "status": "PASS",
+      "durationMs": 2564
+    },
+    {
+      "id": "F08-T2-01",
+      "feature": "F08",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Extreme narrow 320px viewport maintains zero horizontal scroll",
+      "status": "PASS",
+      "durationMs": 2957
+    },
+    {
+      "id": "F08-T2-02",
+      "feature": "F08",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Comparison table wraps or scrolls horizontally within container without breaking body width",
+      "status": "PASS",
+      "durationMs": 2686
+    },
+    {
+      "id": "F08-T2-03",
+      "feature": "F08",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Long unbroken SKU codes do not burst outside container bounds",
+      "status": "PASS",
+      "durationMs": 3202
+    },
+    {
+      "id": "F08-T2-04",
+      "feature": "F08",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Opening CartDrawer does not cause horizontal scrollbar on document",
+      "status": "PASS",
+      "durationMs": 3702
+    },
+    {
+      "id": "F08-T2-05",
+      "feature": "F08",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Viewport dynamic resize from 1440px to 360px preserves zero overflow",
+      "status": "PASS",
+      "durationMs": 2979
+    },
+    {
+      "id": "F09-T2-01",
+      "feature": "F09",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "When all variants of a product are out of stock, displays single merged row + hotline tel: button",
+      "status": "PASS",
+      "durationMs": 1
+    },
+    {
+      "id": "F09-T2-02",
+      "feature": "F09",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Clicking hotline consultation button triggers valid tel: URI without javascript crash",
+      "status": "PASS",
+      "durationMs": 2658
+    },
+    {
+      "id": "F09-T2-03",
+      "feature": "F09",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Rapid variant switching does not cause race condition in displayed price or stock badge",
+      "status": "PASS",
+      "durationMs": 3627
+    },
+    {
+      "id": "F09-T2-04",
+      "feature": "F09",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Cart quantity selector cannot exceed available on-hand stock for selected variant",
+      "status": "PASS",
+      "durationMs": 1
+    },
+    {
+      "id": "F09-T2-05",
+      "feature": "F09",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Direct query ?sku=LN-HT8000-4U selects 4U variant on page mount",
+      "status": "PASS",
+      "durationMs": 2521
+    },
+    {
+      "id": "F10-T2-01",
+      "feature": "F10",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Cart drawer contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 3053
+    },
+    {
+      "id": "F10-T2-02",
+      "feature": "F10",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Command search palette contains zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 2605
+    },
+    {
+      "id": "F10-T2-03",
+      "feature": "F10",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Toast notification popups contain zero <b> and zero <strong> elements",
+      "status": "PASS",
+      "durationMs": 2433
+    },
+    {
+      "id": "F10-T2-04",
+      "feature": "F10",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Markdown rendered in descriptions transforms **bold** into semantic span with font-medium",
+      "status": "PASS",
+      "durationMs": 2527
+    },
+    {
+      "id": "F10-T2-05",
+      "feature": "F10",
+      "tier": 2,
+      "milestone": "M0",
+      "title": "Computed font-weight on catalog filter labels does not exceed 500",
+      "status": "PASS",
+      "durationMs": 2305
+    }
+  ],
+  "tierSummary": {
+    "1": {
+      "total": 50,
+      "passed": 50,
+      "failed": 0
+    },
+    "2": {
+      "total": 50,
+      "passed": 50,
+      "failed": 0
+    },
+    "3": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0
+    },
+    "4": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0
+    }
+  },
+  "endTime": "2026-10-14T11:12:29.982Z",
+  "durationSeconds": 152.14
+}

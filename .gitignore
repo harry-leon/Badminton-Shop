@@ -8,6 +8,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+.agents/
 
 # Java & Build tools
 target/

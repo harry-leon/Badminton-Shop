@@ -1,0 +1,70 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: badminton-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:badminton_db}?sslmode=${PG_SSLMODE:require}}
+    username: ${SPRING_DATASOURCE_USERNAME:${PG_USER:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${PG_PASSWORD:postgres}}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:10}
+      minimum-idle: ${HIKARI_MIN_IDLE:2}
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED:false}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT:2000ms}
+      connect-timeout: ${SPRING_DATA_REDIS_CONNECT_TIMEOUT:2000ms}
+
+jwt:
+  secret: ${JWT_SECRET:smash-court-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256-security}
+  expiration-seconds: 86400
+  issuer: smash-court
+
+imagekit:
+  public-key: ${IMAGEKIT_PUBLIC_KEY:public_oAr8SA2i9Ed1U4+4kcEA+I16UO4=}
+  private-key: ${IMAGEKIT_PRIVATE_KEY:private_hOECE/HeE+7R8xq8MW++vJEoyJU=}
+  url-endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/htqhun}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:false}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha

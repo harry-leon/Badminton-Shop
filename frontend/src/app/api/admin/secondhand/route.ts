@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
+import { resolveActorRole, checkPermission } from '@/lib/rbac';
 
 function getRacketImageForModel(model: string): string {
   const m = (model || '').toLowerCase();
@@ -28,9 +29,104 @@ export async function GET() {
       'secondhand_db',
       `SELECT * FROM buyback_cases ORDER BY created_at DESC`
     );
-    return NextResponse.json({ units, cases });
+    const priceTables = await queryDb(
+      'secondhand_db',
+      `SELECT * FROM buyback_price_tables ORDER BY model_name ASC, grade ASC`
+    );
+    return NextResponse.json({ units, cases, priceTables });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+async function handleApproveResale(unitId: string, approvedBy: string, effectiveRole: string) {
+  if (!unitId || !approvedBy) {
+    return NextResponse.json({ error: 'Thiếu thông tin unitId hoặc người duyệt' }, { status: 400 });
+  }
+
+  const unitRows = await queryDb<any>(
+    'secondhand_db',
+    `SELECT * FROM secondhand_units WHERE id = $1`,
+    [unitId]
+  );
+  if (unitRows.length === 0) {
+    return NextResponse.json({ error: 'Không tìm thấy vợt cũ' }, { status: 404 });
+  }
+  const unit = unitRows[0];
+
+  // R7 & C9: Chỉ duyệt vợt đang ở trạng thái PENDING_RESALE_APPROVAL (ngăn ngừa duyệt lặp lại gây lệch sổ cái R10)
+  if (unit.status !== 'PENDING_RESALE_APPROVAL') {
+    return NextResponse.json(
+      {
+        error: `Không thể phê duyệt mở bán vợt ở trạng thái "${unit.status}". Vợt phải ở trạng thái PENDING_RESALE_APPROVAL!`,
+      },
+      { status: 400 }
+    );
+  }
+
+  // R7: Phê duyệt niêm yết mở bán yêu cầu quyền secondhand:approve_resale
+  const canApproveResale = await checkPermission(effectiveRole, 'secondhand:approve_resale');
+  if (!canApproveResale) {
+    return NextResponse.json(
+      { error: 'QUY TẮC R7: Nhân viên (STAFF) không có thẩm quyền phê duyệt niêm yết mở bán vợt cũ! Yêu cầu Branch Manager hoặc Admin.' },
+      { status: 403 }
+    );
+  }
+
+  let secondhandCommitted = false;
+  try {
+    // Cập nhật trạng thái unit trong secondhand_db bằng withTransaction
+    await withTransaction('secondhand_db', async (client) => {
+      await client.query(
+        `UPDATE secondhand_units 
+         SET status = 'APPROVED_FOR_SALE',
+             approved_by = $1,
+             approved_at = CURRENT_TIMESTAMP,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2 AND status = 'PENDING_RESALE_APPROVAL'`,
+        [approvedBy, unitId]
+      );
+    });
+    secondhandCommitted = true;
+
+    // Thêm tồn kho item_type = 'UNIQUE' vào inventory_db và ghi sổ cái stock_movements bằng withTransaction
+    await withTransaction('inventory_db', async (client) => {
+      await client.query(
+        `INSERT INTO stock_levels (branch_id, sku, item_type, on_hand, reserved, updated_at)
+         VALUES ($1, $2, 'UNIQUE', 1, 0, CURRENT_TIMESTAMP)
+         ON CONFLICT (branch_id, sku)
+         DO UPDATE SET on_hand = 1, item_type = 'UNIQUE', updated_at = CURRENT_TIMESTAMP`,
+        [unit.branch_id, unitId]
+      );
+
+      await client.query(
+        `INSERT INTO stock_movements (branch_id, sku, movement_type, quantity, reference_id, reason, created_by)
+         VALUES ($1, $2, 'INBOUND', 1, $3, $4, $5)`,
+        [
+          unit.branch_id,
+          unitId,
+          unit.buyback_case_id,
+          `Nhập kho vợt cũ Hạng ${unit.grade} (${unit.model_name}) sau khi duyệt mở bán`,
+          approvedBy,
+        ]
+      );
+    });
+
+    return NextResponse.json({ success: true, unitId, status: 'APPROVED_FOR_SALE' });
+  } catch (err: any) {
+    if (secondhandCommitted) {
+      // Compensating rollback nếu inventory_db thất bại
+      try {
+        await queryDb(
+          'secondhand_db',
+          `UPDATE secondhand_units SET status = 'PENDING_RESALE_APPROVAL', approved_by = NULL, approved_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+          [unitId]
+        );
+      } catch (compErr) {
+        console.error('Lỗi compensation secondhand_db:', compErr);
+      }
+    }
+    throw err;
   }
 }
 
@@ -41,7 +137,6 @@ export async function POST(request: NextRequest) {
     const {
       branchId,
       staffId,
-      userRole,
       sellerName,
       sellerPhone,
       sellerIdCardMasked,
@@ -54,10 +149,63 @@ export async function POST(request: NextRequest) {
       adjustedPrice,
       adjustmentReason,
       paymentMethod,
+      action,
+      approvedBy,
+      unitId: inputUnitId,
     } = body;
 
+    const actor = await resolveActorRole(request);
+    const effectiveRole = actor?.role || 'STAFF';
+
+    // C9 & R7: Phê duyệt mở bán lại vợt cũ qua POST
+    if (action === 'APPROVE_FOR_SALE' || action === 'APPROVE_RESALE') {
+      const targetUnitId = inputUnitId || body?.unitId;
+      const approver = approvedBy || staffId || actor?.userId || 'ADMIN';
+      return await handleApproveResale(targetUnitId, approver, effectiveRole);
+    }
+
+    // CRUD BẢNG GIÁ THU MUA CHUẨN (buyback_price_tables)
+    if (action === 'CREATE_PRICE_RULE') {
+      const { model_name, grade: ruleGrade, base_price, is_active } = body;
+      if (!model_name || !ruleGrade || !base_price) {
+        return NextResponse.json({ error: 'Thiếu thông tin model, phân hạng hoặc giá sàn.' }, { status: 400 });
+      }
+      await queryDb(
+        'secondhand_db',
+        `INSERT INTO buyback_price_tables (model_name, grade, base_price, is_active)
+         VALUES ($1, $2, $3, $4)`,
+        [model_name.trim(), ruleGrade.trim().toUpperCase(), Number(base_price), is_active !== false]
+      );
+      return NextResponse.json({ success: true, message: `Đã thêm quy tắc giá sàn cho "${model_name}" (Hạng ${ruleGrade})` });
+    }
+
+    if (action === 'UPDATE_PRICE_RULE') {
+      const { ruleId, base_price, is_active } = body;
+      if (!ruleId || !base_price) {
+        return NextResponse.json({ error: 'Thiếu ID quy tắc hoặc giá sàn.' }, { status: 400 });
+      }
+      await queryDb(
+        'secondhand_db',
+        `UPDATE buyback_price_tables 
+         SET base_price = $1, is_active = $2
+         WHERE id = $3`,
+        [Number(base_price), is_active !== false, ruleId]
+      );
+      return NextResponse.json({ success: true, message: 'Đã cập nhật quy tắc giá thu mua thành công!' });
+    }
+
+    if (action === 'DELETE_PRICE_RULE') {
+      const { ruleId } = body;
+      if (!ruleId) {
+        return NextResponse.json({ error: 'Thiếu ruleId cần xóa.' }, { status: 400 });
+      }
+      await queryDb('secondhand_db', `DELETE FROM buyback_price_tables WHERE id = $1`, [ruleId]);
+      return NextResponse.json({ success: true, message: 'Đã xóa quy tắc giá thu mua.' });
+    }
+
     const headerBranch = request.headers.get('x-branch-id');
-    if (userRole !== 'ADMIN' && headerBranch && headerBranch !== 'ALL' && headerBranch !== branchId) {
+    const isGlobalAdmin = effectiveRole === 'ADMIN';
+    if (!isGlobalAdmin && headerBranch && headerBranch !== 'ALL' && headerBranch !== branchId) {
       return NextResponse.json(
         { error: 'QUY TẮC R4: Nhân viên chỉ được lập hồ sơ thu mua tại chi nhánh được phân công!' },
         { status: 403 }
@@ -109,8 +257,9 @@ export async function POST(request: NextRequest) {
     const minStaffPrice = basePrice * 0.90;
     const isOutOfStaffBounds = adjustedPrice > maxStaffPrice || adjustedPrice < minStaffPrice;
 
-    // R5: Nếu nhân viên điều chỉnh giá vượt ±10%, lưu hồ sơ trạng thái PENDING_MANAGER_APPROVAL
-    if (isOutOfStaffBounds && userRole === 'STAFF') {
+    // R5: Nếu không có quyền phê duyệt giá (secondhand:approve_price) mà điều chỉnh vượt ±10%, chuyển sang PENDING_MANAGER_APPROVAL
+    const canApprovePrice = await checkPermission(effectiveRole, 'secondhand:approve_price');
+    if (isOutOfStaffBounds && !canApprovePrice) {
       await queryDb(
         'secondhand_db',
         `INSERT INTO buyback_cases (
@@ -210,7 +359,10 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { unitId, caseId, action, approvedBy, userRole } = body;
+    const { unitId, caseId, action, approvedBy } = body;
+
+    const actor = await resolveActorRole(request);
+    const effectiveRole = actor?.role || 'STAFF';
 
     // Case 1: Phê duyệt hồ sơ thu mua vượt ngưỡng R5 (PENDING_MANAGER_APPROVAL -> PAID)
     if (caseId || action === 'APPROVE_CASE') {
@@ -219,8 +371,9 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'Thiếu thông tin caseId hoặc người duyệt' }, { status: 400 });
       }
 
-      // R5: Chỉ Branch Manager hoặc Admin mới có quyền duyệt giá vượt ngưỡng
-      if (userRole !== 'BRANCH_MANAGER' && userRole !== 'ADMIN') {
+      // R5: Kiểm tra quyền secondhand:approve_price trong dynamic RBAC
+      const canApprovePrice = await checkPermission(effectiveRole, 'secondhand:approve_price');
+      if (!canApprovePrice) {
         return NextResponse.json(
           { error: 'QUY TẮC R5: Nhân viên (STAFF) không có thẩm quyền phê duyệt mức giá vượt ngưỡng ±10%! Yêu cầu Branch Manager hoặc Admin.' },
           { status: 403 }
@@ -283,94 +436,8 @@ export async function PATCH(request: NextRequest) {
       });
     }
 
-    // Case 2: Phê duyệt niêm yết mở bán (R7)
-    if (!unitId || !approvedBy) {
-      return NextResponse.json({ error: 'Thiếu thông tin unitId hoặc người duyệt' }, { status: 400 });
-    }
-
-    // R7: Chỉ Quản lý chi nhánh (BRANCH_MANAGER) hoặc Quản trị viên (ADMIN) mới có quyền duyệt mở bán
-    if (userRole === 'STAFF') {
-      return NextResponse.json(
-        { error: 'QUY TẮC R7: Nhân viên (STAFF) không có thẩm quyền phê duyệt niêm yết mở bán vợt cũ! Yêu cầu Branch Manager hoặc Admin.' },
-        { status: 403 }
-      );
-    }
-
-    const unitRows = await queryDb(
-      'secondhand_db',
-      `SELECT * FROM secondhand_units WHERE id = $1`,
-      [unitId]
-    );
-    if (unitRows.length === 0) {
-      return NextResponse.json({ error: 'Không tìm thấy vợt cũ' }, { status: 404 });
-    }
-    const unit = unitRows[0];
-
-    // R7: Chỉ duyệt vợt đang ở trạng thái PENDING_RESALE_APPROVAL (ngăn ngừa duyệt lặp lại gây lệch sổ cái R10)
-    if (unit.status !== 'PENDING_RESALE_APPROVAL') {
-      return NextResponse.json(
-        {
-          error: `Không thể phê duyệt mở bán vợt ở trạng thái "${unit.status}". Vợt phải ở trạng thái PENDING_RESALE_APPROVAL!`,
-        },
-        { status: 400 }
-      );
-    }
-
-    let secondhandCommitted = false;
-    try {
-      // Cập nhật trạng thái unit trong secondhand_db bằng withTransaction
-      await withTransaction('secondhand_db', async (client) => {
-        await client.query(
-          `UPDATE secondhand_units 
-           SET status = 'APPROVED_FOR_SALE',
-               approved_by = $1,
-               approved_at = CURRENT_TIMESTAMP,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE id = $2 AND status = 'PENDING_RESALE_APPROVAL'`,
-          [approvedBy, unitId]
-        );
-      });
-      secondhandCommitted = true;
-
-      // Thêm tồn kho item_type = 'UNIQUE' vào inventory_db và ghi sổ cái stock_movements bằng withTransaction
-      await withTransaction('inventory_db', async (client) => {
-        await client.query(
-          `INSERT INTO stock_levels (branch_id, sku, item_type, on_hand, reserved, updated_at)
-           VALUES ($1, $2, 'UNIQUE', 1, 0, CURRENT_TIMESTAMP)
-           ON CONFLICT (branch_id, sku)
-           DO UPDATE SET on_hand = 1, item_type = 'UNIQUE', updated_at = CURRENT_TIMESTAMP`,
-          [unit.branch_id, unitId]
-        );
-
-        await client.query(
-          `INSERT INTO stock_movements (branch_id, sku, movement_type, quantity, reference_id, reason, created_by)
-           VALUES ($1, $2, 'INBOUND', 1, $3, $4, $5)`,
-          [
-            unit.branch_id,
-            unitId,
-            unit.buyback_case_id,
-            `Nhập kho vợt cũ Hạng ${unit.grade} (${unit.model_name}) sau khi duyệt mở bán`,
-            approvedBy,
-          ]
-        );
-      });
-
-      return NextResponse.json({ success: true, unitId, status: 'APPROVED_FOR_SALE' });
-    } catch (err: any) {
-      if (secondhandCommitted) {
-        // Compensating rollback nếu inventory_db thất bại
-        try {
-          await queryDb(
-            'secondhand_db',
-            `UPDATE secondhand_units SET status = 'PENDING_RESALE_APPROVAL', approved_by = NULL, approved_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-            [unitId]
-          );
-        } catch (compErr) {
-          console.error('Lỗi compensation secondhand_db:', compErr);
-        }
-      }
-      throw err;
-    }
+    // Case 2: Phê duyệt niêm yết mở bán (R7 & C9)
+    return await handleApproveResale(unitId, approvedBy, effectiveRole);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
