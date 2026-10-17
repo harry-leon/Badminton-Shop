@@ -22,6 +22,8 @@ build/
 # Node & Next.js
 node_modules/
 .next/
+.open-next/
+.wrangler/
 out/
 *.tsbuildinfo
 npm-debug.log*

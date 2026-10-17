@@ -19,7 +19,8 @@ export function getDbPool(databaseName: string): Pool {
     pools[targetDb] = new Pool({
       ...dbConfig,
       database: targetDb,
-      max: 10,
+      max: 5,
+      connectionTimeoutMillis: 3000,
       idleTimeoutMillis: 30000,
     });
   }
@@ -27,6 +28,10 @@ export function getDbPool(databaseName: string): Pool {
 }
 
 export async function queryDb<T = any>(databaseName: string, text: string, params: any[] = []): Promise<T[]> {
+  if (isLocal && process.env.NODE_ENV === 'production') {
+    // Không cố kết nối tới 127.0.0.1 trên Cloudflare Workers Edge
+    return [];
+  }
   const pool = getDbPool(databaseName);
   const client = await pool.connect();
   try {

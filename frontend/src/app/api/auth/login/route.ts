@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findUserByIdentifier, verifyPassword, signSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { logAudit } from '@/lib/logger';
+import { API_BASE_URL } from '@/lib/api';
 
 export async function POST(request: NextRequest) {
   const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
@@ -18,7 +19,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userWithHash = await findUserByIdentifier(identifier);
+    // 1. Ưu tiên xác thực qua Spring Boot Backend API
+    try {
+      const backendRes = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: identifier.trim(),
+          password,
+        }),
+      });
+
+      if (backendRes.ok) {
+        const backendData = await backendRes.json();
+        const userInfo = backendData.data?.userInfo || {
+          id: backendData.data?.userId || 'usr-' + Date.now(),
+          username: identifier,
+          email: identifier.includes('@') ? identifier : '',
+          full_name: identifier,
+          phone: '',
+          role: 'CUSTOMER',
+          branch_id: null,
+        };
+        const token = backendData.data?.token || signSessionToken(userInfo);
+
+        const response = NextResponse.json({
+          success: true,
+          message: 'Đăng nhập thành công',
+          user: userInfo,
+        });
+
+        response.cookies.set(SESSION_COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60,
+        });
+
+        return response;
+      } else if (backendRes.status === 401 || backendRes.status === 400) {
+        const errJson = await backendRes.json().catch(() => ({}));
+        return NextResponse.json(
+          { error: errJson.message || 'Tài khoản hoặc mật khẩu không chính xác.' },
+          { status: backendRes.status }
+        );
+      }
+    } catch (apiErr) {
+      console.warn('Backend /auth/login không khả dụng, sử dụng luồng dự phòng:', apiErr);
+    }
+
+    let userWithHash: any = null;
+    try {
+      userWithHash = await findUserByIdentifier(identifier);
+    } catch {
+      userWithHash = null;
+    }
     if (!userWithHash) {
       await logAudit({
         level: 'WARN',

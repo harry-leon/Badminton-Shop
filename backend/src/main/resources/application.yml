@@ -17,7 +17,7 @@ spring:
       max-lifetime: 1200000
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     show-sql: false
     open-in-view: false
     properties:
@@ -38,7 +38,7 @@ spring:
       connect-timeout: ${SPRING_DATA_REDIS_CONNECT_TIMEOUT:2000ms}
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET:smashcourt-enterprise-secure-jwt-secret-key-32bytes-min-2026}
   expiration-seconds: 86400
   issuer: smash-court
 

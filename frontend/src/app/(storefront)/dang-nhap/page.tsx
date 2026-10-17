@@ -194,36 +194,31 @@ function LoginForm() {
               >
                 <div>
                   <label className="block text-[13px] text-muted mb-1.5 font-normal">
-                    Email hoặc Tên đăng nhập
+                    Email hoặc số di động
                   </label>
                   <div className="relative">
                     <input
-                      type="email"
+                      type="text"
                       required
-                      placeholder="admin@smashcourt.vn hoặc customer@gmail.com"
+                      placeholder="Email hoặc số di động"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                      className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[13px] text-muted font-normal">
-                      Mật khẩu
-                    </label>
-                    <span className="text-[13px] text-muted font-normal">
-                      Mật khẩu đã đăng ký
-                    </span>
-                  </div>
+                  <label className="block text-[13px] text-muted mb-1.5 font-normal">
+                    Mật khẩu
+                  </label>
                   <input
                     type="password"
                     required
-                    placeholder="••••••••"
+                    placeholder="Mật khẩu"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                   />
                 </div>
 
@@ -247,10 +242,10 @@ function LoginForm() {
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: Hoàng Minh Đức"
+                    placeholder="Họ và tên"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                   />
                 </div>
 
@@ -261,38 +256,38 @@ function LoginForm() {
                   <input
                     type="email"
                     required
-                    placeholder="yourname@gmail.com"
+                    placeholder="Địa chỉ Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[13px] text-muted mb-1.5 font-normal">
-                    Số điện thoại (để tra cứu bảo hành và nhận mã nhận hàng)
+                    Số điện thoại
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="0901234567"
+                    placeholder="Số điện thoại (để tra cứu bảo hành và nhận mã nhận hàng)"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[13px] text-muted mb-1.5 font-normal">
-                    Mật khẩu (tối thiểu 6 ký tự)
+                    Mật khẩu
                   </label>
                   <input
                     type="password"
                     required
-                    placeholder="••••••••"
+                    placeholder="Mật khẩu"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink focus:outline-none focus:border-ink transition-colors"
+                    className="w-full bg-bg border border-line rounded-xl px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-ink transition-colors"
                   />
                 </div>
 

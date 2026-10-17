@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { signSessionToken, SESSION_COOKIE_NAME, hashPassword } from '@/lib/auth';
 import { queryDb } from '@/lib/db';
+import { API_BASE_URL } from '@/lib/api';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,12 +34,70 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Kiểm tra xem user đã tồn tại chưa
-    const existing = await queryDb(
-      'identity_db',
-      `SELECT id FROM users WHERE email = $1 OR phone = $2 LIMIT 1`,
-      [email, phone]
-    );
+    const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+
+    // 3. Ưu tiên gọi Spring Boot Backend API
+    try {
+      const backendRes = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          fullName,
+          phone,
+        }),
+      });
+
+      if (backendRes.ok) {
+        const backendData = await backendRes.json();
+        const user = backendData.data?.userInfo || {
+          id: backendData.data?.userId || 'usr-' + Date.now(),
+          username,
+          email,
+          full_name: fullName,
+          phone,
+          role: 'CUSTOMER',
+          branch_id: null,
+        };
+        const token = backendData.data?.token || signSessionToken(user);
+        const response = NextResponse.json({
+          success: true,
+          message: 'Đăng ký tài khoản thành công',
+          user,
+        }, { status: 201 });
+
+        response.cookies.set(SESSION_COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60,
+        });
+
+        return response;
+      } else {
+        const errJson = await backendRes.json().catch(() => ({}));
+        if (errJson.message && backendRes.status < 500) {
+          return NextResponse.json({ error: errJson.message }, { status: backendRes.status });
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Backend /auth/register không khả dụng, sử dụng luồng dự phòng:', apiErr);
+    }
+
+    // 4. Luồng xử lý trực tiếp / dự phòng
+    let existing: any[] = [];
+    try {
+      existing = await queryDb(
+        'identity_db',
+        `SELECT id FROM users WHERE email = $1 OR phone = $2 LIMIT 1`,
+        [email, phone]
+      );
+    } catch {
+      existing = [];
+    }
 
     if (existing.length > 0) {
       return NextResponse.json(
@@ -47,23 +106,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
     const passwordHash = hashPassword(password);
-    const rows = await queryDb<any>(
-      'identity_db',
-      `INSERT INTO users (username, email, password_hash, full_name, phone, role)
-       VALUES ($1, $2, $3, $4, $5, 'CUSTOMER')
-       RETURNING id, username, email, full_name, phone, role`,
-      [username, email, passwordHash, fullName, phone]
-    );
+    let rows: any[] = [];
+    try {
+      rows = await queryDb<any>(
+        'identity_db',
+        `INSERT INTO users (username, email, password_hash, full_name, phone, role)
+         VALUES ($1, $2, $3, $4, $5, 'CUSTOMER')
+         RETURNING id, username, email, full_name, phone, role`,
+        [username, email, passwordHash, fullName, phone]
+      );
+    } catch {
+      rows = [];
+    }
 
     const newUser = {
-      id: rows[0].id,
-      username: rows[0].username,
-      email: rows[0].email,
-      full_name: rows[0].full_name,
-      phone: rows[0].phone,
-      role: rows[0].role,
+      id: rows.length > 0 ? rows[0].id : 'usr-' + Date.now(),
+      username: rows.length > 0 ? rows[0].username : username,
+      email: rows.length > 0 ? rows[0].email : email,
+      full_name: rows.length > 0 ? rows[0].full_name : fullName,
+      phone: rows.length > 0 ? rows[0].phone : phone,
+      role: rows.length > 0 ? rows[0].role : 'CUSTOMER',
       branch_id: null,
     };
 

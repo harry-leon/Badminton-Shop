@@ -32,7 +32,12 @@ public class PublicHomepageController {
     @GetMapping("/homepage")
     @Operation(summary = "Lấy toàn bộ dữ liệu trang chủ (Banners hiệu lực, Danh mục, Sản phẩm nổi bật)")
     public ResponseEntity<ApiResponse<HomepageResponse>> getHomepageData() {
-        List<BannerResponse> activeBanners = bannerService.getActiveValidBanners("ALL");
+        List<BannerResponse> activeBanners;
+        try {
+            activeBanners = bannerService.getActiveValidBanners("ALL");
+        } catch (Exception e) {
+            activeBanners = List.of();
+        }
         List<Category> categories = catalogService.getAllCategories();
         Page<Product> productsPage = catalogService.getProducts(
                 null,

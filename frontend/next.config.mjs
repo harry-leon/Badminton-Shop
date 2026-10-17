@@ -32,6 +32,14 @@ const nextConfig = {
       },
     ],
   },
+  serverExternalPackages: ['pg-cloudflare'],
+  outputFileTracingIncludes: {
+    '**/*': [
+      './node_modules/pg-cloudflare/**/*',
+      './node_modules/pg-cloudflare/dist/**/*',
+      './node_modules/pg-cloudflare/esm/**/*',
+    ],
+  },
 };
 
 export default nextConfig;
