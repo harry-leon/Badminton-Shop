@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   description: 'Hệ thống bán lẻ vợt cầu lông Yonex, Li-Ning, Victor chính hãng và sàn giao dịch vợt cũ kiểm định 16 tiêu chí độc lập tại 3 chi nhánh toàn quốc.',
 };
 
-export const revalidate = 0; // Luôn kết nối trực tiếp PostgreSQL 18 Zero-Mock
+export const revalidate = 60; // Cache 60s trên Edge CDN cho tốc độ phản hồi tức thì
 
 const branchLabels: Record<string, string> = {
   BR_HCM_01: 'Quận 1, TP.HCM',
@@ -165,18 +165,44 @@ export default async function HomePage() {
     ],
   };
 
-  // 1. Lấy vợt cũ đã duyệt mở bán trực tiếp từ secondhand_db
-  let secondhandRackets: any[] = [];
-  try {
-    const shRows = await queryDb<any>(
+  // Tải song song toàn bộ dữ liệu (Database + Spring Boot Aggregator API)
+  const [shRes, sRes, tagRes, apiRes, catRes, bannerRes] = await Promise.allSettled([
+    queryDb<any>(
       'secondhand_db',
       `SELECT id, serial_number, model_name, grade, resale_price, images_json, branch_id, condition_notes
        FROM secondhand_units
        WHERE status = 'APPROVED_FOR_SALE'
        ORDER BY created_at DESC
        LIMIT 3`
-    );
-    secondhandRackets = shRows.map((r) => {
+    ),
+    queryDb<any>('catalog_db', `SELECT key, value FROM site_settings`),
+    queryDb<any>('catalog_db', `SELECT code, name, bg_color, text_color FROM product_tags WHERE is_active = true`),
+    fetchFromApi<{
+      success?: boolean;
+      data?: HomepageApiData;
+    }>('/public/homepage'),
+    queryDb<any>(
+      'catalog_db',
+      `SELECT id, name, slug, image_url, tag_subtitle, sort_order
+       FROM categories
+       WHERE is_featured = true
+       ORDER BY sort_order ASC, name ASC`
+    ),
+    queryDb<any>(
+      'catalog_db',
+      `SELECT id, position, title, badge, description, primary_cta_text, primary_cta_link,
+              secondary_cta_text, secondary_cta_link, image_url, mobile_image_url, product_tag, product_sub,
+              sort_order
+       FROM banners
+       WHERE is_active = true
+       ORDER BY sort_order ASC, created_at DESC`
+    ),
+  ]);
+
+  // 1. Vợt cũ
+  let secondhandRackets: any[] = [];
+  if (shRes.status === 'fulfilled' && Array.isArray(shRes.value)) {
+    secondhandRackets = shRes.value.map((r) => {
       let images: string[] = [];
       try {
         images = JSON.parse(r.images_json || '[]');
@@ -197,11 +223,9 @@ export default async function HomePage() {
         branch: branchLabels[r.branch_id] || r.branch_id,
       };
     });
-  } catch (err) {
-    console.error('Lỗi khi tải vợt cũ từ secondhand_db:', err);
   }
 
-  // 2. Lấy Cài đặt giao diện (Site Settings) từ catalog_db
+  // 2. Cài đặt giao diện (Site Settings)
   let siteSettings: Record<string, string> = {
     hotline: '1900 6868',
     business_hours: '08:30 – 21:30 hàng ngày',
@@ -210,85 +234,43 @@ export default async function HomePage() {
     address_dn: '78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu',
     announcement_bar: 'Ưu đãi tuần này: Giảm tới 30% toàn bộ vợt chính hãng & Tặng gói cước căng máy BWF',
   };
-  try {
-    const sRows = await queryDb<any>('catalog_db', `SELECT key, value FROM site_settings`);
-    sRows.forEach((r) => { siteSettings[r.key] = r.value; });
-  } catch (err) {
-    console.error('Lỗi khi tải site_settings:', err);
+  if (sRes.status === 'fulfilled' && Array.isArray(sRes.value)) {
+    sRes.value.forEach((r) => { siteSettings[r.key] = r.value; });
   }
 
-  // 3. Lấy Product Tags để map màu và tên hiển thị động
+  // 3. Product Tags
   let tagsMap: Record<string, { code: string; name: string; bg_color: string; text_color: string }> = {};
-  try {
-    const tagRows = await queryDb<any>(
-      'catalog_db',
-      `SELECT code, name, bg_color, text_color FROM product_tags WHERE is_active = true`
-    );
-    tagRows.forEach((t) => { tagsMap[t.code] = t; });
-  } catch (err) {
-    console.error('Lỗi khi tải product_tags:', err);
+  if (tagRes.status === 'fulfilled' && Array.isArray(tagRes.value)) {
+    tagRes.value.forEach((t) => { tagsMap[t.code] = t; });
   }
 
-  // 0. Tải dữ liệu từ Spring Boot Aggregator API: GET /api/v1/public/homepage
+  // 0. Dữ liệu từ Spring Boot Aggregator API: GET /api/v1/public/homepage
   let apiHeroBanners: any[] = [];
   let apiPromoBanners: any[] = [];
   let apiCategories: any[] = [];
   let apiProducts: any[] = [];
 
-  try {
-    const apiRes = await fetchFromApi<{
-      success?: boolean;
-      data?: HomepageApiData;
-    }>('/public/homepage');
-
-    if (apiRes && apiRes.data) {
-      if (Array.isArray(apiRes.data.heroBanners) && apiRes.data.heroBanners.length > 0) {
-        apiHeroBanners = apiRes.data.heroBanners;
-      }
-      if (Array.isArray(apiRes.data.promoBanners) && apiRes.data.promoBanners.length > 0) {
-        apiPromoBanners = apiRes.data.promoBanners;
-      }
-      if (Array.isArray(apiRes.data.categories) && apiRes.data.categories.length > 0) {
-        apiCategories = apiRes.data.categories;
-      }
-      if (Array.isArray(apiRes.data.products) && apiRes.data.products.length > 0) {
-        apiProducts = apiRes.data.products;
-      }
-    }
-  } catch (apiErr) {
-    // Resilient fallback: Nếu backend Spring Boot tạm thời không phản hồi, storefront tiếp tục hoạt động trơn tru
-    console.warn('Aggregator API /api/v1/public/homepage không khả dụng, chuyển sang chế độ fallback:', apiErr);
+  if (apiRes.status === 'fulfilled' && apiRes.value?.data) {
+    const data = apiRes.value.data;
+    if (Array.isArray(data.heroBanners) && data.heroBanners.length > 0) apiHeroBanners = data.heroBanners;
+    if (Array.isArray(data.promoBanners) && data.promoBanners.length > 0) apiPromoBanners = data.promoBanners;
+    if (Array.isArray(data.categories) && data.categories.length > 0) apiCategories = data.categories;
+    if (Array.isArray(data.products) && data.products.length > 0) apiProducts = data.products;
   }
 
-  // 4. Lấy Danh mục nổi bật (Featured Categories) từ catalog_db
+  // 4. Danh mục nổi bật (Featured Categories)
   let featuredCategories: any[] = [];
-  try {
-    featuredCategories = await queryDb<any>(
-      'catalog_db',
-      `SELECT id, name, slug, image_url, tag_subtitle, sort_order
-       FROM categories
-       WHERE is_featured = true
-       ORDER BY sort_order ASC, name ASC`
-    );
-  } catch (err) {
-    console.error('Lỗi khi tải categories:', err);
+  if (catRes.status === 'fulfilled' && Array.isArray(catRes.value)) {
+    featuredCategories = catRes.value;
   }
 
-  // 5. Lấy Banners: Dải Cam Kết Vàng (USP_BAR), Bộ 3 Banner Ưu Đãi (HOME_PROMO_3), VĐV (ATHLETES), Hero Banners (HERO/HERO_SLIDER)
+  // 5. Banners
   let uspBadges: any[] = [];
   let promoBanners: any[] = [];
   let athleteBanners: any[] = [];
   let dbHeroBanners: any[] = [];
-  try {
-    const bannerRows = await queryDb<any>(
-      'catalog_db',
-      `SELECT id, position, title, badge, description, primary_cta_text, primary_cta_link,
-              secondary_cta_text, secondary_cta_link, image_url, mobile_image_url, product_tag, product_sub,
-              sort_order
-       FROM banners
-       WHERE is_active = true
-       ORDER BY sort_order ASC, created_at DESC`
-    );
+  if (bannerRes.status === 'fulfilled' && Array.isArray(bannerRes.value)) {
+    const bannerRows = bannerRes.value;
     uspBadges = bannerRows.filter((b) => b.position === 'USP_BAR');
     promoBanners = bannerRows.filter((b) => b.position === 'HOME_PROMO_3');
     athleteBanners = bannerRows.filter((b) => b.position === 'ATHLETES');
@@ -312,8 +294,6 @@ export default async function HomePage() {
         productSub: b.product_sub,
         sortOrder: b.sort_order,
       }));
-  } catch (err) {
-    console.error('Lỗi khi tải banners từ catalog_db:', err);
   }
 
   // Tổng hợp dữ liệu hiển thị với cơ chế fallback kiên cường (Resilient Fallback)

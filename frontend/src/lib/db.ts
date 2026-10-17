@@ -20,7 +20,7 @@ export function getDbPool(databaseName: string): Pool {
       ...dbConfig,
       database: targetDb,
       max: 5,
-      connectionTimeoutMillis: 3000,
+      connectionTimeoutMillis: 1500,
       idleTimeoutMillis: 30000,
     });
   }
