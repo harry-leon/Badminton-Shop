@@ -15,13 +15,13 @@ services:
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
       - key: JWT_SECRET
-        value: smash-court-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256-security
+        sync: false
       - key: IMAGEKIT_PUBLIC_KEY
-        value: public_oAr8SA2i9Ed1U4+4kcEA+I16UO4=
+        sync: false
       - key: IMAGEKIT_PRIVATE_KEY
-        value: private_hOECE/HeE+7R8xq8MW++vJEoyJU=
+        sync: false
       - key: IMAGEKIT_URL_ENDPOINT
-        value: https://ik.imagekit.io/htqhun
+        sync: false
       - key: SPRING_DATA_REDIS_HOST
         value: localhost
       - key: SPRING_DATA_REDIS_PORT

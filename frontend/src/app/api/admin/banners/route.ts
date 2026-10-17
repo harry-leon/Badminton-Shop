@@ -105,16 +105,19 @@ function generateBackendJwt(user: AuthUser): string {
   const now = Math.floor(Date.now() / 1000);
   const payload = Buffer.from(
     JSON.stringify({
-      sub: user.id || 'admin',
-      role: user.role || 'ADMIN',
-      authorities: ['ADMIN', 'STAFF', 'banners:manage', user.role || 'ADMIN', `ROLE_${user.role || 'ADMIN'}`],
+      sub: user.id,
+      role: user.role,
+      authorities: [user.role, `ROLE_${user.role}`, 'banners:manage'],
       iss: 'smash-court',
       iat: now,
       exp: now + 3600,
     })
   ).toString('base64url');
 
-  const secret = process.env.JWT_SECRET || 'smash-court-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256-security';
+  const secret = process.env.JWT_SECRET || '';
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not configured.');
+  }
   const signature = crypto.createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url');
   return `${header}.${payload}.${signature}`;
 }

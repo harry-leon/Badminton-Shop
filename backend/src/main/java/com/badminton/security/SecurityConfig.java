@@ -38,7 +38,7 @@ public class SecurityConfig {
     public SecurityConfig(
             RestAuthenticationEntryPoint authenticationEntryPoint,
             RestAccessDeniedHandler accessDeniedHandler,
-            @Value("${jwt.secret:default-insecure-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256}") String jwtSecret
+            @Value("${jwt.secret:}") String jwtSecret
     ) {
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
@@ -82,6 +82,9 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
+        if (jwtSecret == null || jwtSecret.isBlank() || jwtSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT secret must be configured via environment variable JWT_SECRET and be at least 256 bits (32 bytes)");
+        }
         SecretKeySpec secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }

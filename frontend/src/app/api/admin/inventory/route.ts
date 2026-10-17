@@ -3,10 +3,19 @@ import { queryDb, withTransaction } from '@/lib/db';
 import { resolveActorRole, checkPermission } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const branchId = searchParams.get('branchId');
-
   try {
+    const actorData = await resolveActorRole(request);
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để truy cập dữ liệu tồn kho!' }, { status: 401 });
+    }
+    const canView = await checkPermission(actorData.role, 'inventory:view');
+    if (!canView && actorData.role !== 'ADMIN' && actorData.role !== 'BRANCH_MANAGER') {
+      return NextResponse.json({ error: 'Forbidden: Bạn không có quyền xem tồn kho (inventory:view)!' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const branchId = searchParams.get('branchId');
+
     let stockQuery = `SELECT * FROM stock_levels`;
     const params: any[] = [];
     if (branchId && branchId !== 'ALL') {
@@ -41,7 +50,10 @@ export async function POST(request: NextRequest) {
     const { fromBranchId, toBranchId, sku, quantity, actor, actorBranchId } = await request.json();
 
     const actorData = await resolveActorRole(request);
-    const effectiveRole = actorData?.role || 'STAFF';
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actorData.role;
 
     const canCreate = await checkPermission(effectiveRole, 'inventory:transfer_create');
     if (!canCreate) {
@@ -103,7 +115,10 @@ export async function PATCH(request: NextRequest) {
     const transfer = transferRows[0];
 
     const actorData = await resolveActorRole(request);
-    const effectiveRole = actorData?.role || 'STAFF';
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actorData.role;
     const isGlobal = effectiveRole === 'ADMIN';
 
     if (action === 'DISPATCH') {

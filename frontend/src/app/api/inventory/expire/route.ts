@@ -1,5 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
+import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+
+function isAuthorized(request: NextRequest): boolean {
+  const cronSecret = process.env.CRON_SECRET;
+  const authHeader = request.headers.get('authorization');
+  const cronHeader = request.headers.get('x-cron-secret');
+
+  // 1. Kiểm tra secret bảo vệ CRON job nếu được cung cấp
+  if (cronSecret) {
+    if (cronHeader === cronSecret) return true;
+    if (authHeader && (authHeader === `Bearer ${cronSecret}` || authHeader === cronSecret)) {
+      return true;
+    }
+  }
+
+  // 2. Kiểm tra token phiên làm việc nội bộ (ADMIN / STAFF / BRANCH_MANAGER)
+  let token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  if (!token && authHeader && authHeader.startsWith('Bearer ') && authHeader.substring(7).trim() !== cronSecret) {
+    token = authHeader.substring(7).trim();
+  }
+  if (token) {
+    const user = verifySessionToken(token);
+    if (user && user.role !== 'CUSTOMER') {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 async function processExpiredReservations() {
   // 1. Quét các lượt giữ chỗ quá hạn còn ở trạng thái ACTIVE (R3)
@@ -90,6 +119,13 @@ async function processExpiredReservations() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Yêu cầu xác thực quyền nội bộ hoặc CRON_SECRET.' },
+        { status: 401 }
+      );
+    }
+
     const result = await processExpiredReservations();
     return NextResponse.json({
       success: true,
@@ -101,8 +137,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Yêu cầu xác thực quyền nội bộ hoặc CRON_SECRET.' },
+        { status: 401 }
+      );
+    }
+
     const result = await processExpiredReservations();
     return NextResponse.json({
       success: true,

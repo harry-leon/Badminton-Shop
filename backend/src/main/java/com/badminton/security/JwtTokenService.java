@@ -25,7 +25,7 @@ public class JwtTokenService {
     private final String issuer;
 
     public JwtTokenService(
-            @Value("${jwt.secret:default-insecure-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256}") String secret,
+            @Value("${jwt.secret:}") String secret,
             @Value("${jwt.expiration-seconds:86400}") long expirationSeconds,
             @Value("${jwt.issuer:smash-court}") String issuer
     ) {
@@ -35,6 +35,9 @@ public class JwtTokenService {
     }
 
     public String generateToken(UUID userId, String username, String role, String branchId, List<String> permissions) {
+        if (secretBytes.length < 32) {
+            throw new IllegalStateException("JWT secret must be configured via environment variable JWT_SECRET and be at least 256 bits (32 bytes)");
+        }
         try {
             Instant now = Instant.now();
             Instant expiry = now.plusSeconds(expirationSeconds);

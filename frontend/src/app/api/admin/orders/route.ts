@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queryDb, withTransaction } from '@/lib/db';
 import { resolveActorRole, checkPermission } from '@/lib/rbac';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const actor = await resolveActorRole(request);
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để truy cập danh sách đơn hàng!' }, { status: 401 });
+    }
+    const canView = await checkPermission(actor.role, 'orders:view');
+    if (!canView && actor.role !== 'ADMIN' && actor.role !== 'BRANCH_MANAGER') {
+      return NextResponse.json({ error: 'Forbidden: Bạn không có quyền xem đơn hàng (orders:view)!' }, { status: 403 });
+    }
+
     const orders = await queryDb(
       'order_db',
       `SELECT o.*, 
@@ -47,7 +56,10 @@ export async function POST(request: NextRequest) {
     const { action, orderId, transactionRef, confirmedBy } = body;
 
     const actor = await resolveActorRole(request);
-    const effectiveRole = actor?.role || 'ADMIN';
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actor.role;
 
     // 1. TẠO YÊU CẦU HOÀN TIỀN
     if (action === 'CREATE_REFUND') {
@@ -228,7 +240,10 @@ export async function PATCH(request: NextRequest) {
     const order = orderRows[0];
 
     const actorData = await resolveActorRole(request);
-    const effectiveRole = actorData?.role || 'STAFF';
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để xử lý đơn hàng!' }, { status: 401 });
+    }
+    const effectiveRole = actorData.role;
 
     const canProcess = await checkPermission(effectiveRole, 'orders:process');
     if (!canProcess) {

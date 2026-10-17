@@ -92,7 +92,13 @@ export async function resolveActorRole(
   bodyRole?: string
 ): Promise<{ role: string; userId?: string; branchId?: string | null } | null> {
   try {
-    const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    let token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (!token) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7).trim();
+      }
+    }
     if (token) {
       const user = verifySessionToken(token);
       if (user && user.role) {

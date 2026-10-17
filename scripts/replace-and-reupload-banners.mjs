@@ -5,7 +5,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY || 'private_hOECE/HeE+7R8xq8MW++vJEoyJU=';
+const PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY || '';
+if (!PRIVATE_KEY) {
+  console.error('IMAGEKIT_PRIVATE_KEY is not set');
+  process.exit(1);
+}
 const authHeader = `Basic ${Buffer.from(`${PRIVATE_KEY}:`).toString('base64')}`;
 
 const downloadsDir = 'C:/Users/htquo/Downloads/Banner';

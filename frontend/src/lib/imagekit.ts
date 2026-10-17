@@ -9,9 +9,9 @@ if (typeof window !== 'undefined') {
   throw new Error('ImageKit server module cannot be loaded on the client side.');
 }
 
-const IMAGEKIT_PUBLIC_KEY = process.env.IMAGEKIT_PUBLIC_KEY || 'public_oAr8SA2i9Ed1U4+4kcEA+I16UO4=';
-const IMAGEKIT_PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY || 'private_hOECE/HeE+7R8xq8MW++vJEoyJU=';
-const IMAGEKIT_URL_ENDPOINT = process.env.IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/htqhun';
+const IMAGEKIT_PUBLIC_KEY = process.env.IMAGEKIT_PUBLIC_KEY || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
+const IMAGEKIT_PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY || '';
+const IMAGEKIT_URL_ENDPOINT = process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
 
 interface UploadOptions {
   file: Buffer | string; // Buffer hoặc Base64 string hoặc image URL

@@ -17,7 +17,7 @@ export interface AuthUser {
 }
 
 const SESSION_COOKIE_NAME = 'smash_session';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'smashcourt-secret-token-key-2026';
+const SESSION_SECRET = process.env.SESSION_SECRET || '';
 
 export { SESSION_COOKIE_NAME };
 
@@ -25,6 +25,9 @@ export { SESSION_COOKIE_NAME };
  * Tạo token phiên làm việc có chữ ký HMAC-SHA256
  */
 export function signSessionToken(user: AuthUser): string {
+  if (!SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is not configured.');
+  }
   const payload = JSON.stringify({
     user,
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 ngày
@@ -41,7 +44,7 @@ export function signSessionToken(user: AuthUser): string {
  * Xác thực và giải mã token phiên làm việc
  */
 export function verifySessionToken(token: string): AuthUser | null {
-  if (!token || !token.includes('.')) return null;
+  if (!SESSION_SECRET || !token || !token.includes('.')) return null;
   const [encodedPayload, signature] = token.split('.');
   if (!encodedPayload || !signature) return null;
 

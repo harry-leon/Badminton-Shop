@@ -3,7 +3,10 @@ import crypto from 'crypto';
 const BASE_URL = 'http://localhost:3000';
 
 function generateAdminCookie() {
-  const SESSION_SECRET = process.env.SESSION_SECRET || 'smashcourt-secret-token-key-2026';
+  const SESSION_SECRET = process.env.SESSION_SECRET || '';
+  if (!SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is not configured.');
+  }
   const user = {
     id: 'usr_admin_test',
     email: 'admin@smashcourt.vn',

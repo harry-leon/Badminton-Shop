@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { resolveActorRole, checkPermission } from '@/lib/rbac';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const actorData = await resolveActorRole(request);
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để truy cập dữ liệu bảo hành!' }, { status: 401 });
+    }
+    const canView = await checkPermission(actorData.role, 'warranty:view');
+    if (!canView && actorData.role !== 'ADMIN' && actorData.role !== 'BRANCH_MANAGER') {
+      return NextResponse.json({ error: 'Forbidden: Bạn không có quyền xem dữ liệu bảo hành (warranty:view)!' }, { status: 403 });
+    }
+
     const claims = await queryDb(
       'warranty_db',
       `SELECT * FROM warranty_claims ORDER BY created_at DESC`
@@ -29,7 +38,10 @@ export async function POST(request: NextRequest) {
     const { action, id, name, duration_months, coverage_type, terms_text } = body;
 
     const actorData = await resolveActorRole(request);
-    const effectiveRole = actorData?.role || 'ADMIN';
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actorData.role;
 
     const canManagePolicy = await checkPermission(effectiveRole, 'warranty:manage_policies');
     if (!canManagePolicy && effectiveRole !== 'ADMIN') {
@@ -106,7 +118,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     const actorData = await resolveActorRole(request);
-    const effectiveRole = actorData?.role || 'STAFF';
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actorData.role;
 
     // Phân quyền vai trò: Phê duyệt đổi mới/sửa chữa hoặc từ chối yêu cầu quyền warranty:decide
     if (toStatus === 'APPROVED' || toStatus === 'REJECTED') {

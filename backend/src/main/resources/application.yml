@@ -38,14 +38,14 @@ spring:
       connect-timeout: ${SPRING_DATA_REDIS_CONNECT_TIMEOUT:2000ms}
 
 jwt:
-  secret: ${JWT_SECRET:smash-court-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256-security}
+  secret: ${JWT_SECRET:}
   expiration-seconds: 86400
   issuer: smash-court
 
 imagekit:
-  public-key: ${IMAGEKIT_PUBLIC_KEY:public_oAr8SA2i9Ed1U4+4kcEA+I16UO4=}
-  private-key: ${IMAGEKIT_PRIVATE_KEY:private_hOECE/HeE+7R8xq8MW++vJEoyJU=}
-  url-endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/htqhun}
+  public-key: ${IMAGEKIT_PUBLIC_KEY:}
+  private-key: ${IMAGEKIT_PRIVATE_KEY:}
+  url-endpoint: ${IMAGEKIT_URL_ENDPOINT:}
 
 management:
   endpoints:

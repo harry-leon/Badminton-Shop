@@ -19,8 +19,17 @@ function getRacketImageForModel(model: string): string {
   return '/images/secondhand/sh-astrox-88d-pro.png';
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const actorData = await resolveActorRole(request);
+    if (!actorData) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để truy cập dữ liệu vợt cũ!' }, { status: 401 });
+    }
+    const canView = await checkPermission(actorData.role, 'secondhand:view');
+    if (!canView && actorData.role !== 'ADMIN' && actorData.role !== 'BRANCH_MANAGER') {
+      return NextResponse.json({ error: 'Forbidden: Bạn không có quyền xem dữ liệu vợt cũ (secondhand:view)!' }, { status: 403 });
+    }
+
     const units = await queryDb(
       'secondhand_db',
       `SELECT * FROM secondhand_units ORDER BY created_at DESC`
@@ -155,12 +164,15 @@ export async function POST(request: NextRequest) {
     } = body;
 
     const actor = await resolveActorRole(request);
-    const effectiveRole = actor?.role || 'STAFF';
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actor.role;
 
     // C9 & R7: Phê duyệt mở bán lại vợt cũ qua POST
     if (action === 'APPROVE_FOR_SALE' || action === 'APPROVE_RESALE') {
       const targetUnitId = inputUnitId || body?.unitId;
-      const approver = approvedBy || staffId || actor?.userId || 'ADMIN';
+      const approver = approvedBy || staffId || actor.userId;
       return await handleApproveResale(targetUnitId, approver, effectiveRole);
     }
 
@@ -362,7 +374,10 @@ export async function PATCH(request: NextRequest) {
     const { unitId, caseId, action, approvedBy } = body;
 
     const actor = await resolveActorRole(request);
-    const effectiveRole = actor?.role || 'STAFF';
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized: Bạn cần đăng nhập để thực hiện thao tác này!' }, { status: 401 });
+    }
+    const effectiveRole = actor.role;
 
     // Case 1: Phê duyệt hồ sơ thu mua vượt ngưỡng R5 (PENDING_MANAGER_APPROVAL -> PAID)
     if (caseId || action === 'APPROVE_CASE') {
@@ -437,7 +452,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Case 2: Phê duyệt niêm yết mở bán (R7 & C9)
-    return await handleApproveResale(unitId, approvedBy, effectiveRole);
+    return await handleApproveResale(unitId, approvedBy || actor.userId, effectiveRole);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
