@@ -56,7 +56,7 @@ export default function SecondhandGallery({
         <button
           type="button"
           onClick={() => setZoomPhoto(activePhoto.url)}
-          className="absolute bottom-4 right-4 bg-surface/90 hover:bg-surface border border-line p-2.5 rounded-full text-ink shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 text-[13px] font-medium"
+          className="absolute bottom-4 right-4 bg-surface/90 hover:bg-surface border border-line min-h-[44px] px-3.5 py-2 rounded-full text-ink shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 text-[13px] font-medium touch-target"
           aria-label="Phóng to ảnh kiểm định"
         >
           <ZoomIn className="w-4 h-4 text-brand" />
@@ -78,7 +78,7 @@ export default function SecondhandGallery({
       </div>
 
       {/* Danh sách ảnh góc chụp thu nhỏ (Thumbnails) */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+      <div className="flex overflow-x-auto no-scrollbar sm:grid sm:grid-cols-5 gap-2 sm:gap-3 pb-1 sm:pb-0">
         {photos.map((photo, idx) => {
           const isSelected = idx === activeIndex;
           return (
@@ -86,7 +86,7 @@ export default function SecondhandGallery({
               key={idx}
               type="button"
               onClick={() => setActiveIndex(idx)}
-              className={`relative aspect-square rounded-2xl overflow-hidden border p-2 transition-all cursor-pointer bg-[#EFECE6] dark:bg-[#18201C] flex flex-col items-center justify-center ${
+              className={`relative min-w-[68px] sm:min-w-0 aspect-square rounded-2xl overflow-hidden border p-1.5 sm:p-2 transition-all cursor-pointer bg-[#EFECE6] dark:bg-[#18201C] flex flex-col items-center justify-center shrink-0 sm:shrink touch-target ${
                 isSelected
                   ? 'border-brand ring-2 ring-brand/20'
                   : 'border-line hover:border-ink/40 opacity-75 hover:opacity-100'
@@ -102,7 +102,7 @@ export default function SecondhandGallery({
                 />
               </div>
               <div className="absolute bottom-1 inset-x-1 text-center">
-                <span className="text-[13px] font-medium text-ink bg-surface/90 px-1 py-0.5 rounded truncate block shadow-2xs">
+                <span className="text-[11px] sm:text-[13px] font-medium text-ink bg-surface/90 px-1 py-0.5 rounded truncate block shadow-2xs">
                   {photo.label}
                 </span>
               </div>
@@ -124,7 +124,7 @@ export default function SecondhandGallery({
             <button
               type="button"
               onClick={() => setZoomPhoto(null)}
-              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-bg/90 hover:bg-bg border border-line flex items-center justify-center text-ink cursor-pointer"
+              className="absolute top-4 right-4 z-10 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-bg/90 hover:bg-bg border border-line flex items-center justify-center text-ink cursor-pointer touch-target"
               aria-label="Đóng ảnh phóng to"
             >
               <X className="w-5 h-5" />

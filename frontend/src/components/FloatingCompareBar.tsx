@@ -55,8 +55,9 @@ export function FloatingCompareBar() {
                 </div>
                 <button
                   onClick={() => removeFromCompare(item.id)}
-                  className="text-muted hover:text-ink p-0.5 rounded-full hover:bg-surface transition-colors"
+                  className="text-muted hover:text-ink p-1.5 rounded-full hover:bg-surface transition-colors touch-target-hit inline-flex items-center justify-center cursor-pointer"
                   title="Bỏ so sánh"
+                  aria-label={`Bỏ so sánh ${item.name}`}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -68,14 +69,14 @@ export function FloatingCompareBar() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={clearCompare}
-              className="hidden sm:inline-flex text-[13px] text-muted hover:text-ink px-2 py-1 transition-colors"
+              className="hidden sm:inline-flex text-[13px] text-muted hover:text-ink px-2 py-1 min-h-[44px] items-center transition-colors touch-target-hit cursor-pointer"
             >
               Xóa tất cả
             </button>
 
             <Link
               href="/so-sanh"
-              className="inline-flex items-center gap-1.5 bg-ink text-bg text-[13px] font-medium px-4 py-2 rounded-full hover:opacity-90 active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-1.5 bg-ink text-bg text-[13px] font-medium min-h-[44px] px-4 py-2 rounded-full hover:opacity-90 active:scale-[0.98] transition-all touch-target"
             >
               <span>Đối chiếu</span>
               <ArrowRight className="w-3.5 h-3.5" />

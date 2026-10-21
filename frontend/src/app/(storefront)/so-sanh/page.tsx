@@ -39,7 +39,7 @@ export default function ComparePage() {
           {items.length > 0 && (
             <button
               onClick={clearCompare}
-              className="text-[13px] text-muted hover:text-ink border border-line hover:border-ink rounded-full px-4 py-1.5 transition-colors self-start sm:self-auto cursor-pointer"
+              className="text-[13px] text-muted hover:text-ink border border-line hover:border-ink rounded-full px-4 py-1.5 transition-colors self-start sm:self-auto cursor-pointer touch-target-hit inline-flex items-center"
             >
               Xóa tất cả
             </button>
@@ -67,8 +67,9 @@ export default function ComparePage() {
                   <div key={item.id} className="relative bg-surface rounded-2xl p-4 border border-line flex flex-col justify-between">
                     <button
                       onClick={() => removeFromCompare(item.id)}
-                      className="absolute top-2.5 right-2.5 text-muted hover:text-ink p-1 rounded-full hover:bg-bg transition-colors"
+                      className="absolute top-2 right-2 text-muted hover:text-ink w-11 h-11 min-w-[44px] min-h-[44px] rounded-full hover:bg-bg transition-colors cursor-pointer touch-target touch-target-hit inline-flex items-center justify-center"
                       title="Bỏ so sánh"
+                      aria-label={`Bỏ so sánh ${item.name}`}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -92,7 +93,7 @@ export default function ComparePage() {
                       <PriceTag amount={item.priceFrom} size="md" />
                       <Link
                         href={`/vot-cau-long/${item.slug}`}
-                        className="inline-flex items-center justify-center gap-1.5 bg-ink text-bg text-[13px] font-medium py-2 px-3 rounded-full hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center justify-center gap-1.5 bg-ink text-bg text-[13px] font-medium min-h-[44px] py-2 px-3 rounded-full hover:opacity-90 transition-opacity touch-target"
                       >
                         <span>Xem chi tiết</span>
                         <ArrowRight className="w-3.5 h-3.5" />

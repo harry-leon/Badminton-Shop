@@ -47,7 +47,7 @@ public class BannerService {
     }
 
     @Transactional(readOnly = true)
-    public BannerResponse getBannerById(UUID id) {
+    public BannerResponse getBannerById(String id) {
         return bannerRepository.findById(id)
                 .map(BannerResponse::fromEntity)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy banner với ID: " + id));
@@ -87,7 +87,7 @@ public class BannerService {
     }
 
     @Transactional
-    public BannerResponse updateBanner(UUID id, UpdateBannerRequest request) {
+    public BannerResponse updateBanner(String id, UpdateBannerRequest request) {
         validateBannerInput(request.title(), request.imageUrl(), request.startAt(), request.endAt());
 
         Banner banner = bannerRepository.findById(id)
@@ -128,7 +128,7 @@ public class BannerService {
     }
 
     @Transactional
-    public BannerResponse toggleBannerStatus(UUID id) {
+    public BannerResponse toggleBannerStatus(String id) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy banner với ID: " + id));
         banner.setIsActive(!Boolean.TRUE.equals(banner.getIsActive()));
@@ -136,7 +136,7 @@ public class BannerService {
     }
 
     @Transactional
-    public void deleteBanner(UUID id) {
+    public void deleteBanner(String id) {
         if (!bannerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy banner với ID: " + id);
         }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAdmin } from '@/lib/admin-context';
 import { 
@@ -285,6 +286,43 @@ function AdminSecondhandPageContent() {
 
   return (
     <div className="space-y-6">
+      {/* On-page Tab Navigation Strip for Mobile/Tablet */}
+      <div className="flex items-center gap-1.5 border-b border-[#E4E3DD] overflow-x-auto no-scrollbar pb-1">
+        <Link
+          href="/portal/secondhand?tab=WIZARD"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'WIZARD'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Wizard kiểm định thu mua</span>
+        </Link>
+        <Link
+          href="/portal/secondhand?tab=RESALE_APPROVAL"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'RESALE_APPROVAL'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>Duyệt mở bán ({pendingUnits.length})</span>
+        </Link>
+        <Link
+          href="/portal/secondhand?tab=PRICE_TABLES"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'PRICE_TABLES'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <DollarSign className="w-3.5 h-3.5" />
+          <span>Bảng giá thu mua chuẩn</span>
+        </Link>
+      </div>
+
       {/* TAB 3: BẢNG GIÁ THU MUA CHUẨN (PRICE_TABLES) */}
       {activeTab === 'PRICE_TABLES' && (
         <div className="space-y-4">
@@ -330,8 +368,8 @@ function AdminSecondhandPageContent() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-black/10 overflow-hidden shadow-xs">
-            <table className="w-full text-left text-xs">
+          <div className="bg-white rounded-xl border border-black/10 overflow-x-auto shadow-xs">
+            <table className="w-full min-w-[650px] text-left text-xs">
               <thead className="bg-[#FAF9F5] text-gray-500 font-medium border-b border-gray-100">
                 <tr>
                   <th className="py-3 px-4">DÒNG VỢT (MODEL)</th>
@@ -392,7 +430,7 @@ function AdminSecondhandPageContent() {
                                   setRuleBasePrice(String(rule.base_price));
                                   setIsPriceModalOpen(true);
                                 }}
-                                className="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer"
+                                className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer"
                                 title="Sửa giá sàn"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
@@ -400,7 +438,7 @@ function AdminSecondhandPageContent() {
                               {user?.role === 'ADMIN' && (
                                 <button
                                   onClick={() => handleDeletePriceRule(rule.id)}
-                                  className="p-1 rounded hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
+                                  className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 rounded hover:bg-red-50 text-red-600 transition-colors cursor-pointer"
                                   title="Xóa quy tắc"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />

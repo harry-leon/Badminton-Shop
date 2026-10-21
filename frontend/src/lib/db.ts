@@ -1,44 +1,104 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, PoolConfig } from 'pg';
 
-// Connection pools for isolated PostgreSQL databases
-const isLocal = !process.env.PG_HOST || process.env.PG_HOST === '127.0.0.1' || process.env.PG_HOST === 'localhost';
+function getCloudflareStream(ssl: any) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pgCf = require('pg-cloudflare');
+    const SocketClass = pgCf.CloudflareSocket || pgCf.default || pgCf;
+    if (typeof SocketClass === 'function') {
+      return new SocketClass(ssl);
+    }
+  } catch (err) {
+    console.error('[pg-cloudflare] Failed to initialize socket stream:', err);
+  }
+  return undefined;
+}
 
-const dbConfig = {
-  host: process.env.PG_HOST || '127.0.0.1',
-  port: parseInt(process.env.PG_PORT || '5432', 10),
-  user: process.env.PG_USER || 'postgres',
-  password: process.env.PG_PASSWORD || '',
-  ssl: isLocal ? false : { rejectUnauthorized: false },
-};
+function getEnvVal(key: string): string | undefined {
+  if (process.env[key]) return process.env[key];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require('@opennextjs/cloudflare');
+    const ctx = getCloudflareContext({ async: false });
+    if (ctx?.env?.[key]) return ctx.env[key];
+  } catch {}
+  return undefined;
+}
+
+function getDbConfig() {
+  const host = getEnvVal('PG_HOST');
+  const isLocal = !host || host === '127.0.0.1' || host === 'localhost';
+  return {
+    host: host || '127.0.0.1',
+    port: parseInt(getEnvVal('PG_PORT') || '5432', 10),
+    user: getEnvVal('PG_USER') || 'postgres',
+    password: getEnvVal('PG_PASSWORD') || '',
+    ssl: isLocal ? false : { rejectUnauthorized: false },
+    isLocal,
+  };
+}
+
+function isCloudflareRuntime(): boolean {
+  return (
+    (typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers') ||
+    typeof (globalThis as any).WebSocketPair !== 'undefined'
+  );
+}
 
 const pools: Record<string, Pool> = {};
 
 export function getDbPool(databaseName: string): Pool {
-  const targetDb = process.env.PG_DATABASE || databaseName;
-  if (!pools[targetDb]) {
-    pools[targetDb] = new Pool({
-      ...dbConfig,
+  const config = getDbConfig();
+  // Trên Supabase cloud, tất cả bảng nằm chung trong database PG_DATABASE (ví dụ: 'postgres')
+  const targetDb = config.isLocal ? databaseName : (getEnvVal('PG_DATABASE') || 'postgres');
+  const poolKey = `${config.host}:${config.port}:${config.user}:${targetDb}`;
+
+  if (!pools[poolKey]) {
+    const isCf = isCloudflareRuntime();
+    const poolConfig: PoolConfig = {
+      host: config.host,
+      port: config.port,
+      user: config.user,
+      password: config.password,
       database: targetDb,
-      max: 5,
-      connectionTimeoutMillis: 1500,
-      idleTimeoutMillis: 30000,
-    });
+      ssl: config.ssl,
+      max: isCf ? 1 : 5,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: isCf ? 0 : 30000,
+    };
+
+    // Khi đang chạy trong môi trường Cloudflare Workers kết nối Supabase Pooler:
+    if (!config.isLocal && isCf) {
+      (poolConfig as any).stream = (ssl: any) => getCloudflareStream(ssl);
+    }
+
+    pools[poolKey] = new Pool(poolConfig);
   }
-  return pools[targetDb];
+  return pools[poolKey];
 }
 
 export async function queryDb<T = any>(databaseName: string, text: string, params: any[] = []): Promise<T[]> {
-  if (isLocal && process.env.NODE_ENV === 'production') {
-    // Không cố kết nối tới 127.0.0.1 trên Cloudflare Workers Edge
+  const config = getDbConfig();
+  if (config.isLocal && process.env.NODE_ENV === 'production') {
+    // Không cố kết nối tới 127.0.0.1 trên Cloudflare Workers Edge nếu chưa có PG_HOST từ xa
     return [];
   }
-  const pool = getDbPool(databaseName);
-  const client = await pool.connect();
+  if (!config.isLocal && !config.password) {
+    console.error(`[DB CONFIG ERROR] PG_PASSWORD is not set. Cannot connect to ${config.host}:${config.port}`);
+    return [];
+  }
   try {
-    const res = await client.query(text, params);
-    return res.rows as T[];
-  } finally {
-    client.release();
+    const pool = getDbPool(databaseName);
+    const client = await pool.connect();
+    try {
+      const res = await client.query(text, params);
+      return res.rows as T[];
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error(`[DB ERROR] Failed to query ${databaseName}:`, err);
+    return [];
   }
 }
 

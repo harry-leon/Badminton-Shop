@@ -46,12 +46,12 @@ class AdminBannerControllerTest {
     @MockBean
     private BannerService bannerService;
 
-    private UUID sampleId;
+    private String sampleId;
     private BannerResponse sampleBannerResponse;
 
     @BeforeEach
     void setUp() {
-        sampleId = UUID.randomUUID();
+        sampleId = UUID.randomUUID().toString();
         sampleBannerResponse = new BannerResponse(
                 sampleId,
                 "Siêu Sale Vợt Yonex 2026",

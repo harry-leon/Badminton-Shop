@@ -80,7 +80,13 @@ export default async function StringCatalogPage({ searchParams }: PageProps) {
     const displayBrand = normalizedBrand === 'LINING' ? 'Li-Ning' : normalizedBrand === 'VICTOR' ? 'Victor' : 'Yonex';
     const price = parseInt(p.price_from as string, 10);
 
-    const isPromo = ['yonex-aerobite-boost', 'yonex-aerobite', 'yonex-aerosonic'].includes(p.slug);
+    const isPromo = [
+      'day-cuoc-yonex-aerobite-boost',
+      'day-cuoc-yonex-aerobite-hybrid',
+      'day-cuoc-yonex-aerosonic',
+      'day-cuoc-yonex-bg65-titanium',
+      'day-cuoc-yonex-bg66-ultimax',
+    ].includes(p.slug);
     const originalPrice = isPromo ? Math.round(price * 1.15) : undefined;
 
     return {
@@ -97,7 +103,7 @@ export default async function StringCatalogPage({ searchParams }: PageProps) {
       secondImageUrl: p.second_image_url || p.image_url,
       inStockBranches: stockByProduct[p.id] || ['BR_HCM_01', 'BR_HN_01', 'BR_DN_01'],
       rating: 4.9,
-      isBestSeller: ['yonex-aerobite-boost', 'yonex-aerobite'].includes(p.slug),
+      isBestSeller: ['day-cuoc-yonex-aerobite-boost', 'day-cuoc-yonex-aerobite-hybrid'].includes(p.slug),
     };
   });
 
@@ -110,13 +116,12 @@ export default async function StringCatalogPage({ searchParams }: PageProps) {
           <span className="text-ink">Dây cước cầu lông</span>
         </nav>
 
-
-
         <ProductCatalogGrid
           initialProducts={products}
           initialSearchParams={resolvedSearchParams}
           currentCategory="cat_string"
           categoryCounts={categoryCounts}
+          basePath="/day-cuoc"
         />
       </Container>
     </div>

@@ -75,7 +75,7 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="bg-bg border border-line rounded-2xl w-full max-w-lg shadow-lg overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-bg border border-line rounded-2xl w-full max-w-lg shadow-lg overflow-hidden flex flex-col max-h-[90dvh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-modal-title"
@@ -98,10 +98,10 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
           <button
             type="button"
             onClick={handleReset}
-            className="text-muted hover:text-ink p-1.5 rounded-lg hover:bg-surface transition-colors cursor-pointer"
+            className="text-muted hover:text-ink w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-surface transition-colors cursor-pointer touch-target"
             aria-label="Đóng"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

@@ -237,7 +237,7 @@ export default function TaxonomyPage() {
                         setBrandDesc(b.description || '');
                         setBrandModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
                       title="Sửa thương hiệu"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -245,7 +245,7 @@ export default function TaxonomyPage() {
                     <button
                       type="button"
                       onClick={() => handleDeleteBrand(b.id)}
-                      className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
                       title="Xóa thương hiệu"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -303,7 +303,7 @@ export default function TaxonomyPage() {
                         setCatSlug(c.slug);
                         setCatModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
                       title="Sửa danh mục"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -311,7 +311,7 @@ export default function TaxonomyPage() {
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(c.id)}
-                      className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
                       title="Xóa danh mục"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

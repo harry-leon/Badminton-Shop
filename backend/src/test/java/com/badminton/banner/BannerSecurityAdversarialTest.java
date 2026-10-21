@@ -56,12 +56,12 @@ class BannerSecurityAdversarialTest {
     @MockBean
     private CatalogService catalogService;
 
-    private UUID sampleId;
+    private String sampleId;
     private BannerResponse sampleBannerResponse;
 
     @BeforeEach
     void setUp() {
-        sampleId = UUID.randomUUID();
+        sampleId = UUID.randomUUID().toString();
         sampleBannerResponse = new BannerResponse(
                 sampleId,
                 "Sample Banner",

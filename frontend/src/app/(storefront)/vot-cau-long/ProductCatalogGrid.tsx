@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SlidersHorizontal, ArrowUpDown, X, Check } from 'lucide-react';
@@ -60,6 +61,7 @@ interface ProductCatalogGridProps {
   initialSearchParams?: { [key: string]: string | string[] | undefined };
   currentCategory?: string;
   categoryCounts?: Record<string, number>;
+  basePath?: string;
 }
 
 const BRANCHES = [
@@ -74,24 +76,33 @@ export default function ProductCatalogGrid({
   initialSearchParams,
   currentCategory = 'cat_racket',
   categoryCounts = DEFAULT_CATEGORY_COUNTS,
+  basePath,
 }: ProductCatalogGridProps) {
+  const currentPathname = usePathname();
+  const routeBase = basePath || currentPathname || '/vot-cau-long';
+
   // 1. Initial State from URL searchParams
   const getInitialBrand = () => {
     const b = initialSearchParams?.brand;
-    if (typeof b === 'string') return [b];
-    if (Array.isArray(b)) return b;
+    if (typeof b === 'string') {
+      const parts = b.split(',').map((s) => s.trim()).filter(Boolean);
+      return parts;
+    }
+    if (Array.isArray(b)) {
+      return b.map((s) => s.trim()).filter(Boolean);
+    }
     return [];
   };
 
   const getInitialMaxPrice = () => {
     const p = initialSearchParams?.maxPrice || initialSearchParams?.max_price;
-    if (typeof p === 'string') return parseInt(p, 10);
+    if (typeof p === 'string' && p.trim()) return parseInt(p, 10);
     return null;
   };
 
   const getInitialMinPrice = () => {
     const p = initialSearchParams?.minPrice || initialSearchParams?.min_price;
-    if (typeof p === 'string') return parseInt(p, 10);
+    if (typeof p === 'string' && p.trim()) return parseInt(p, 10);
     return null;
   };
 
@@ -116,8 +127,9 @@ export default function ProductCatalogGrid({
   const updateUrl = useCallback((brands: string[], minP: number | null, maxP: number | null, isSale?: boolean) => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams();
-    if (brands.length > 0) {
-      params.set('brand', brands.join(','));
+    const cleanBrands = brands.filter((b) => Boolean(b && b.trim()));
+    if (cleanBrands.length > 0) {
+      params.set('brand', cleanBrands.join(','));
     }
     if (minP !== null && minP > 0) {
       params.set('minPrice', minP.toString());
@@ -130,9 +142,9 @@ export default function ProductCatalogGrid({
     }
 
     const query = params.toString();
-    const newUrl = query ? `/vot-cau-long?${query}` : '/vot-cau-long';
+    const newUrl = query ? `${routeBase}?${query}` : routeBase;
     window.history.replaceState(null, '', newUrl);
-  }, []);
+  }, [routeBase]);
 
   const handleBrandToggle = (brand: string) => {
     setSelectedBrands((prev) => {
@@ -175,7 +187,7 @@ export default function ProductCatalogGrid({
     setMinPrice(null);
     setMaxPrice(null);
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '/vot-cau-long');
+      window.history.replaceState(null, '', routeBase);
     }
   };
 
@@ -282,7 +294,20 @@ export default function ProductCatalogGrid({
     sortBy,
   ]);
 
-  // Compute live counts
+  // Compute live counts and available brands dynamically
+  const availableBrands = useMemo(() => {
+    const brandMap: Record<string, { id: string; label: string; count: number }> = {};
+    initialProducts.forEach((p) => {
+      const bName = p.brand?.trim() || 'Khác';
+      const bKey = bName.toLowerCase();
+      if (!brandMap[bKey]) {
+        brandMap[bKey] = { id: bName, label: bName, count: 0 };
+      }
+      brandMap[bKey].count += 1;
+    });
+    return Object.values(brandMap).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'vi'));
+  }, [initialProducts]);
+
   const facetCounts = useMemo(() => {
     return {
       brands: {
@@ -377,38 +402,37 @@ export default function ProductCatalogGrid({
           </span>
         </label>
       </div>
-      <div className="border-b border-line pb-5">
-        <h3 className="font-medium text-ink mb-3 text-[14px]">Hãng sản xuất</h3>
-        <div className="space-y-2">
-          {[
-            { id: 'Yonex', label: 'Yonex', count: facetCounts.brands.Yonex },
-            { id: 'Li-Ning', label: 'Li-Ning', count: facetCounts.brands['Li-Ning'] },
-            { id: 'Victor', label: 'Victor', count: facetCounts.brands.Victor },
-          ].map((b) => {
-            const isChecked = selectedBrands.includes(b.id);
-            return (
-              <label
-                key={b.id}
-                className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    value={b.id}
-                    checked={isChecked}
-                    onChange={() => handleBrandToggle(b.id)}
-                    className="w-4 h-4 rounded border-line text-ink focus:ring-0 focus:ring-offset-0 cursor-pointer accent-ink"
-                  />
-                  <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
-                    {b.label}
-                  </span>
-                </div>
-                <span className="text-[13px] text-muted font-normal">({b.count})</span>
-              </label>
-            );
-          })}
+      {/* 2. Hãng sản xuất (Hiển thị động theo sản phẩm thực tế có trong danh mục) */}
+      {availableBrands.length > 0 && (
+        <div className="border-b border-line pb-5">
+          <h3 className="font-medium text-ink mb-3 text-[14px]">Hãng sản xuất</h3>
+          <div className="space-y-2">
+            {availableBrands.map((b) => {
+              const isChecked = selectedBrands.includes(b.id);
+              return (
+                <label
+                  key={b.id}
+                  className="flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-surface cursor-pointer select-none group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      value={b.id}
+                      checked={isChecked}
+                      onChange={() => handleBrandToggle(b.id)}
+                      className="w-4 h-4 rounded border-line text-ink focus:ring-0 focus:ring-offset-0 cursor-pointer accent-ink"
+                    />
+                    <span className={`text-[13px] ${isChecked ? 'font-medium text-ink' : 'text-muted group-hover:text-ink'}`}>
+                      {b.label}
+                    </span>
+                  </div>
+                  <span className="text-[13px] text-muted font-normal">({b.count})</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 2. Mức giá (Price presets + inputs) */}
       <div className="border-b border-line pb-5">
@@ -662,7 +686,7 @@ export default function ProductCatalogGrid({
           <button
             type="button"
             onClick={resetAllFilters}
-            className="w-full py-2 px-3 text-[13px] text-muted hover:text-ink bg-surface hover:bg-bg border border-line rounded-xl transition-colors cursor-pointer text-center font-normal"
+            className="w-full min-h-[44px] py-2 px-3 text-[13px] text-muted hover:text-ink bg-surface hover:bg-bg border border-line rounded-xl transition-colors cursor-pointer text-center font-normal flex items-center justify-center touch-target"
           >
             Xóa bộ lọc
           </button>
@@ -675,7 +699,7 @@ export default function ProductCatalogGrid({
     <div className="flex flex-col lg:flex-row gap-8 items-start">
       {/* 1. DESKTOP 280px FIXED LEFT SIDEBAR (Width strictly ~280px) */}
       <aside
-        className="hidden lg:block w-[280px] shrink-0 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto space-y-6 pr-4 no-scrollbar"
+        className="hidden lg:block w-[280px] shrink-0 sticky top-24 self-start max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-6 pr-4 no-scrollbar"
         data-filter-sidebar
       >
         <div className="flex items-center justify-between pb-3 border-b border-line">
@@ -684,7 +708,7 @@ export default function ProductCatalogGrid({
             <button
               type="button"
               onClick={resetAllFilters}
-              className="text-[13px] text-brand hover:underline font-normal cursor-pointer"
+              className="text-[13px] text-brand hover:underline font-normal cursor-pointer touch-target-hit inline-flex items-center min-h-[44px]"
             >
               Đặt lại
             </button>
@@ -701,7 +725,7 @@ export default function ProductCatalogGrid({
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-surface hover:bg-bg text-[14px] font-medium text-ink transition-colors cursor-pointer shadow-xs active:scale-95"
+            className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-full border border-line bg-surface hover:bg-bg text-[14px] font-medium text-ink transition-colors cursor-pointer shadow-xs active:scale-95 touch-target"
             aria-label="Mở bộ lọc"
           >
             <SlidersHorizontal className="w-4 h-4 text-muted" />
@@ -715,7 +739,7 @@ export default function ProductCatalogGrid({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-bg border border-line rounded-lg px-2.5 py-1 text-[13px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer"
+              className="bg-bg border border-line rounded-lg px-2.5 py-2 min-h-[44px] text-[13px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer touch-target"
             >
               <option value="NAME_ASC">Tên A → Z</option>
               <option value="BEST_SELLERS">Bán chạy nhất</option>
@@ -811,7 +835,7 @@ export default function ProductCatalogGrid({
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/50 z-50 backdrop-blur-xs transition-opacity" />
           <Drawer.Content
-            className="bg-surface flex flex-col rounded-t-[20px] max-h-[85vh] fixed bottom-0 left-0 right-0 z-50 focus:outline-none border-t border-line shadow-2xl"
+            className="bg-surface flex flex-col rounded-t-[20px] max-h-[85dvh] fixed bottom-0 left-0 right-0 z-50 focus:outline-none border-t border-line shadow-2xl pb-[env(safe-area-inset-bottom,0px)]"
             aria-describedby="filter-drawer-desc"
           >
             <Drawer.Title className="sr-only">Bộ lọc</Drawer.Title>
@@ -830,7 +854,7 @@ export default function ProductCatalogGrid({
                 <button
                   type="button"
                   onClick={resetAllFilters}
-                  className="text-[13px] text-brand hover:underline font-normal cursor-pointer"
+                  className="text-[13px] text-brand hover:underline font-normal cursor-pointer touch-target-hit inline-flex items-center min-h-[44px]"
                 >
                   Đặt lại
                 </button>
@@ -846,12 +870,12 @@ export default function ProductCatalogGrid({
               {renderFacetFilters()}
             </div>
 
-            {/* Drawer Footer CTA */}
-            <div className="p-4 border-t border-line bg-surface/95 backdrop-blur-xs">
+            {/* Drawer Footer CTA with iOS safe area padding */}
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-line bg-surface/95 backdrop-blur-xs">
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-full h-11 rounded-full bg-ink text-bg text-[14px] font-medium flex items-center justify-center cursor-pointer active:scale-98 transition-transform"
+                className="w-full h-11 rounded-full bg-ink text-bg text-[14px] font-medium flex items-center justify-center cursor-pointer active:scale-98 transition-transform touch-target"
               >
                 Xem {filteredProducts.length} sản phẩm
               </button>

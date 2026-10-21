@@ -92,10 +92,10 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        size="sm"
-        className="px-4 text-[13px]"
+        size="md"
+        className="w-full sm:w-auto h-11 px-6 text-[14px] touch-target"
       >
-        <ShoppingBag className="w-3.5 h-3.5" />
+        <ShoppingBag className="w-4 h-4" />
         <span>Giữ chỗ mua</span>
       </Button>
 
@@ -107,7 +107,8 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                 setIsOpen(false);
                 setOrderResult(null);
               }}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-bg text-muted hover:text-ink transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-bg text-muted hover:text-ink transition-colors cursor-pointer touch-target"
+              aria-label="Đóng cửa sổ giữ chỗ"
             >
               <X className="w-5 h-5" />
             </button>
@@ -172,7 +173,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                       <button
                         type="button"
                         onClick={() => setFulfillmentType('STORE_PICKUP')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer text-[13px] ${
+                        className={`p-2.5 min-h-[44px] flex items-center justify-center rounded-xl border text-center transition-colors cursor-pointer text-[13px] touch-target ${
                           fulfillmentType === 'STORE_PICKUP'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'
@@ -183,7 +184,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                       <button
                         type="button"
                         onClick={() => setFulfillmentType('DELIVERY')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer text-[13px] ${
+                        className={`p-2.5 min-h-[44px] flex items-center justify-center rounded-xl border text-center transition-colors cursor-pointer text-[13px] touch-target ${
                           fulfillmentType === 'DELIVERY'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'
@@ -215,7 +216,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('VIETQR')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-[13px] ${
+                        className={`p-2.5 min-h-[44px] rounded-xl border text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-[13px] touch-target ${
                           paymentMethod === 'VIETQR'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'
@@ -226,7 +227,7 @@ export default function SecondhandOrderButton({ unit }: SecondhandOrderButtonPro
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('COD')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer text-[13px] ${
+                        className={`p-2.5 min-h-[44px] flex items-center justify-center rounded-xl border text-center transition-colors cursor-pointer text-[13px] touch-target ${
                           paymentMethod === 'COD'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'

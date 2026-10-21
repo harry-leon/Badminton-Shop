@@ -5,7 +5,7 @@ spring:
   application:
     name: badminton-backend
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:badminton_db}?sslmode=${PG_SSLMODE:require}}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:badminton_db}?sslmode=${PG_SSLMODE:prefer}}
     username: ${SPRING_DATASOURCE_USERNAME:${PG_USER:postgres}}
     password: ${SPRING_DATASOURCE_PASSWORD:${PG_PASSWORD:postgres}}
     driver-class-name: org.postgresql.Driver

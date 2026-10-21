@@ -258,7 +258,7 @@ export default function AdminUsersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo tên, email, username hoặc SĐT..."
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
+            className="w-full pl-9 pr-3 py-2 min-h-[42px] rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
           />
         </div>
 
@@ -266,7 +266,7 @@ export default function AdminUsersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-black"
+            className="text-xs border border-gray-200 rounded-lg px-2.5 py-2 min-h-[42px] bg-white text-gray-700 focus:outline-none focus:border-black"
           >
             <option value="ALL">Tất cả vai trò</option>
             <option value="ADMIN">ADMIN</option>
@@ -278,7 +278,7 @@ export default function AdminUsersPage() {
           <select
             value={branchFilter}
             onChange={(e) => setBranchFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-black"
+            className="text-xs border border-gray-200 rounded-lg px-2.5 py-2 min-h-[42px] bg-white text-gray-700 focus:outline-none focus:border-black"
           >
             <option value="ALL">Tất cả chi nhánh</option>
             {branches.map((b) => (
@@ -306,7 +306,7 @@ export default function AdminUsersPage() {
       {/* Users DataTable */}
       <div className="bg-white rounded-xl border border-black/10 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full min-w-[750px] text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50/75 text-gray-600 font-medium uppercase tracking-wider">
                 <th className="py-3 px-4">Nhân sự</th>
@@ -402,7 +402,7 @@ export default function AdminUsersPage() {
                               setEditRole(u.role);
                               setEditBranch(u.branch_id || 'ALL');
                             }}
-                            className="p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
+                            className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
                             title="Sửa thông tin"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -411,7 +411,7 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => handleResetPassword(u)}
-                            className="p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-amber-600 hover:border-amber-300 transition-colors cursor-pointer"
+                            className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-amber-600 hover:border-amber-300 transition-colors cursor-pointer"
                             title="Đặt lại mật khẩu (reset về smash2026)"
                           >
                             <Key className="w-3.5 h-3.5" />
@@ -420,7 +420,7 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => handleToggleActive(u)}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            className={`min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border transition-colors cursor-pointer ${
                               u.is_active 
                                 ? 'border-gray-200 text-gray-500 hover:text-amber-600 hover:border-amber-300' 
                                 : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
@@ -433,7 +433,7 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => handleDelete(u)}
-                            className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
+                            className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
                             title="Xóa tài khoản"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

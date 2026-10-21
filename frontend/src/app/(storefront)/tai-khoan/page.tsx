@@ -412,8 +412,9 @@ function AccountContent() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={avatarUploading}
-                      className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-ink text-bg shadow-md hover:opacity-90 transition-all cursor-pointer border border-surface"
+                      className="absolute -bottom-1 -right-1 p-2 rounded-full bg-ink text-bg shadow-md hover:opacity-90 transition-all cursor-pointer border border-surface touch-target-hit inline-flex items-center justify-center min-w-[32px] min-h-[32px]"
                       title="Đổi ảnh đại diện"
+                      aria-label="Đổi ảnh đại diện"
                     >
                       <Camera className="w-3.5 h-3.5" />
                     </button>
@@ -525,12 +526,12 @@ function AccountContent() {
         </div>
 
         {/* Thanh Tabs chuyển đổi nội dung: Hồ sơ cá nhân | Đơn mua | Sổ bảo hành */}
-        <div className="flex border-b border-line mb-8 gap-6 text-[14px] overflow-x-auto">
+        <div className="flex border-b border-line mb-8 gap-6 text-[14px] overflow-x-auto no-scrollbar">
           {currentUser && (
             <button
               type="button"
               onClick={() => setActiveTab('PROFILE')}
-              className={`pb-3 font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 ${
+              className={`py-3 min-h-[44px] font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 touch-target touch-target-hit ${
                 activeTab === 'PROFILE' ? 'text-ink' : 'text-muted hover:text-ink font-normal'
               }`}
             >
@@ -545,7 +546,7 @@ function AccountContent() {
           <button
             type="button"
             onClick={() => setActiveTab('ORDERS')}
-            className={`pb-3 font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 ${
+            className={`py-3 min-h-[44px] font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 touch-target touch-target-hit ${
               activeTab === 'ORDERS' ? 'text-ink' : 'text-muted hover:text-ink font-normal'
             }`}
           >
@@ -559,7 +560,7 @@ function AccountContent() {
           <button
             type="button"
             onClick={() => setActiveTab('WARRANTY')}
-            className={`pb-3 font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 ${
+            className={`py-3 min-h-[44px] font-medium transition-colors cursor-pointer relative flex items-center gap-2 shrink-0 touch-target touch-target-hit ${
               activeTab === 'WARRANTY' ? 'text-ink' : 'text-muted hover:text-ink font-normal'
             }`}
           >

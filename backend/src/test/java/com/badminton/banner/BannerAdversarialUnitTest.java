@@ -50,12 +50,12 @@ class BannerAdversarialUnitTest {
     private BannerService bannerService;
 
     private Instant now;
-    private UUID sampleId;
+    private String sampleId;
 
     @BeforeEach
     void setUp() {
         now = Instant.now();
-        sampleId = UUID.randomUUID();
+        sampleId = UUID.randomUUID().toString();
     }
 
     @Nested
@@ -316,7 +316,7 @@ class BannerAdversarialUnitTest {
             // 1. 20 Inactive banners (bất kể ngày giờ)
             for (int i = 0; i < 20; i++) {
                 population.add(Banner.builder()
-                        .id(UUID.randomUUID())
+                        .id(UUID.randomUUID().toString())
                         .title("Inactive Banner " + i)
                         .imageUrl("https://example.com/inactive" + i + ".jpg")
                         .position(i % 2 == 0 ? BannerPosition.HERO_SLIDER : BannerPosition.MID_PAGE)
@@ -329,7 +329,7 @@ class BannerAdversarialUnitTest {
             // 2. 20 Expired banners (endAt trong quá khứ)
             for (int i = 0; i < 20; i++) {
                 population.add(Banner.builder()
-                        .id(UUID.randomUUID())
+                        .id(UUID.randomUUID().toString())
                         .title("Expired Banner " + i)
                         .imageUrl("https://example.com/expired" + i + ".jpg")
                         .position(BannerPosition.HERO_SLIDER)
@@ -342,7 +342,7 @@ class BannerAdversarialUnitTest {
             // 3. 20 Future banners (startAt trong tương lai)
             for (int i = 0; i < 20; i++) {
                 population.add(Banner.builder()
-                        .id(UUID.randomUUID())
+                        .id(UUID.randomUUID().toString())
                         .title("Future Banner " + i)
                         .imageUrl("https://example.com/future" + i + ".jpg")
                         .position(BannerPosition.HERO_SLIDER)
@@ -355,7 +355,7 @@ class BannerAdversarialUnitTest {
             // 4. 40 Valid Active Banners
             for (int i = 0; i < 40; i++) {
                 population.add(Banner.builder()
-                        .id(UUID.randomUUID())
+                        .id(UUID.randomUUID().toString())
                         .title("Active Valid Banner " + i)
                         .imageUrl("https://example.com/active" + i + ".jpg")
                         .position(i % 2 == 0 ? BannerPosition.HERO_SLIDER : BannerPosition.MID_PAGE)
@@ -394,7 +394,7 @@ class BannerAdversarialUnitTest {
         @DisplayName("Biên thời gian: Banner kết thúc tại đúng thời điểm now phải được coi là còn hạn (inclusive)")
         void temporalBoundary_endAtEqualsNow_included() {
             Banner boundaryBanner = Banner.builder()
-                    .id(UUID.randomUUID())
+                    .id(UUID.randomUUID().toString())
                     .title("Boundary Banner End At Now")
                     .imageUrl("https://example.com/img.jpg")
                     .position(BannerPosition.HERO_SLIDER)
@@ -411,7 +411,7 @@ class BannerAdversarialUnitTest {
         @DisplayName("Biên thời gian: Banner kết thúc 1 milli/nano giây trước now bị loại bỏ (exclusive)")
         void temporalBoundary_endAtBeforeNow_excluded() {
             Banner expiredNano = Banner.builder()
-                    .id(UUID.randomUUID())
+                    .id(UUID.randomUUID().toString())
                     .title("Expired Banner By 1 Millis")
                     .imageUrl("https://example.com/img.jpg")
                     .position(BannerPosition.HERO_SLIDER)
@@ -428,7 +428,7 @@ class BannerAdversarialUnitTest {
         @DisplayName("Biên thời gian: Banner bắt đầu tại đúng thời điểm now phải được coi là đã bắt đầu (inclusive)")
         void temporalBoundary_startAtEqualsNow_included() {
             Banner boundaryBanner = Banner.builder()
-                    .id(UUID.randomUUID())
+                    .id(UUID.randomUUID().toString())
                     .title("Boundary Banner Start At Now")
                     .imageUrl("https://example.com/img.jpg")
                     .position(BannerPosition.HERO_SLIDER)
@@ -445,7 +445,7 @@ class BannerAdversarialUnitTest {
         @DisplayName("Biên thời gian: Banner bắt đầu 1 milli giây trong tương lai bị loại bỏ (future)")
         void temporalBoundary_startAtAfterNow_excluded() {
             Banner futureNano = Banner.builder()
-                    .id(UUID.randomUUID())
+                    .id(UUID.randomUUID().toString())
                     .title("Future Banner By 1 Millis")
                     .imageUrl("https://example.com/img.jpg")
                     .position(BannerPosition.HERO_SLIDER)
@@ -467,27 +467,27 @@ class BannerAdversarialUnitTest {
         @DisplayName("HomepageResponse phân tách chính xác heroBanners vs promoBanners và không bao giờ chứa null list")
         void homepageResponse_partitionIntegrity() {
             BannerResponse hero1 = new BannerResponse(
-                    UUID.randomUUID(), "Hero 1", "Desc", "TAG", "https://img1.jpg", "https://img1.jpg",
+                    UUID.randomUUID().toString(), "Hero 1", "Desc", "TAG", "https://img1.jpg", "https://img1.jpg",
                     null, "CTA", "/link", null, null, null, null, null, null,
                     BannerPosition.HERO_SLIDER, 1, true, null, null, null, null, null
             );
             BannerResponse hero2 = new BannerResponse(
-                    UUID.randomUUID(), "Hero 2", "Desc", "TAG", "https://img2.jpg", "https://img2.jpg",
+                    UUID.randomUUID().toString(), "Hero 2", "Desc", "TAG", "https://img2.jpg", "https://img2.jpg",
                     null, "CTA", "/link", null, null, null, null, null, null,
                     BannerPosition.HERO, 2, true, null, null, null, null, null
             );
             BannerResponse promo1 = new BannerResponse(
-                    UUID.randomUUID(), "Promo 1", "Desc", "TAG", "https://img3.jpg", "https://img3.jpg",
+                    UUID.randomUUID().toString(), "Promo 1", "Desc", "TAG", "https://img3.jpg", "https://img3.jpg",
                     null, "CTA", "/link", null, null, null, null, null, null,
                     BannerPosition.MID_PAGE, 3, true, null, null, null, null, null
             );
             BannerResponse promo2 = new BannerResponse(
-                    UUID.randomUUID(), "Promo 2", "Desc", "TAG", "https://img4.jpg", "https://img4.jpg",
+                    UUID.randomUUID().toString(), "Promo 2", "Desc", "TAG", "https://img4.jpg", "https://img4.jpg",
                     null, "CTA", "/link", null, null, null, null, null, null,
                     BannerPosition.HOME_PROMO_3, 4, true, null, null, null, null, null
             );
 
-            Category cat = Category.builder().id(UUID.randomUUID()).name("Vợt").slug("vot").build();
+            Category cat = Category.builder().id(UUID.randomUUID().toString()).name("Vợt").slug("vot").build();
             Product prod = Product.builder().id(UUID.randomUUID()).name("Astrox 99").basePrice(new BigDecimal("4250000")).build();
 
             HomepageResponse response = new HomepageResponse(

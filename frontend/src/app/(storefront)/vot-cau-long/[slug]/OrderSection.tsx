@@ -204,7 +204,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                 key={sku.id}
                 type="button"
                 onClick={() => handleSelectSku(sku.id)}
-                className={`px-4 py-2 rounded-full text-[13px] transition-all cursor-pointer select-none flex items-center gap-2 ${
+                className={`px-4 py-2.5 min-h-[44px] rounded-full text-[13px] transition-all cursor-pointer select-none flex items-center gap-2 touch-target ${
                   isSelected
                     ? 'bg-ink text-bg font-medium shadow-xs'
                     : 'bg-surface text-ink border border-line hover:border-ink/50 font-normal'
@@ -274,7 +274,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                 key={opt.val}
                 type="button"
                 onClick={() => setSelectedTension(opt.val)}
-                className={`py-1.5 px-2 rounded-xl text-center border text-[11px] font-medium transition-all cursor-pointer ${
+                className={`py-2 px-2 min-h-[44px] rounded-xl text-center border text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center touch-target ${
                   selectedTension === opt.val
                     ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-2xs'
                     : 'bg-surface border-line text-muted hover:border-ink/40'
@@ -471,7 +471,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
       </div>
 
       {/* 4. Sticky Bottom Bar cho màn hình di động (Mobile Sticky Purchase Bar) */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-surface/95 backdrop-blur-md border-t border-line p-3 px-4 flex items-center justify-between gap-4 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-surface/95 backdrop-blur-md border-t border-line p-3 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] flex items-center justify-between gap-4 shadow-lg">
         <div>
           <span className="text-[13px] text-muted block">Tổng tiền</span>
           <PriceTag amount={selectedSku?.price || 0} size="md" />
@@ -480,7 +480,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
         {totalAvailableAcrossBranches === 0 ? (
           <a
             href="tel:19006868"
-            className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-full bg-brand text-white text-[13px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none"
+            className="inline-flex items-center justify-center gap-1.5 h-11 px-5 rounded-full bg-brand text-white text-[13px] font-medium hover:bg-brand/90 transition-all cursor-pointer shadow-xs select-none touch-target"
           >
             <Phone className="w-4 h-4" />
             <span>Gọi 1900 6868</span>
@@ -490,7 +490,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
             onClick={handleOpenOrder}
             disabled={availableQty === 0}
             size="md"
-            className="px-6"
+            className="px-6 h-11 touch-target"
           >
             {availableQty > 0 ? 'Mua ngay' : 'Hết hàng'}
           </Button>
@@ -506,7 +506,8 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                 setIsModalOpen(false);
                 setOrderResult(null);
               }}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-bg text-muted hover:text-ink transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-bg text-muted hover:text-ink transition-colors cursor-pointer touch-target"
+              aria-label="Đóng cửa sổ đặt hàng"
             >
               <X className="w-5 h-5" />
             </button>
@@ -575,7 +576,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                       <button
                         type="button"
                         onClick={() => setFulfillmentType('DELIVERY')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer text-[13px] ${
+                        className={`p-2.5 min-h-[44px] flex items-center justify-center rounded-xl border text-center transition-colors cursor-pointer text-[13px] touch-target ${
                           fulfillmentType === 'DELIVERY'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'
@@ -586,7 +587,7 @@ export default function OrderSection({ product, skus, branches, stockLevels }: O
                       <button
                         type="button"
                         onClick={() => setFulfillmentType('STORE_PICKUP')}
-                        className={`p-2.5 rounded-xl border text-center transition-colors cursor-pointer text-[13px] ${
+                        className={`p-2.5 min-h-[44px] flex items-center justify-center rounded-xl border text-center transition-colors cursor-pointer text-[13px] touch-target ${
                           fulfillmentType === 'STORE_PICKUP'
                             ? 'border-ink bg-bg text-ink font-medium'
                             : 'border-line text-muted font-normal'

@@ -388,7 +388,7 @@ function BranchesContent() {
               </div>
 
               {/* Bản đồ Google Maps Embed */}
-              <div className="flex-1 w-full min-h-[380px] relative bg-slate-100 dark:bg-zinc-900">
+              <div className="flex-1 w-full min-h-[380px] relative bg-slate-100 dark:bg-zinc-900 overflow-hidden">
                 <iframe
                   title={`Bản đồ ${activeBranch.name}`}
                   src={`https://maps.google.com/maps?q=${encodeURIComponent(activeBranch.address)}&t=&z=16&ie=UTF8&iwloc=&output=embed`}

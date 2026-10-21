@@ -17,8 +17,8 @@ import java.util.UUID;
 public class Brand {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(length = 100)
+    private String id;
 
     @Column(nullable = false)
     private String name;

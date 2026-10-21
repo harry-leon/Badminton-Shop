@@ -50,7 +50,7 @@ class PublicHomepageControllerTest {
     @Test
     @DisplayName("GET /api/v1/public/homepage - Trả về HTTP 200 và HomepageResponse DTO đầy đủ")
     void getHomepageData_returnsOkWithHomepageResponse() throws Exception {
-        UUID heroId = UUID.randomUUID();
+        String heroId = UUID.randomUUID().toString();
         BannerResponse heroBanner = new BannerResponse(
                 heroId,
                 "Hero Astrox 99 Pro",
@@ -77,7 +77,7 @@ class PublicHomepageControllerTest {
                 Instant.now()
         );
 
-        UUID promoId = UUID.randomUUID();
+        String promoId = UUID.randomUUID().toString();
         BannerResponse promoBanner = new BannerResponse(
                 promoId,
                 "Khuyến mãi phụ kiện",
@@ -105,7 +105,7 @@ class PublicHomepageControllerTest {
         );
 
         Category category = Category.builder()
-                .id(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .name("Vợt Cầu Lông")
                 .slug("vot-cau-long")
                 .description("Các dòng vợt chính hãng")

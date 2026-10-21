@@ -233,7 +233,7 @@ export default function AdminBranchesPage() {
                         setEditCity(b.city);
                         setEditAddress(b.address);
                       }}
-                      className="p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
                       title="Chỉnh sửa chi nhánh"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -242,7 +242,7 @@ export default function AdminBranchesPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(b)}
-                      className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
                       title="Xóa chi nhánh"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

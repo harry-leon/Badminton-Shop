@@ -40,12 +40,12 @@ class BannerServiceTest {
     @InjectMocks
     private BannerService bannerService;
 
-    private UUID sampleId;
+    private String sampleId;
     private Instant now;
 
     @BeforeEach
     void setUp() {
-        sampleId = UUID.randomUUID();
+        sampleId = UUID.randomUUID().toString();
         now = Instant.now();
     }
 
@@ -183,7 +183,7 @@ class BannerServiceTest {
     @DisplayName("Lọc banner theo trạng thái is_active và khoảng thời gian hiệu lực")
     void filterBanners_byActiveAndTimeRange() {
         Banner activeBanner = Banner.builder()
-                .id(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .title("Active Valid Banner")
                 .imageUrl("https://example.com/banner1.jpg")
                 .position(BannerPosition.HERO_SLIDER)

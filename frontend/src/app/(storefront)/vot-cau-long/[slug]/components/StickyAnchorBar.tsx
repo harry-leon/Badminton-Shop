@@ -50,7 +50,7 @@ export function StickyAnchorBar({ className = '' }: StickyAnchorBarProps) {
   };
 
   return (
-    <div className={`sticky top-16 z-20 bg-surface/90 backdrop-blur-md border-b border-line ${className}`.trim()}>
+    <div className={`sticky top-[64px] lg:top-[92px] z-20 bg-surface/90 backdrop-blur-md border-b border-line ${className}`.trim()}>
       <Container>
         <nav
           className="flex items-center gap-6 sm:gap-8 overflow-x-auto no-scrollbar py-3 text-[14px]"
@@ -63,7 +63,7 @@ export function StickyAnchorBar({ className = '' }: StickyAnchorBarProps) {
                 key={tab.id}
                 href={`#${tab.id}`}
                 onClick={(e) => handleTabClick(e, tab.id)}
-                className={`py-1.5 transition-colors relative whitespace-nowrap select-none font-medium ${
+                className={`py-2 min-h-[44px] transition-colors relative whitespace-nowrap select-none font-medium touch-target-hit inline-flex items-center ${
                   isActive ? 'text-ink' : 'text-muted hover:text-ink font-normal'
                 }`}
               >

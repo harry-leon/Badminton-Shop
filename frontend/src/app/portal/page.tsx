@@ -465,7 +465,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full min-w-[650px] text-left">
             <thead className="bg-[#FAF9F5] text-[#6A726E] font-medium border-b border-[#E4E3DD]">
               <tr>
                 <th className={`${headerPadding} ${fontSize}`}>MÃ ĐƠN</th>

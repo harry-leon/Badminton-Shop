@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-16 bg-bg text-ink">
+    <div className="min-h-[70dvh] flex flex-col items-center justify-center text-center px-4 py-16 bg-bg text-ink">
       <div className="w-20 h-20 rounded-full bg-surface border border-line flex items-center justify-center mb-6">
         <svg
           className="w-10 h-10 text-muted"

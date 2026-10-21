@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAdmin } from '@/lib/admin-context';
 import {
@@ -318,6 +319,32 @@ function AdminRecruitmentPageContent() {
 
   return (
     <div className="space-y-6">
+      {/* On-page Tab Navigation Strip for Mobile/Tablet */}
+      <div className="flex items-center gap-1.5 border-b border-[#E4E3DD] overflow-x-auto no-scrollbar pb-1">
+        <Link
+          href="/portal/recruitment?tab=JOBS"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'JOBS'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+          <span>Tin tuyển dụng ({jobs.length})</span>
+        </Link>
+        <Link
+          href="/portal/recruitment?tab=APPLICATIONS"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'APPLICATIONS'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Hồ sơ ứng viên ({applications.length})</span>
+        </Link>
+      </div>
+
       {/* Search & Filter Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#E4E3DD]">
         <div className="relative flex-1 max-w-md">
@@ -327,7 +354,7 @@ function AdminRecruitmentPageContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === 'JOBS' ? 'Tìm theo tiêu đề, vị trí, chi nhánh...' : 'Tìm theo tên ứng viên, SĐT, email...'}
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black"
+            className="w-full pl-9 pr-3 py-2 min-h-[42px] rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black"
           />
         </div>
 
@@ -338,7 +365,7 @@ function AdminRecruitmentPageContent() {
               <select
                 value={appStatusFilter}
                 onChange={(e) => setAppStatusFilter(e.target.value)}
-                className="text-xs py-1.5 px-2.5 rounded-lg border border-gray-200 bg-white text-gray-800"
+                className="text-xs py-2 min-h-[42px] px-2.5 rounded-lg border border-gray-200 bg-white text-gray-800"
               >
                 <option value="ALL">Tất cả trạng thái</option>
                 <option value="NEW">Mới nộp</option>
@@ -367,7 +394,7 @@ function AdminRecruitmentPageContent() {
       {activeTab === 'JOBS' && (
         <div className="bg-white rounded-2xl border border-[#E4E3DD] overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[750px] text-left text-xs">
               <thead className="bg-[#FAF9F5] text-[#555E58] border-b border-[#E4E3DD] uppercase font-semibold text-[11px]">
                 <tr>
                   <th className="py-3 px-4">Tin tuyển dụng</th>
@@ -426,7 +453,7 @@ function AdminRecruitmentPageContent() {
                             href={`/tuyen-dung/${j.slug}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-black transition-colors"
+                            className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-black transition-colors"
                             title="Xem trang tuyển dụng công khai"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -434,7 +461,7 @@ function AdminRecruitmentPageContent() {
                           <button
                             type="button"
                             onClick={() => handleOpenEditModal(j)}
-                            className="p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
+                            className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer"
                             title="Sửa tin"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -442,7 +469,7 @@ function AdminRecruitmentPageContent() {
                           <button
                             type="button"
                             onClick={() => handleToggleJob(j.id, j.is_active)}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            className={`min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border transition-colors cursor-pointer ${
                               j.is_active
                                 ? 'border-gray-200 text-gray-500 hover:text-amber-600'
                                 : 'border-emerald-200 text-emerald-600'
@@ -455,7 +482,7 @@ function AdminRecruitmentPageContent() {
                             <button
                               type="button"
                               onClick={() => handleDeleteJob(j.id, j.title)}
-                              className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Xóa tin"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -476,7 +503,7 @@ function AdminRecruitmentPageContent() {
       {activeTab === 'APPLICATIONS' && (
         <div className="bg-white rounded-2xl border border-[#E4E3DD] overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[750px] text-left text-xs">
               <thead className="bg-[#FAF9F5] text-[#555E58] border-b border-[#E4E3DD] uppercase font-semibold text-[11px]">
                 <tr>
                   <th className="py-3 px-4">Ứng viên</th>
@@ -544,7 +571,7 @@ function AdminRecruitmentPageContent() {
                               setAppStatus(a.status);
                               setAppNotes(a.notes || '');
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-black text-[11px] font-medium text-gray-800 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                            className="min-h-[36px] touch-target-hit inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-black text-[11px] font-medium text-gray-800 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
                             <span>Cập nhật</span>

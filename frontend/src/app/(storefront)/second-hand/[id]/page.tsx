@@ -470,7 +470,7 @@ export default async function SecondHandDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[13px]">
+                  <table className="w-full min-w-[580px] text-left text-[13px]">
                     <thead>
                       <tr className="border-b border-line text-muted font-normal">
                         <th className="pb-2.5 font-normal">#</th>

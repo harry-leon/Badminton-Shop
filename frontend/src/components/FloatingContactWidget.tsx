@@ -1,12 +1,19 @@
 'use client';
 
 import * as React from 'react';
+import { usePathname } from 'next/navigation';
 import { Mail, Phone, MessageSquare, X, ChevronDown, Send, CheckCircle2, Loader2, ExternalLink, RotateCcw } from 'lucide-react';
 import { CONTACT_CONFIG } from '@/lib/contact-config';
 import { toast } from 'sonner';
 import { SanitizedMarkdown } from '@/app/(storefront)/vot-cau-long/[slug]/components/SanitizedMarkdown';
 
 export function FloatingContactWidget() {
+  const pathname = usePathname() || '';
+  const isPDP = Boolean(
+    (pathname.startsWith('/vot-cau-long/') && pathname.replace('/vot-cau-long/', '').trim().length > 0) ||
+    (pathname.startsWith('/second-hand/') && pathname.replace('/second-hand/', '').trim().length > 0)
+  );
+
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const [showEmailForm, setShowEmailForm] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -198,10 +205,13 @@ export function FloatingContactWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end select-none" ref={containerRef}>
+    <div
+      className={`fixed ${isPDP ? 'bottom-20 sm:bottom-6' : 'bottom-4 sm:bottom-6'} right-4 sm:right-6 z-50 flex flex-col items-end select-none`}
+      ref={containerRef}
+    >
       {/* Sapo-like Chat Box Popup / AI Chatbot Tư Vấn */}
       {isPopupOpen && (
-        <div className="mb-4 w-[340px] sm:w-[380px] bg-surface rounded-2xl shadow-2xl border border-line overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200 flex flex-col max-h-[560px]">
+        <div className="mb-3 w-[calc(100dvw-2rem)] sm:w-[380px] max-w-[380px] bg-surface rounded-2xl shadow-2xl border border-line overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200 flex flex-col max-h-[min(560px,calc(100dvh-100px))]">
           {/* Header Xanh Thương hiệu hệ thống */}
           <div className="bg-brand text-white p-3.5 relative shrink-0">
             <div className="flex items-center justify-between mb-2">
@@ -224,16 +234,16 @@ export function FloatingContactWidget() {
                 <button
                   type="button"
                   onClick={handleResetChat}
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer"
+                  className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer touch-target-hit"
                   aria-label="Làm mới cuộc trò chuyện"
                   title="Làm mới cuộc trò chuyện"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsPopupOpen(false)}
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer"
+                  className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors cursor-pointer touch-target-hit"
                   aria-label="Thu nhỏ"
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -242,11 +252,11 @@ export function FloatingContactWidget() {
             </div>
 
             {/* Tab chuyển đổi: Chatbot AI vs Kênh hỗ trợ khác */}
-            <div className="flex items-center gap-1 bg-black/15 p-0.5 rounded-xl text-[12px]">
+            <div className="flex items-center gap-1 bg-black/15 p-1 rounded-xl text-[12px]">
               <button
                 type="button"
                 onClick={() => { setActiveTab('chat'); setShowEmailForm(false); }}
-                className={`flex-1 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                className={`flex-1 py-1.5 min-h-[38px] rounded-lg font-medium transition-all cursor-pointer flex items-center justify-center ${
                   activeTab === 'chat' ? 'bg-surface text-brand shadow-xs' : 'text-white/80 hover:text-white'
                 }`}
               >
@@ -255,7 +265,7 @@ export function FloatingContactWidget() {
               <button
                 type="button"
                 onClick={() => setActiveTab('channels')}
-                className={`flex-1 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                className={`flex-1 py-1.5 min-h-[38px] rounded-lg font-medium transition-all cursor-pointer flex items-center justify-center ${
                   activeTab === 'channels' ? 'bg-surface text-brand shadow-xs' : 'text-white/80 hover:text-white'
                 }`}
               >
@@ -391,7 +401,7 @@ export function FloatingContactWidget() {
                 <button
                   type="submit"
                   disabled={isBotTyping || !chatInput.trim()}
-                  className="w-9 h-9 rounded-xl bg-brand text-white flex items-center justify-center hover:bg-brand/90 transition-all disabled:opacity-40 cursor-pointer shrink-0 shadow-xs"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-brand text-white flex items-center justify-center hover:bg-brand/90 transition-all disabled:opacity-40 cursor-pointer shrink-0 shadow-xs touch-target"
                   aria-label="Gửi tin nhắn"
                 >
                   <Send className="w-4 h-4" />
@@ -570,12 +580,12 @@ export function FloatingContactWidget() {
               target="_blank"
               rel="noopener noreferrer"
               title="Chat Fanpage Facebook"
-              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all"
+              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all touch-target"
             >
               <span className="bg-surface border border-line text-ink text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 Messenger
               </span>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-brand text-white hover:shadow-lg">
+              <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-brand text-white hover:shadow-lg touch-target">
                 <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
                   <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.517 3.735 7.185V22l3.418-1.875c.91.252 1.874.39 2.847.39 5.523 0 10-4.145 10-9.257C22 6.145 17.523 2 12 2zm1.042 12.443l-2.617-2.793-5.105 2.793 5.615-5.962 2.68 2.793 5.042-2.793-5.615 5.962z" />
                 </svg>
@@ -588,12 +598,12 @@ export function FloatingContactWidget() {
               target="_blank"
               rel="noopener noreferrer"
               title={`Chat Zalo: ${CONTACT_CONFIG.zalo.displayPhone}`}
-              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all"
+              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all touch-target"
             >
               <span className="bg-surface border border-line text-ink text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 Zalo
               </span>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-[#0068FF] hover:shadow-lg">
+              <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-[#0068FF] hover:shadow-lg touch-target">
                 <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-xs">
                   <span className="text-[#0068FF] font-black text-[9px] tracking-tight">Zalo</span>
                 </div>
@@ -604,12 +614,12 @@ export function FloatingContactWidget() {
             <a
               href={`tel:${CONTACT_CONFIG.hotline.number}`}
               title={`Gọi ngay: ${CONTACT_CONFIG.hotline.display}`}
-              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all"
+              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all touch-target"
             >
               <span className="bg-surface border border-line text-ink text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 {CONTACT_CONFIG.hotline.display}
               </span>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-[#f59e0b] text-white hover:shadow-lg">
+              <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-[#f59e0b] text-white hover:shadow-lg touch-target">
                 <Phone className="w-4 h-4 text-white fill-white" />
               </div>
             </a>
@@ -619,12 +629,12 @@ export function FloatingContactWidget() {
               type="button"
               onClick={() => setIsPopupOpen(!isPopupOpen)}
               title="Mở hộp thoại tư vấn"
-              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all"
+              className="group relative flex items-center gap-2 p-0.5 rounded-full transition-all touch-target"
             >
               <span className="bg-surface border border-line text-ink text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 Tư vấn nhanh
               </span>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-brand text-white hover:shadow-lg">
+              <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md bg-brand text-white hover:shadow-lg touch-target">
                 <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.08L2 22l4.92-1.38C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" />
                 </svg>
@@ -642,7 +652,7 @@ export function FloatingContactWidget() {
               setIsPopupOpen(false);
             }
           }}
-          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-full shadow-lg transition-all duration-200 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full shadow-lg transition-all duration-200 cursor-pointer touch-target ${
             isExpanded
               ? 'bg-ink text-bg hover:opacity-90 shadow-xl scale-105'
               : 'bg-brand text-white hover:bg-brand/90 hover:shadow-xl hover:scale-105 active:scale-95'

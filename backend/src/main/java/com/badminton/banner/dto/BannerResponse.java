@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record BannerResponse(
-        UUID id,
+        String id,
         String title,
         String description,
         String badge,
@@ -35,7 +35,7 @@ public record BannerResponse(
         Instant updatedAt
 ) {
     public BannerResponse(
-            UUID id,
+            String id,
             String title,
             String description,
             String badge,

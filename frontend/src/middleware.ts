@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'smash_session';
-const SESSION_SECRET = process.env.SESSION_SECRET || '';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'smashcourt-default-session-secret-key-prod-2026';
 
 function base64UrlToUint8Array(str: string): Uint8Array {
   const base64 = str.replace(/-/g, '+').replace(/_/g, '/');

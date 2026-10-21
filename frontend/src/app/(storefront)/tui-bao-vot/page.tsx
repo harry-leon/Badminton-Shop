@@ -75,6 +75,7 @@ export default async function BagCatalogPage({ searchParams }: PageProps) {
     const normalizedBrand = p.brand ? p.brand.toUpperCase() : 'YONEX';
     const displayBrand = normalizedBrand === 'LINING' ? 'Li-Ning' : normalizedBrand === 'VICTOR' ? 'Victor' : 'Yonex';
     const price = parseInt(p.price_from as string, 10);
+    const originalPrice = price > 500000 ? Math.round(price * 1.15) : undefined;
 
     return {
       id: p.id,
@@ -85,6 +86,7 @@ export default async function BagCatalogPage({ searchParams }: PageProps) {
       playerType: p.play_style || p.player_type || 'Thiết kế cách nhiệt',
       playStyle: p.play_style || p.player_type || 'Thiết kế cách nhiệt',
       priceFrom: price,
+      originalPrice,
       imageUrl: p.image_url,
       secondImageUrl: p.second_image_url || p.image_url,
       inStockBranches: stockByProduct[p.id] || ['BR_HCM_01', 'BR_HN_01', 'BR_DN_01'],
@@ -106,6 +108,7 @@ export default async function BagCatalogPage({ searchParams }: PageProps) {
           initialSearchParams={resolvedSearchParams}
           currentCategory="cat_bag"
           categoryCounts={categoryCounts}
+          basePath="/tui-bao-vot"
         />
       </Container>
     </div>

@@ -577,7 +577,7 @@ export default async function HomePage() {
           </div>
 
           {/* 3 Thẻ Sale Off hiển thị động từ activePromoBanners */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {activePromoBanners.slice(0, 3).map((promo: any, index: number) => {
               const badgeText = promo.badge || (index === 0 ? 'Ưu đãi tuần này' : index === 1 ? 'Bộ sưu tập mới' : 'Độc quyền SmashCourt');
               const titleText = promo.title || 'Ưu đãi đặc biệt';
@@ -589,7 +589,7 @@ export default async function HomePage() {
               return (
                 <div
                   key={promo.id || `promo-${index}`}
-                  className="bg-white dark:bg-surface border border-[#ECE8DE] dark:border-line rounded-3xl p-6 sm:p-7 flex items-center justify-between shadow-2xs hover:shadow-md transition-all group"
+                  className="bg-white dark:bg-surface border border-[#ECE8DE] dark:border-line rounded-3xl p-6 sm:p-7 flex items-center justify-between shadow-2xs hover:shadow-md transition-all group overflow-hidden"
                 >
                   <div className="space-y-2.5 z-10 max-w-[62%]">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#11382B] text-white text-[13px] font-medium">
@@ -790,13 +790,15 @@ export default async function HomePage() {
       </section>
 
       {/* 6. THƯƠNG HIỆU MARQUEE CHẠY NGANG VÔ TẬN */}
-      <section className="py-7 border-b border-line bg-surface/60 overflow-hidden select-none relative group">
+      <section className="py-7 border-b border-line bg-surface/60 overflow-hidden w-full max-w-full select-none relative group" style={{ overflowX: 'clip', contain: 'paint' }}>
         {/* Lớp che mờ hai đầu trái/phải tạo chiều sâu (Fade Mask) */}
         {/* design-rule-ignore: marquee edge fade */}<div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-bg via-bg/80 to-transparent z-10 pointer-events-none" />
         {/* design-rule-ignore: marquee edge fade */}<div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-bg via-bg/80 to-transparent z-10 pointer-events-none" />
 
-        {/* Thanh cuộn chạy ngang liên tục */}
-        <div className="animate-marquee items-center gap-10 sm:gap-16 text-[15px] sm:text-[18px] font-medium text-muted">
+        {/* Wrapper cứng khống chế tràn bề ngang */}
+        <div className="w-full max-w-full overflow-hidden" style={{ overflowX: 'clip' }}>
+          {/* Thanh cuộn chạy ngang liên tục */}
+          <div className="animate-marquee items-center gap-10 sm:gap-16 text-[15px] sm:text-[18px] font-medium text-muted">
           {/* Nhóm 1 */}
           <div className="flex items-center gap-10 sm:gap-16 shrink-0">
             <Link href="/vot-cau-long?brand=Yonex" className="hover:text-brand transition-colors flex items-center gap-2">
@@ -860,6 +862,7 @@ export default async function HomePage() {
             </Link>
             <span className="text-line text-sm">•</span>
           </div>
+        </div>
         </div>
       </section>
 

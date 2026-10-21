@@ -148,7 +148,7 @@ function LoginForm() {
               <button
                 type="button"
                 onClick={() => { setMode('LOGIN'); setErrorMessage(''); }}
-                className={`flex-1 pb-3 text-[14px] transition-colors cursor-pointer text-center relative ${
+                className={`flex-1 min-h-[44px] pb-3 text-[14px] transition-colors cursor-pointer text-center relative inline-flex items-center justify-center touch-target ${
                   mode === 'LOGIN' ? 'text-ink font-medium' : 'text-muted hover:text-ink font-normal'
                 }`}
               >
@@ -160,7 +160,7 @@ function LoginForm() {
               <button
                 type="button"
                 onClick={() => { setMode('REGISTER'); setErrorMessage(''); }}
-                className={`flex-1 pb-3 text-[14px] transition-colors cursor-pointer text-center relative ${
+                className={`flex-1 min-h-[44px] pb-3 text-[14px] transition-colors cursor-pointer text-center relative inline-flex items-center justify-center touch-target ${
                   mode === 'REGISTER' ? 'text-ink font-medium' : 'text-muted hover:text-ink font-normal'
                 }`}
               >

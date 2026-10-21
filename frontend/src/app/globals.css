@@ -2,7 +2,36 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@utility touch-target-hit {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 @layer base {
+  html, body {
+    max-width: 100%;
+    overflow-x: clip;
+    -webkit-overflow-scrolling: touch;
+  }
+
   :root {
     --page-gutter: 16px; /* 16px trên mobile (<768px) */
     --bg: #F5F4F0;       /* nền trang, trắng ngà */
@@ -337,6 +366,7 @@ body {
   display: flex;
   width: max-content;
   animation: marquee-scroll 25s linear infinite;
+  contain: layout paint;
 }
 
 .animate-marquee:hover {

@@ -46,18 +46,18 @@ export default function GioiThieuPage() {
           {/* ========================================================= */}
           {/* SIDEBAR TRÁI (ShopVNB Style: Danh mục tin & Bài xem nhiều) */}
           {/* ========================================================= */}
-          <aside className="lg:col-span-3 space-y-6">
+          <aside className="lg:col-span-3 order-2 lg:order-1 space-y-6">
             
             {/* Box 1: Danh mục thông tin */}
             <div className="bg-surface border border-line rounded-2xl p-5 shadow-xs">
               <h3 className="font-bold text-ink text-[15px] uppercase tracking-wide pb-3 border-b-2 border-brand flex items-center gap-2">
                 <span>DANH MỤC THÔNG TIN</span>
               </h3>
-              <ul className="mt-3 space-y-2 text-[13px]">
+              <ul className="mt-3 space-y-1 text-[13px]">
                 <li>
                   <Link 
                     href="/gioi-thieu" 
-                    className="flex items-center justify-between text-brand font-semibold py-1 hover:translate-x-1 transition-transform"
+                    className="flex items-center justify-between text-brand font-semibold py-2.5 min-h-[44px] hover:translate-x-1 transition-transform touch-target-hit"
                   >
                     <span>Giới thiệu SmashCourt</span>
                     <ChevronRight className="w-4 h-4" />
@@ -66,7 +66,7 @@ export default function GioiThieuPage() {
                 <li>
                   <Link 
                     href="/tuyen-dung" 
-                    className="flex items-center justify-between text-muted hover:text-brand py-1 hover:translate-x-1 transition-transform"
+                    className="flex items-center justify-between text-muted hover:text-brand py-2.5 min-h-[44px] hover:translate-x-1 transition-transform touch-target-hit"
                   >
                     <span>Cơ hội việc làm (Tuyển dụng)</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-950/80 dark:text-red-300">
@@ -77,7 +77,7 @@ export default function GioiThieuPage() {
                 <li>
                   <Link 
                     href="/chi-nhanh" 
-                    className="flex items-center justify-between text-muted hover:text-brand py-1 hover:translate-x-1 transition-transform"
+                    className="flex items-center justify-between text-muted hover:text-brand py-2.5 min-h-[44px] hover:translate-x-1 transition-transform touch-target-hit"
                   >
                     <span>Hệ thống chi nhánh toàn quốc</span>
                     <span className="text-[11px] text-muted">({branchCount})</span>
@@ -86,7 +86,7 @@ export default function GioiThieuPage() {
                 <li>
                   <Link 
                     href="/tra-cuu-bao-hanh" 
-                    className="flex items-center justify-between text-muted hover:text-brand py-1 hover:translate-x-1 transition-transform"
+                    className="flex items-center justify-between text-muted hover:text-brand py-2.5 min-h-[44px] hover:translate-x-1 transition-transform touch-target-hit"
                   >
                     <span>Tra cứu bảo hành điện tử</span>
                     <ChevronRight className="w-4 h-4 opacity-50" />
@@ -95,7 +95,7 @@ export default function GioiThieuPage() {
                 <li>
                   <Link 
                     href="/second-hand" 
-                    className="flex items-center justify-between text-muted hover:text-brand py-1 hover:translate-x-1 transition-transform"
+                    className="flex items-center justify-between text-muted hover:text-brand py-2.5 min-h-[44px] hover:translate-x-1 transition-transform touch-target-hit"
                   >
                     <span>Quy chuẩn 16 tiêu chí vợt cũ</span>
                     <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -170,7 +170,7 @@ export default function GioiThieuPage() {
           {/* ========================================================= */}
           {/* CỘT NỘI DUNG CHÍNH (Right - Ảnh 3 ShopVNB Style) */}
           {/* ========================================================= */}
-          <main className="lg:col-span-9 bg-surface border border-line rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
+          <main className="lg:col-span-9 order-1 lg:order-2 bg-surface border border-line rounded-3xl p-6 sm:p-10 shadow-xs space-y-8">
             
             {/* Tiêu đề bài viết */}
             <div className="border-b border-line pb-6 space-y-2">

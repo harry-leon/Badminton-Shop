@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAdmin } from '@/lib/admin-context';
 import { 
@@ -600,6 +601,98 @@ function AdminBannersPageContent() {
           </button>
         </div>
       )}
+
+      {/* On-page Tab Navigation Strip for Mobile/Tablet */}
+      <div className="flex items-center gap-1.5 border-b border-[#E4E3DD] overflow-x-auto no-scrollbar pb-1">
+        <Link
+          href="/portal/banners?tab=hero"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'hero'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span>Hero Slide</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=midpage"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'midpage'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <ImageIcon className="w-3.5 h-3.5" />
+          <span>Giữa trang</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=popup"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'popup'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Popup</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=promo"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'promo'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Tag className="w-3.5 h-3.5" />
+          <span>Bộ 3 ưu đãi</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=categories"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'categories'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <LayoutGrid className="w-3.5 h-3.5" />
+          <span>Danh mục</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=usp"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'usp'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Cam kết & VĐV</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=navtags"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'navtags'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>Menu Tags</span>
+        </Link>
+        <Link
+          href="/portal/banners?tab=settings"
+          className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'settings'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Settings className="w-3.5 h-3.5" />
+          <span>Cài đặt chung</span>
+        </Link>
+      </div>
 
       {/* TAB 1: HERO SLIDER */}
       {activeTab === 'hero' && (
@@ -1256,7 +1349,7 @@ function AdminBannersPageContent() {
 
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full min-w-[780px] text-left text-xs">
                 <thead>
                   <tr className="bg-[#141A17] text-white border-b border-white/10 font-semibold">
                     <th className="py-3 px-4 w-12 text-center">STT</th>
@@ -1331,7 +1424,7 @@ function AdminBannersPageContent() {
                             <button
                               type="button"
                               onClick={() => handleToggleNavItem(item.id)}
-                              className={`p-1 rounded-md text-xs font-semibold ${
+                              className={`min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 rounded-md text-xs font-semibold cursor-pointer ${
                                 item.is_active ? 'text-emerald-500 hover:text-emerald-600' : 'text-zinc-400 hover:text-zinc-500'
                               }`}
                             >
@@ -1346,14 +1439,14 @@ function AdminBannersPageContent() {
                                   setIsCreatingNavItem(false);
                                   setEditingNavItem({ ...item });
                                 }}
-                                className="p-1 hover:bg-black/5  rounded text-[#111613]"
+                                className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 hover:bg-black/5 rounded text-[#111613] cursor-pointer"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleDeleteNavItem(item.id)}
-                                className="p-1 hover:bg-red-500/10 rounded text-red-500"
+                                className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 hover:bg-red-500/10 rounded text-red-500 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

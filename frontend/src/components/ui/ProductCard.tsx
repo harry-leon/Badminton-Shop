@@ -205,7 +205,7 @@ export function ProductCard({
                   ...compareData,
                 });
               }}
-              className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+              className={`absolute top-2 right-2 z-10 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all touch-target touch-target-hit ${
                 compared
                   ? 'bg-ink text-bg shadow-xs'
                   : 'bg-surface/90 hover:bg-surface text-muted hover:text-ink backdrop-blur-xs border border-line shadow-xs'
@@ -303,7 +303,7 @@ export function ProductCard({
         <button
           type="button"
           onClick={handleAddToCart}
-          className="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 px-2.5 sm:px-3 text-[12px] sm:text-[13px] font-medium text-white bg-brand hover:bg-brand/90 rounded-full shadow-xs hover:shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+          className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 sm:px-3.5 text-[12px] sm:text-[13px] font-medium text-white bg-brand hover:bg-brand/90 rounded-full shadow-xs hover:shadow-md transition-all active:scale-95 cursor-pointer shrink-0 touch-target touch-target-hit"
           title="Thêm vào giỏ hàng"
           aria-label={`Thêm ${name} vào giỏ hàng`}
         >

@@ -58,50 +58,53 @@ export default function CartPage() {
             <div className="lg:col-span-7 space-y-4">
               <div className="divide-y divide-line border border-line rounded-2xl bg-surface overflow-hidden">
                 {items.map((item) => (
-                  <div key={item.id} className="p-4 sm:p-5 flex gap-4 sm:gap-5 items-center">
-                    {/* Ảnh sản phẩm */}
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-[#EFECE6] dark:bg-[#18201C] p-2 shrink-0 flex items-center justify-center relative overflow-hidden">
-                      <SafeImage
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        className="object-contain mix-blend-multiply dark:mix-blend-normal p-2"
-                      />
+                  <div key={item.id} className="p-3.5 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-5 sm:items-center justify-between">
+                    {/* Ảnh & thông tin sản phẩm */}
+                    <div className="flex gap-3 sm:gap-4 items-center flex-1 min-w-0">
+                      {/* Ảnh sản phẩm */}
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl bg-[#EFECE6] dark:bg-[#18201C] p-2 shrink-0 flex items-center justify-center relative overflow-hidden">
+                        <SafeImage
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          className="object-contain mix-blend-multiply dark:mix-blend-normal p-2"
+                        />
+                      </div>
+
+                      {/* Chi tiết */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="text-[12px] sm:text-[13px] text-muted truncate">
+                          {item.isSecondhand ? 'Vợt cũ kiểm định' : 'Vợt chính hãng'} · {item.sku}
+                        </div>
+                        <h3 className="text-[14px] sm:text-[16px] font-medium text-ink line-clamp-2">
+                          {item.name}
+                        </h3>
+                        <div className="pt-0.5">
+                          <PriceTag amount={item.price} size="md" />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Chi tiết */}
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="text-[13px] text-muted">
-                        {item.isSecondhand ? 'Vợt cũ kiểm định' : 'Vợt chính hãng'} · {item.sku}
-                      </div>
-                      <h3 className="text-[15px] sm:text-[16px] font-medium text-ink truncate">
-                        {item.name}
-                      </h3>
-                      <div className="pt-1">
-                        <PriceTag amount={item.price} size="md" />
-                      </div>
-                    </div>
-
-                    {/* Bộ tăng/giảm số lượng */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Bộ tăng/giảm số lượng & nút xóa */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t border-line/60 sm:border-0 w-full sm:w-auto">
                       {!item.isSecondhand ? (
                         <div className="flex items-center border border-line rounded-full bg-bg">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
+                            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer touch-target touch-target-hit"
                             aria-label="Giảm số lượng"
                           >
-                            <Minus className="w-3.5 h-3.5" />
+                            <Minus className="w-4 h-4" />
                           </button>
-                          <span className="w-8 text-center text-[13px] font-medium text-ink select-none">
+                          <span className="w-9 text-center text-[14px] font-medium text-ink select-none">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
+                            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer touch-target touch-target-hit"
                             aria-label="Tăng số lượng"
                           >
-                            <Plus className="w-3.5 h-3.5" />
+                            <Plus className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
@@ -112,7 +115,7 @@ export default function CartPage() {
 
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="p-2 text-muted hover:text-sale transition-colors rounded-full hover:bg-bg cursor-pointer"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] text-muted hover:text-sale transition-colors rounded-full hover:bg-bg cursor-pointer touch-target touch-target-hit inline-flex items-center justify-center"
                         title="Xóa sản phẩm"
                         aria-label="Xóa sản phẩm"
                       >
@@ -172,7 +175,7 @@ export default function CartPage() {
               <div className="text-center">
                 <Link
                   href="/vot-cau-long"
-                  className="text-[13px] text-muted hover:text-ink transition-colors font-normal inline-block"
+                  className="text-[13px] text-muted hover:text-ink transition-colors font-normal inline-flex items-center min-h-[44px] touch-target-hit"
                 >
                   ← Tiếp tục xem thêm vợt
                 </Link>

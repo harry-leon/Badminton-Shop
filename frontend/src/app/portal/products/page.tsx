@@ -798,7 +798,7 @@ function AdminProductsPageContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm theo tên sản phẩm hoặc mã SKU..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
+                className="w-full pl-9 pr-3 py-2 min-h-[42px] rounded-lg border border-gray-200 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
               />
             </div>
 
@@ -807,7 +807,7 @@ function AdminProductsPageContent() {
               <select
                 value={brandFilter}
                 onChange={(e) => setBrandFilter(e.target.value)}
-                className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-black"
+                className="text-xs border border-gray-200 rounded-lg px-2.5 py-2 min-h-[42px] bg-white text-gray-700 focus:outline-none focus:border-black"
               >
                 <option value="ALL">Tất cả thương hiệu</option>
                 {dbBrands.map((b) => (
@@ -819,7 +819,7 @@ function AdminProductsPageContent() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-black"
+                className="text-xs border border-gray-200 rounded-lg px-2.5 py-2 min-h-[42px] bg-white text-gray-700 focus:outline-none focus:border-black"
               >
                 <option value="ALL">Tất cả danh mục (10 nhóm)</option>
                 {dbCategories.map((c) => (
@@ -847,7 +847,7 @@ function AdminProductsPageContent() {
       {/* Bảng danh sách sản phẩm */}
       <div className="bg-white rounded-xl border border-black/10 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full min-w-[850px] text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50/75 text-gray-600 font-medium uppercase tracking-wider">
                 <th className="py-3 px-4">Sản phẩm</th>
@@ -972,7 +972,7 @@ function AdminProductsPageContent() {
                           href={`/vot-cau-long/${p.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-black hover:border-black transition-colors"
+                          className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-black hover:border-black transition-colors"
                           title="Xem trang sản phẩm công khai"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -983,7 +983,7 @@ function AdminProductsPageContent() {
                           <button
                             type="button"
                             onClick={() => handleOpenEditModal(p, 'INFO')}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E4E3DD] bg-white hover:bg-stone-50 text-[#111613] hover:border-emerald-700 text-xs font-medium shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                            className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E4E3DD] bg-white hover:bg-stone-50 text-[#111613] hover:border-emerald-700 text-xs font-medium shadow-2xs transition-all cursor-pointer whitespace-nowrap touch-target-hit"
                             title="Mở bảng thao tác sản phẩm toàn diện (Thông tin, Kho, Ảnh, SKU)"
                           >
                             <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
@@ -996,7 +996,7 @@ function AdminProductsPageContent() {
                           <button
                             type="button"
                             onClick={() => handleToggleProduct(p.id, p.is_active)}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            className={`min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border transition-colors cursor-pointer ${
                               p.is_active
                                 ? 'border-gray-200 text-gray-400 hover:text-amber-600 hover:border-amber-300'
                                 : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'

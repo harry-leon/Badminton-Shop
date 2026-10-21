@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAdmin } from '@/lib/admin-context';
 import { 
@@ -257,6 +258,32 @@ function AdminWarrantyPageContent() {
 
   return (
     <div className="space-y-6">
+      {/* On-page Tab Navigation Strip for Mobile/Tablet */}
+      <div className="flex items-center gap-1.5 border-b border-[#E4E3DD] overflow-x-auto no-scrollbar pb-1">
+        <Link
+          href="/portal/warranty?tab=CLAIMS"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'CLAIMS'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <Wrench className="w-3.5 h-3.5" />
+          <span>Hồ sơ bảo hành ({claims.length})</span>
+        </Link>
+        <Link
+          href="/portal/warranty?tab=POLICIES"
+          className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap touch-target-hit inline-flex items-center gap-1.5 ${
+            activeTab === 'POLICIES'
+              ? 'bg-white border-t border-x border-[#E4E3DD] text-[#0F5132] font-semibold'
+              : 'text-[#6A726E] hover:text-[#111613]'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Chính sách bảo hành</span>
+        </Link>
+      </div>
+
       {activeTab === 'POLICIES' ? (
         /* TAB CHÍNH SÁCH BẢO HÀNH (POLICIES) */
         <div className="space-y-4">

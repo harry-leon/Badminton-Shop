@@ -228,7 +228,7 @@ export default function AdminRolesPage() {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0F5132] hover:bg-[#0c4128] text-white text-xs font-medium shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+                className="min-h-[36px] touch-target-hit inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0F5132] hover:bg-[#0c4128] text-white text-xs font-medium shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tạo vai trò</span>
@@ -252,7 +252,7 @@ export default function AdminRolesPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-sm text-[#111613]">{r.name}</span>
-                    <Badge variant={isSelected ? 'brand' : 'muted'}>{r.id}</Badge>
+                    <Badge variant={isSelected ? 'brand' : 'muted'} className="truncate max-w-[140px] inline-block">{r.id}</Badge>
                   </div>
                   <div className="text-xs text-[#6A726E] font-normal mt-1.5 line-clamp-2">
                     {r.description || 'Chưa có mô tả cho vai trò này.'}

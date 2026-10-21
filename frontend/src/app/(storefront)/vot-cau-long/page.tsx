@@ -181,6 +181,7 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
           initialSearchParams={resolvedSearchParams}
           currentCategory="cat_racket"
           categoryCounts={categoryCounts}
+          basePath="/vot-cau-long"
         />
       </Container>
     </div>

@@ -109,6 +109,7 @@ export default async function ShoesCatalogPage({ searchParams }: PageProps) {
           initialSearchParams={resolvedSearchParams}
           currentCategory="cat_shoes"
           categoryCounts={categoryCounts}
+          basePath="/giay-cau-long"
         />
       </Container>
     </div>

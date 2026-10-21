@@ -331,11 +331,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div 
-      className={`portal-root min-h-screen bg-[#F5F4F0] flex flex-col md:flex-row text-[#111613] density-${density}`}
+      className={`portal-root min-h-screen bg-[#F5F4F0] flex flex-col lg:flex-row text-[#111613] density-${density}`}
       data-density={density}
     >
       {/* 1. Desktop & Tablet Sidebar */}
-      <aside className="hidden md:flex w-64 bg-[#111613] text-[#F5F4F0] flex-col border-r border-white/10 shrink-0 sticky top-0 h-screen z-30">
+      <aside className="hidden lg:flex w-64 bg-[#111613] text-[#F5F4F0] flex-col border-r border-white/10 shrink-0 sticky top-0 h-[100dvh] z-30">
         {/* Logo & Header */}
         <div className="p-4 border-b border-white/10 flex items-center justify-between">
           <Link href="/portal" className="flex items-center gap-2.5">
@@ -586,7 +586,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-1.5 rounded-lg hover:bg-stone-100 text-stone-600"
+              className="lg:hidden min-w-[44px] min-h-[44px] touch-target p-2 rounded-lg hover:bg-stone-100 text-stone-600 touch-target-hit inline-flex items-center justify-center cursor-pointer"
+              aria-label="Mở menu quản trị"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -611,7 +612,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 router.refresh();
               }}
               title="Làm mới dữ liệu trang"
-              className="p-1.5 rounded-lg border border-[#E4E3DD] bg-stone-50 hover:bg-stone-100 text-[#111613] hover:text-[#0F5132] transition-colors cursor-pointer"
+              className="min-w-[44px] min-h-[44px] touch-target p-2 rounded-lg border border-[#E4E3DD] bg-stone-50 hover:bg-stone-100 text-[#111613] hover:text-[#0F5132] transition-colors cursor-pointer touch-target-hit inline-flex items-center justify-center"
             >
               <RefreshCw className="w-3.5 h-3.5 text-stone-600" />
             </button>
@@ -675,12 +676,12 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* 3. Mobile Sheet Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
+        <div className="fixed inset-0 z-50 flex lg:hidden">
           <div 
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative w-72 max-w-[80vw] bg-[#111613] text-[#F5F4F0] flex flex-col h-full shadow-2xl z-10">
+          <div className="relative w-72 max-w-[80vw] bg-[#111613] text-[#F5F4F0] flex flex-col h-[100dvh] max-h-[100dvh] overscroll-contain shadow-2xl z-10">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
               <div className="font-medium text-sm text-white flex items-center gap-2">
                 <span className="text-[#C8F31D]">Smash Court</span> Cổng Vận Hành
@@ -688,7 +689,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1 rounded-md text-stone-400 hover:text-white"
+                className="min-w-[44px] min-h-[44px] touch-target p-2 rounded-md text-stone-400 hover:text-white cursor-pointer touch-target-hit inline-flex items-center justify-center"
+                aria-label="Đóng menu quản trị"
               >
                 <X className="w-5 h-5" />
               </button>

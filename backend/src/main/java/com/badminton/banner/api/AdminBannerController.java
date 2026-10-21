@@ -34,7 +34,7 @@ public class AdminBannerController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Xem chi tiết một banner")
-    public ResponseEntity<ApiResponse<BannerResponse>> getBannerById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BannerResponse>> getBannerById(@PathVariable String id) {
         BannerResponse banner = bannerService.getBannerById(id);
         return ResponseEntity.ok(ApiResponse.success("BANNER_DETAIL", "Lấy chi tiết banner thành công", banner));
     }
@@ -49,7 +49,7 @@ public class AdminBannerController {
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật banner")
     public ResponseEntity<ApiResponse<BannerResponse>> updateBanner(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody UpdateBannerRequest request
     ) {
         BannerResponse updated = bannerService.updateBanner(id, request);
@@ -58,14 +58,14 @@ public class AdminBannerController {
 
     @PatchMapping("/{id}/status")
     @Operation(summary = "Bật/Tắt trạng thái hiển thị banner")
-    public ResponseEntity<ApiResponse<BannerResponse>> toggleBannerStatus(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BannerResponse>> toggleBannerStatus(@PathVariable String id) {
         BannerResponse updated = bannerService.toggleBannerStatus(id);
         return ResponseEntity.ok(ApiResponse.success("BANNER_STATUS_TOGGLED", "Cập nhật trạng thái banner thành công", updated));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa banner")
-    public ResponseEntity<ApiResponse<Void>> deleteBanner(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteBanner(@PathVariable String id) {
         bannerService.deleteBanner(id);
         return ResponseEntity.ok(ApiResponse.success("BANNER_DELETED", "Xóa banner thành công"));
     }

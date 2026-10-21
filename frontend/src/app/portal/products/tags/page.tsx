@@ -231,7 +231,7 @@ export default function ProductTagsPage() {
                         setTagSortOrder(t.sort_order.toString());
                         setTagModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700 cursor-pointer"
                       title="Sửa tag"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -239,7 +239,7 @@ export default function ProductTagsPage() {
                     <button
                       type="button"
                       onClick={() => handleDeleteTag(t.id, t.name)}
-                      className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
+                      className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 cursor-pointer"
                       title="Xóa tag"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface BannerRepository extends JpaRepository<Banner, UUID> {
+public interface BannerRepository extends JpaRepository<Banner, String> {
 
     List<Banner> findByPositionOrderBySortOrderAscCreatedAtDesc(String position);
 

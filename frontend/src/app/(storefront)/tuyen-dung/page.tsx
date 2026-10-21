@@ -131,14 +131,14 @@ export default function RecruitmentListPage() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="Nhập từ khóa vị trí, chi nhánh..."
-                className="w-full bg-white dark:bg-surface border border-line rounded-xl py-2.5 pl-4 pr-10 text-[13px] text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs"
+                className="w-full bg-white dark:bg-surface border border-line rounded-xl py-2.5 min-h-[44px] pl-4 pr-10 text-[13px] text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs"
               />
             </div>
 
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="bg-white dark:bg-surface border border-line rounded-xl py-2.5 px-3 text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs cursor-pointer"
+              className="bg-white dark:bg-surface border border-line rounded-xl py-2.5 min-h-[44px] px-3 text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs cursor-pointer"
             >
               {locations.map((loc) => (
                 <option key={loc} value={loc}>
@@ -149,7 +149,7 @@ export default function RecruitmentListPage() {
 
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-[13px] font-bold inline-flex items-center justify-center gap-1.5 transition-colors shadow-2xs shrink-0 cursor-pointer"
+              className="px-5 py-2.5 min-h-[44px] rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-[13px] font-bold inline-flex items-center justify-center gap-1.5 transition-colors shadow-2xs shrink-0 cursor-pointer touch-target"
             >
               <Search className="w-3.5 h-3.5" />
               <span>Tìm kiếm</span>
@@ -221,7 +221,7 @@ export default function RecruitmentListPage() {
 
                     <Link
                       href={`/tuyen-dung/${job.slug}`}
-                      className="px-4 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[12px] font-bold transition-colors shadow-2xs inline-flex items-center gap-1"
+                      className="px-4 py-2 min-h-[44px] rounded-full bg-red-600 hover:bg-red-700 text-white text-[12px] font-bold transition-colors shadow-2xs inline-flex items-center gap-1 touch-target touch-target-hit"
                     >
                       <span>Ứng tuyển</span>
                       <ArrowRight className="w-3 h-3" />

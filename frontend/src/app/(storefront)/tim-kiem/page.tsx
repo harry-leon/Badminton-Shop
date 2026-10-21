@@ -141,21 +141,22 @@ function SearchContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Nhập tên vợt, mã model, lối đánh, thương hiệu..."
-              className="w-full h-14 pl-12 pr-28 rounded-2xl bg-surface border border-line text-[15px] text-ink placeholder:text-muted outline-none focus:border-ink transition-colors shadow-xs"
+              className="w-full h-14 pl-12 pr-32 rounded-2xl bg-surface border border-line text-[15px] text-ink placeholder:text-muted outline-none focus:border-ink transition-colors shadow-xs"
               autoFocus
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-24 p-1.5 rounded-full text-muted hover:text-ink transition-colors"
+                className="absolute right-28 sm:right-32 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-muted hover:text-ink transition-colors cursor-pointer touch-target"
+                aria-label="Xóa nội dung tìm kiếm"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
             <button
               type="submit"
-              className="absolute right-2.5 h-9 px-4 rounded-xl bg-ink text-bg text-[13px] font-medium hover:opacity-90 transition-opacity cursor-pointer"
+              className="absolute right-2 h-11 px-4 sm:px-5 rounded-xl bg-ink text-bg text-[13px] sm:text-[14px] font-medium hover:opacity-90 transition-opacity cursor-pointer touch-target flex items-center justify-center"
             >
               Tìm kiếm
             </button>
@@ -176,7 +177,7 @@ function SearchContent() {
                   <button
                     type="button"
                     onClick={clearAllRecent}
-                    className="text-[13px] text-muted hover:text-red-500 font-normal transition-colors"
+                    className="text-[13px] text-muted hover:text-red-500 font-normal transition-colors min-h-[44px] inline-flex items-center touch-target-hit cursor-pointer"
                   >
                     Xóa tất cả
                   </button>
@@ -198,7 +199,7 @@ function SearchContent() {
                           router.push(`/tim-kiem?q=${encodeURIComponent(term)}`);
                           performSearch(term);
                         }}
-                        className="group w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-bg transition-colors cursor-pointer text-left"
+                        className="group w-full flex items-center justify-between py-2 px-3 min-h-[44px] rounded-xl hover:bg-bg transition-colors cursor-pointer text-left touch-target"
                       >
                         <div className="flex items-center gap-2.5 text-[14px] text-ink font-normal min-w-0 flex-1">
                           <Clock className="w-3.5 h-3.5 text-muted shrink-0 group-hover:text-brand transition-colors" />
@@ -207,8 +208,9 @@ function SearchContent() {
                         <button
                           type="button"
                           onClick={(e) => removeRecentSearch(term, e)}
-                          className="opacity-40 group-hover:opacity-100 hover:text-red-500 p-1 rounded-md transition-all ml-2"
+                          className="opacity-40 group-hover:opacity-100 hover:text-red-500 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all ml-2 cursor-pointer touch-target-hit touch-target"
                           title="Xóa tìm kiếm này"
+                          aria-label={`Xóa tìm kiếm ${term}`}
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -220,7 +222,7 @@ function SearchContent() {
                     <button
                       type="button"
                       onClick={() => setShowAllRecent(!showAllRecent)}
-                      className="pt-2.5 text-[13px] text-brand hover:underline font-medium flex items-center gap-1 cursor-pointer"
+                      className="pt-2 text-[13px] text-brand hover:underline font-medium min-h-[44px] inline-flex items-center gap-1 cursor-pointer touch-target-hit"
                     >
                       <span>{showAllRecent ? 'Thu gọn' : `Xem thêm (${recentSearches.length - 6} từ khóa khác)`}</span>
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllRecent ? 'rotate-180' : ''}`} />
@@ -258,7 +260,7 @@ function SearchContent() {
                         router.push(`/tim-kiem?q=${encodeURIComponent(term)}`);
                         performSearch(term);
                       }}
-                      className="group w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-bg transition-colors cursor-pointer text-left"
+                      className="group w-full flex items-center justify-between py-2 px-3 min-h-[44px] rounded-xl hover:bg-bg transition-colors cursor-pointer text-left touch-target"
                     >
                       <div className="flex items-center gap-3 text-[14px] text-ink font-normal min-w-0 flex-1">
                         {/* Biểu tượng sấm sét hoạt ảnh động với số thứ tự bên trong */}
@@ -313,7 +315,7 @@ function SearchContent() {
                         router.push(`/tim-kiem?q=${encodeURIComponent(term)}`);
                         performSearch(term);
                       }}
-                      className="px-2 py-0.5 rounded-lg bg-surface border border-line hover:text-ink text-[13px] shrink-0"
+                      className="px-2.5 py-1 min-h-[36px] sm:min-h-[32px] rounded-lg bg-surface border border-line hover:text-ink text-[13px] shrink-0 touch-target-hit inline-flex items-center"
                     >
                       {term}
                     </button>
@@ -336,7 +338,7 @@ function SearchContent() {
                 <div className="pt-2">
                   <Link
                     href="/vot-cau-long"
-                    className="inline-flex items-center gap-1 px-5 py-2 rounded-full bg-ink text-bg text-[13px] font-medium hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-1 px-5 py-2 min-h-[44px] rounded-full bg-ink text-bg text-[13px] font-medium hover:opacity-90 transition-opacity touch-target"
                   >
                     <span>Xem tất cả vợt mới</span>
                     <ArrowRight className="w-3.5 h-3.5" />

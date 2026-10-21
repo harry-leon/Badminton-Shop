@@ -177,7 +177,7 @@ export default function AdminCustomersPage() {
             placeholder="Tìm theo tên, email, số điện thoại..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-[#E4E3DD] text-xs focus:outline-none focus:border-[#0F5132]"
+            className="w-full pl-9 pr-3 py-2 min-h-[42px] rounded-lg border border-[#E4E3DD] text-xs focus:outline-none focus:border-[#0F5132]"
           />
         </div>
 
@@ -185,7 +185,7 @@ export default function AdminCustomersPage() {
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border border-[#E4E3DD] text-xs bg-white text-[#111613] focus:outline-none"
+            className="px-2.5 py-2 min-h-[42px] rounded-lg border border-[#E4E3DD] text-xs bg-white text-[#111613] focus:outline-none"
           >
             <option value="ALL">Tất cả hạng thành viên</option>
             <option value="DIAMOND">Kim Cương (&gt; 20tr)</option>
@@ -197,7 +197,7 @@ export default function AdminCustomersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border border-[#E4E3DD] text-xs bg-white text-[#111613] focus:outline-none"
+            className="px-2.5 py-2 min-h-[42px] rounded-lg border border-[#E4E3DD] text-xs bg-white text-[#111613] focus:outline-none"
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="ACTIVE">Đang hoạt động</option>
@@ -209,7 +209,7 @@ export default function AdminCustomersPage() {
       {/* Customers Table */}
       <div className="bg-white rounded-xl border border-[#E4E3DD] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[750px] text-left text-xs border-collapse">
             <thead className="bg-[#F5F4F0] border-b border-[#E4E3DD] text-[#6A726E] font-medium">
               <tr>
                 <th className="py-3 px-4">Khách hàng</th>
@@ -306,7 +306,7 @@ export default function AdminCustomersPage() {
                             setEditFullName(cust.full_name);
                             setEditPhone(cust.phone || '');
                           }}
-                          className="p-1 rounded hover:bg-stone-100 text-stone-600"
+                          className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 rounded hover:bg-stone-100 text-stone-600 cursor-pointer"
                           title="Sửa thông tin"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -314,7 +314,7 @@ export default function AdminCustomersPage() {
                         <button
                           type="button"
                           onClick={() => handleToggleStatus(cust)}
-                          className={`p-1 rounded hover:bg-stone-100 ${cust.is_active ? 'text-rose-600' : 'text-emerald-600'}`}
+                          className={`min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1 rounded hover:bg-stone-100 cursor-pointer ${cust.is_active ? 'text-rose-600' : 'text-emerald-600'}`}
                           title={cust.is_active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                         >
                           {cust.is_active ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}

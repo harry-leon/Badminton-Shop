@@ -231,7 +231,7 @@ export default function AdminReportsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[600px] text-left text-xs border-collapse">
             <thead className="bg-[#F5F4F0] border-b border-[#E4E3DD] text-[#6A726E] font-medium">
               <tr>
                 <th className="py-3 px-4">Hạng</th>
