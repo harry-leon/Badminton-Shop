@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SafeImage } from '@/components/ui/SafeImage';
 import { Container } from '@/components/ui/Container';
 import { queryDb } from '@/lib/db';
-import { fetchFromApi } from '@/lib/api';
+import { fetchFromApi, getPublicSecondhandUnits } from '@/lib/api';
 import { 
   ShieldCheck, 
   Award, 
@@ -106,8 +106,10 @@ const CATEGORY_IMAGE_MAP: Record<string, string> = {
 };
 
 function maskSerialNumber(serial?: string | null): string {
-  if (!serial) return 'Khớp hồ sơ';
-  const parts = serial.trim().split('-');
+  if (!serial || !serial.trim()) return 'Khớp hồ sơ';
+  const trimmed = serial.trim();
+  if (trimmed.includes('***')) return trimmed;
+  const parts = trimmed.split('-');
   if (parts.length >= 4) {
     const prefix = parts.slice(0, parts.length - 2).join('-');
     const suffix = parts[parts.length - 1];
@@ -116,10 +118,16 @@ function maskSerialNumber(serial?: string | null): string {
   if (parts.length === 3) {
     return `${parts[0]}-***-${parts[2]}`;
   }
-  if (serial.length > 8) {
-    return serial.slice(0, 4) + '-***-' + serial.slice(-3);
+  if (parts.length === 2) {
+    return `${parts[0]}-***`;
   }
-  return serial;
+  if (trimmed.length >= 7) {
+    return `${trimmed.slice(0, 3)}-***-${trimmed.slice(-2)}`;
+  }
+  if (trimmed.length >= 4) {
+    return `${trimmed.slice(0, 2)}-***-${trimmed.slice(-1)}`;
+  }
+  return '***';
 }
 
 function renderUspIcon(badgeName?: string) {
@@ -223,6 +231,34 @@ export default async function HomePage() {
         branch: branchLabels[r.branch_id] || r.branch_id,
       };
     });
+  }
+
+  if (secondhandRackets.length === 0) {
+    try {
+      const shApiRes = await getPublicSecondhandUnits({ size: 3 });
+      const content = shApiRes?.data?.content || shApiRes?.data || [];
+      secondhandRackets = content.map((r: any) => {
+        let images: string[] = [];
+        try {
+          images = JSON.parse(r.imagesJson || r.images_json || '[]');
+        } catch {
+          images = ['/images/secondhand/sh-nanoflare-800-pro.png'];
+        }
+        const imgUrl = images[0] || '/images/secondhand/sh-nanoflare-800-pro.png';
+        return {
+          id: r.id,
+          serial: maskSerialNumber(r.serialNumber || r.serial_number),
+          name: r.modelName || r.model_name,
+          slug: r.id,
+          brand: 'Yonex',
+          grade: r.grade,
+          playerType: 'Độc bản đã kiểm định',
+          price: Number(r.resalePrice || r.resale_price),
+          imageUrl: imgUrl,
+          branch: branchLabels[r.branchId || r.branch_id] || (r.branchId || r.branch_id),
+        };
+      });
+    } catch {}
   }
 
   // 2. Cài đặt giao diện (Site Settings)

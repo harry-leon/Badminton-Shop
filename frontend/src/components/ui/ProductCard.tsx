@@ -7,6 +7,7 @@ import { PriceTag } from './PriceTag';
 import { Badge } from './Badge';
 import { useCompare, type CompareItem } from '@/lib/compare-context';
 import { useCart } from '@/lib/cart-context';
+import { getProductDetailUrl } from '@/lib/productUrl';
 import { Scale, Star, Flame, ShoppingBag } from 'lucide-react';
 
 export interface ProductCardTag {
@@ -38,6 +39,8 @@ export interface ProductCardProps {
   compareData?: Partial<CompareItem>;
   salesCount?: number;
   isBestSeller?: boolean;
+  category?: string | { slug?: string; id?: string };
+  href?: string;
   onQuickAdd?: () => void;
   className?: string;
 }
@@ -64,13 +67,15 @@ export function ProductCard({
   compareData,
   salesCount,
   isBestSeller,
+  category,
+  href: customHref,
   onQuickAdd,
   className = '',
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const { addToCompare, isInCompare } = useCompare();
   const { addItem, setIsCartOpen } = useCart();
-  const href = isSecondHand ? `/second-hand#${slug}` : `/vot-cau-long/${slug}`;
+  const href = customHref || (isSecondHand ? `/second-hand#${slug}` : getProductDetailUrl({ slug, category }));
   const compared = isInCompare(slug);
 
   const hasDiscount = Boolean(originalPrice && originalPrice > priceFrom);

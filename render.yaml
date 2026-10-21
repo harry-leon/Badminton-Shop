@@ -29,4 +29,4 @@ services:
       - key: MANAGEMENT_HEALTH_REDIS_ENABLED
         value: "false"
       - key: JAVA_OPTS
-        value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
+        value: "-XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xms128m -Xmx384m -XX:+ExitOnOutOfMemoryError"

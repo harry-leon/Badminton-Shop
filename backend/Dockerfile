@@ -18,7 +18,7 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_OPTS="-XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xms128m -Xmx384m -XX:+ExitOnOutOfMemoryError"
 ENV SERVER_PORT=8080
 
 EXPOSE 8080

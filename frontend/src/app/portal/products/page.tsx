@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import ImageUpload from '@/components/ui/ImageUpload';
 import { resolveImageKitUrl } from '@/components/ui/SafeImage';
+import { getProductDetailUrl } from '@/lib/productUrl';
 
 export interface GalleryImage {
   id: string;
@@ -969,7 +970,7 @@ function AdminProductsPageContent() {
                       <div className="flex items-center justify-end gap-2">
                         {/* Nút xem storefront */}
                         <a
-                          href={`/vot-cau-long/${p.slug}`}
+                          href={getProductDetailUrl({ slug: p.slug, category_id: p.category_id })}
                           target="_blank"
                           rel="noreferrer"
                           className="min-w-[36px] min-h-[36px] touch-target-hit inline-flex items-center justify-center p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-black hover:border-black transition-colors"

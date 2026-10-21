@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { SafeImage } from '@/components/ui/SafeImage';
+import { getProductDetailUrl } from '@/lib/productUrl';
 
 import { Flame, ShoppingBag } from 'lucide-react';
 
@@ -165,7 +166,7 @@ export function HomeProductTabs({ products, initialTab = 'all', badgeText }: Hom
               return (
                 <Link
                   key={p.id}
-                  href={`/vot-cau-long/${p.slug}`}
+                  href={getProductDetailUrl({ slug: p.slug, category: p.category })}
                   className="group flex flex-col justify-between bg-white dark:bg-bg/40 border border-line hover:border-brand rounded-xl p-3 text-left transition-all hover:shadow-md hover:-translate-y-0.5"
                 >
                   <div>

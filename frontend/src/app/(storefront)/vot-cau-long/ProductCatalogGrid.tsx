@@ -818,6 +818,7 @@ export default function ProductCatalogGrid({
                 salesCount={product.salesCount}
                 isBestSeller={product.isBestSeller}
                 inStock={true}
+                category={currentCategory}
                 compareData={{
                   balancePoint: product.balancePoint,
                   stiffness: product.stiffness,

@@ -39,12 +39,22 @@ public class Product {
     @Column(name = "base_price", nullable = false)
     private BigDecimal basePrice;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(length = 50)
     @Builder.Default
     private String status = "ACTIVE";
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "player_type")
+    private String playerType;
+
+    @Column(name = "warranty_months")
+    @Builder.Default
+    private Integer warrantyMonths = 12;
 
     @Column(name = "play_style")
     private String playStyle;

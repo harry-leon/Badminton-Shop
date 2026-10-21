@@ -59,8 +59,27 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.failure(ErrorCode.UNAUTHORIZED.getCode(), ErrorCode.UNAUTHORIZED.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler({
+            org.apache.catalina.connector.ClientAbortException.class,
+            org.springframework.web.context.request.async.AsyncRequestNotUsableException.class
+    })
+    public void handleClientAbortException(Exception ex, HttpServletRequest request) {
+        log.debug("Client closed connection prematurely for {}: {}", request.getRequestURI(), ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex, HttpServletRequest request) {
+        Throwable cause = ex;
+        while (cause != null) {
+            if (cause instanceof org.apache.catalina.connector.ClientAbortException
+                    || cause instanceof org.springframework.web.context.request.async.AsyncRequestNotUsableException
+                    || (cause.getMessage() != null && (cause.getMessage().contains("Broken pipe") || cause.getMessage().contains("Connection reset by peer")))) {
+                log.debug("Client closed connection prematurely for {}: {}", request.getRequestURI(), cause.getMessage());
+                return null;
+            }
+            cause = cause.getCause();
+        }
+
         log.error("Unhandled system error at {}: ", request.getRequestURI(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.failure(ErrorCode.INTERNAL_ERROR.getCode(), ErrorCode.INTERNAL_ERROR.getMessage(), request.getRequestURI()));

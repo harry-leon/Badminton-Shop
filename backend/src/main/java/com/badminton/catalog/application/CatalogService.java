@@ -24,12 +24,18 @@ public class CatalogService {
     private final BrandRepository brandRepository;
 
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(String brandSlug, String categorySlug, Pageable pageable) {
-        if (brandSlug != null && !brandSlug.isBlank()) {
-            return productRepository.findByBrandSlug(brandSlug, pageable);
+    public Page<Product> getProducts(String brand, String category, Pageable pageable) {
+        boolean hasBrand = brand != null && !brand.isBlank();
+        boolean hasCategory = category != null && !category.isBlank();
+
+        if (hasBrand && hasCategory) {
+            return productRepository.findByBrandSlugOrIdAndCategorySlugOrId(brand, category, pageable);
         }
-        if (categorySlug != null && !categorySlug.isBlank()) {
-            return productRepository.findByCategorySlug(categorySlug, pageable);
+        if (hasBrand) {
+            return productRepository.findByBrandSlugOrId(brand, pageable);
+        }
+        if (hasCategory) {
+            return productRepository.findByCategorySlugOrId(category, pageable);
         }
         return productRepository.findAll(pageable);
     }

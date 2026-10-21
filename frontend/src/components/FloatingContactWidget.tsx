@@ -6,12 +6,12 @@ import { Mail, Phone, MessageSquare, X, ChevronDown, Send, CheckCircle2, Loader2
 import { CONTACT_CONFIG } from '@/lib/contact-config';
 import { toast } from 'sonner';
 import { SanitizedMarkdown } from '@/app/(storefront)/vot-cau-long/[slug]/components/SanitizedMarkdown';
+import { getProductDetailUrl } from '@/lib/productUrl';
 
 export function FloatingContactWidget() {
   const pathname = usePathname() || '';
   const isPDP = Boolean(
-    (pathname.startsWith('/vot-cau-long/') && pathname.replace('/vot-cau-long/', '').trim().length > 0) ||
-    (pathname.startsWith('/second-hand/') && pathname.replace('/second-hand/', '').trim().length > 0)
+    /^\/(vot-cau-long|giay-cau-long|quan-ao|day-cuoc|phu-kien|qua-cau-long|tui-bao-vot|quan-can|luoi-cau-long|second-hand)\/[^/]+/.test(pathname)
   );
 
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
@@ -47,17 +47,12 @@ export function FloatingContactWidget() {
   const [suggestedChips, setSuggestedChips] = React.useState<string[]>([]);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
-  // Sinh URL động chuẩn xác theo category_id của sản phẩm
+  // Sinh URL động chuẩn xác theo category_id và slug của sản phẩm
   const getProductUrl = (p: { category_id?: string; slug?: string; id?: string }) => {
-    if (p.category_id === 'cat_shoes') return '/giay-cau-long';
-    if (p.category_id === 'cat_bag') return '/tui-bao-vot';
-    if (p.category_id === 'cat_string') return '/day-cuoc';
-    if (p.category_id === 'cat_grip') return '/quan-can';
-    if (p.category_id === 'cat_secondhand') return `/second-hand/${p.slug || p.id}`;
-    if (p.category_id === 'cat_shuttle') return '/qua-cau-long';
-    if (p.category_id === 'cat_apparel') return '/quan-ao';
-    if (p.slug) return `/vot-cau-long/${p.slug}`;
-    return `/vot-cau-long/${p.id}`;
+    return getProductDetailUrl({
+      slug: p.slug || p.id || '',
+      category_id: p.category_id,
+    });
   };
 
   // Làm mới cuộc trò chuyện tư vấn

@@ -30,6 +30,9 @@ export async function fetchFromApi<T>(endpoint: string, options: RequestInit = {
   if (isGet && !options.cache && !(options as any).next) {
     (fetchOptions as any).next = { revalidate: 60 };
   }
+  if (!fetchOptions.signal && typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    fetchOptions.signal = AbortSignal.timeout(8000);
+  }
 
   const response = await fetch(`${API_BASE_URL}${normalizedEndpoint}`, fetchOptions);
 
@@ -76,6 +79,22 @@ export async function getProductDetail(slug: string) {
 
 export async function getCatalogFacets() {
   return fetchFromApi<any>('/catalog/facets');
+}
+
+/**
+ * 2.1. Sàn Vợt cũ công khai (Secondhand Units)
+ */
+export async function getPublicSecondhandUnits(params?: Record<string, any>) {
+  const searchParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        searchParams.set(key, String(val));
+      }
+    });
+  }
+  const queryString = searchParams.toString();
+  return fetchFromApi<any>(`/public/secondhand/units${queryString ? '?' + queryString : ''}`);
 }
 
 /**

@@ -9,6 +9,7 @@ import { PriceTag } from '@/components/ui/PriceTag';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { X, ArrowRight, Scale, ChevronRight } from 'lucide-react';
+import { getProductDetailUrl } from '@/lib/productUrl';
 
 export default function ComparePage() {
   const { items, removeFromCompare, clearCompare } = useCompare();
@@ -92,7 +93,7 @@ export default function ComparePage() {
                     <div className="mt-4 pt-3 border-t border-line flex flex-col gap-2">
                       <PriceTag amount={item.priceFrom} size="md" />
                       <Link
-                        href={`/vot-cau-long/${item.slug}`}
+                        href={getProductDetailUrl({ slug: item.slug })}
                         className="inline-flex items-center justify-center gap-1.5 bg-ink text-bg text-[13px] font-medium min-h-[44px] py-2 px-3 rounded-full hover:opacity-90 transition-opacity touch-target"
                       >
                         <span>Xem chi tiết</span>

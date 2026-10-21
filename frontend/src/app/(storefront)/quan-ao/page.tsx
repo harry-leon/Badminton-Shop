@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { queryDb } from '@/lib/db';
+import { getCatalogProducts } from '@/lib/api';
 import ProductCatalogGrid, { ProductItem } from '../vot-cau-long/ProductCatalogGrid';
 import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
@@ -19,19 +20,44 @@ interface PageProps {
 export default async function ApparelCatalogPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
 
-  const rows = await queryDb<any>(
-    'catalog_db',
-    `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.play_style,
-            p.balance_category, p.shaft_stiffness, p.weight_classes, p.max_tension_lbs,
-            p.image_url,
-            COALESCE(MIN(s.price), 0) as price_from,
-            p.image_url as second_image_url
-     FROM products p
-     LEFT JOIN skus s ON p.id = s.product_id
-     WHERE p.is_active = true AND p.category_id = 'cat_apparel'
-     GROUP BY p.id
-     ORDER BY p.name ASC`
-  );
+  let rows: any[] = [];
+  try {
+    rows = await queryDb<any>(
+      'catalog_db',
+      `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.play_style,
+              p.balance_category, p.shaft_stiffness, p.weight_classes, p.max_tension_lbs,
+              p.image_url,
+              COALESCE(MIN(s.price), 0) as price_from,
+              p.image_url as second_image_url
+       FROM products p
+       LEFT JOIN skus s ON p.id = s.product_id
+       WHERE p.is_active = true AND p.category_id = 'cat_apparel'
+       GROUP BY p.id
+       ORDER BY p.name ASC`
+    );
+  } catch (err) {
+    console.error('[ApparelCatalogPage] queryDb error:', err);
+  }
+
+  if (!rows || rows.length === 0) {
+    try {
+      const apiRes = await getCatalogProducts({ category: 'cat_apparel', size: 50 });
+      const items = apiRes?.data?.content || apiRes?.data || [];
+      rows = items.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        brand: p.brand?.id || p.brand?.name || 'yonex',
+        player_type: p.playerType || p.playStyle || 'Thi đấu chuyên nghiệp',
+        play_style: p.playStyle || null,
+        image_url: p.imageUrl || '/images/categories/cat-ao-cau-long-v2.png',
+        price_from: p.basePrice || 0,
+        second_image_url: p.imageUrl || null,
+      }));
+    } catch (e) {
+      console.error('[ApparelCatalogPage] Fallback API error:', e);
+    }
+  }
 
   let categoryCounts: Record<string, number> = {};
   try {

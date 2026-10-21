@@ -23,6 +23,14 @@ public class SecondhandService {
         return secondhandUnitRepository.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Page<SecondhandUnit> getApprovedUnits(String branchId, Pageable pageable) {
+        if (branchId != null && !branchId.isBlank() && !branchId.equalsIgnoreCase("ALL")) {
+            return secondhandUnitRepository.findByStatusAndBranchId("APPROVED_FOR_SALE", branchId, pageable);
+        }
+        return secondhandUnitRepository.findByStatus("APPROVED_FOR_SALE", pageable);
+    }
+
     @Transactional
     public SecondhandUnit approveResale(String unitId) {
         SecondhandUnit unit = secondhandUnitRepository.findById(unitId)

@@ -43,6 +43,9 @@ public class SecondhandUnit {
     @Column(name = "condition_notes", columnDefinition = "TEXT")
     private String conditionNotes;
 
+    @Column(name = "images_json", columnDefinition = "TEXT")
+    private String imagesJson;
+
     @Column(length = 50)
     @Builder.Default
     private String status = "PURCHASED";

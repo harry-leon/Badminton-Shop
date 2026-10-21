@@ -28,9 +28,15 @@ function getEnvVal(key: string): string | undefined {
 function getDbConfig() {
   const host = getEnvVal('PG_HOST');
   const isLocal = !host || host === '127.0.0.1' || host === 'localhost';
+  let port = parseInt(getEnvVal('PG_PORT') || '5432', 10);
+  if (!isLocal && port === 6543) {
+    // Port 6543 là PgBouncer Transaction Mode không hỗ trợ prepared statements của node-postgres
+    // Port 5432 là Session Mode của Supabase Pooler, hỗ trợ đầy đủ prepared statements
+    port = 5432;
+  }
   return {
     host: host || '127.0.0.1',
-    port: parseInt(getEnvVal('PG_PORT') || '5432', 10),
+    port,
     user: getEnvVal('PG_USER') || 'postgres',
     password: getEnvVal('PG_PASSWORD') || '',
     ssl: isLocal ? false : { rejectUnauthorized: false },
@@ -67,11 +73,6 @@ export function getDbPool(databaseName: string): Pool {
       idleTimeoutMillis: isCf ? 0 : 30000,
     };
 
-    // Khi đang chạy trong môi trường Cloudflare Workers kết nối Supabase Pooler:
-    if (!config.isLocal && isCf) {
-      (poolConfig as any).stream = (ssl: any) => getCloudflareStream(ssl);
-    }
-
     pools[poolKey] = new Pool(poolConfig);
   }
   return pools[poolKey];
@@ -87,6 +88,36 @@ export async function queryDb<T = any>(databaseName: string, text: string, param
     console.error(`[DB CONFIG ERROR] PG_PASSWORD is not set. Cannot connect to ${config.host}:${config.port}`);
     return [];
   }
+
+  // Trên Cloudflare Workers Edge: dùng Client độc lập per-request và đóng ngay lập tức
+  // để tránh lỗi stale socket khi isolate bị freeze giữa các request
+  if (isCloudflareRuntime()) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Client } = require('pg');
+    const targetDb = config.isLocal ? databaseName : (getEnvVal('PG_DATABASE') || 'postgres');
+    const clientConfig: any = {
+      host: config.host,
+      port: config.port,
+      user: config.user,
+      password: config.password,
+      database: targetDb,
+      ssl: config.ssl,
+      connectionTimeoutMillis: 10000,
+    };
+    const client = new Client(clientConfig);
+    try {
+      await client.connect();
+      const res = await client.query(text, params);
+      return res.rows as T[];
+    } catch (err) {
+      console.error(`[DB ERROR] Failed to query ${databaseName}:`, err);
+      return [];
+    } finally {
+      await client.end().catch(() => {});
+    }
+  }
+
+  // Môi trường Node.js local: dùng Connection Pool bình thường
   try {
     const pool = getDbPool(databaseName);
     const client = await pool.connect();

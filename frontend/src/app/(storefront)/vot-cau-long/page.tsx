@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { queryDb } from '@/lib/db';
+import { getCatalogProducts } from '@/lib/api';
 import ProductCatalogGrid, { ProductItem } from './ProductCatalogGrid';
 import { ChevronRight, ShieldCheck } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
@@ -43,29 +44,63 @@ export default async function RacketCatalogPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
 
   // 1. Lấy dữ liệu sản phẩm kèm ảnh phụ góc BACK từ catalog_db
-  const rows = await queryDb<ProductRow>(
-    'catalog_db',
-    `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.play_style,
-            p.balance_category, p.shaft_stiffness, p.weight_classes, p.max_tension_lbs,
-            p.image_url,
-            COALESCE(MIN(s.price), 0) as price_from,
-            COALESCE(AVG(s.balance_point_mm), 305) as balance_point,
-            MIN(s.stiffness) as sku_stiffness,
-            STRING_AGG(DISTINCT s.weight, ', ') as sku_weights,
-            MAX(s.max_tension_lbs) as sku_max_tension,
-            COALESCE(
-              (SELECT pi.image_url 
-               FROM product_images pi 
-               WHERE pi.product_id = p.id AND pi.angle = 'BACK' 
-               LIMIT 1),
-              p.image_url
-            ) as second_image_url
-     FROM products p
-     LEFT JOIN skus s ON p.id = s.product_id
-     WHERE p.is_active = true AND p.category_id = 'cat_racket'
-     GROUP BY p.id
-     ORDER BY p.name ASC`
-  );
+  let rows: ProductRow[] = [];
+  try {
+    rows = await queryDb<ProductRow>(
+      'catalog_db',
+      `SELECT p.id, p.name, p.slug, p.brand_id as brand, p.player_type, p.play_style,
+              p.balance_category, p.shaft_stiffness, p.weight_classes, p.max_tension_lbs,
+              p.image_url,
+              COALESCE(MIN(s.price), 0) as price_from,
+              COALESCE(AVG(s.balance_point_mm), 305) as balance_point,
+              MIN(s.stiffness) as sku_stiffness,
+              STRING_AGG(DISTINCT s.weight, ', ') as sku_weights,
+              MAX(s.max_tension_lbs) as sku_max_tension,
+              COALESCE(
+                (SELECT pi.image_url 
+                 FROM product_images pi 
+                 WHERE pi.product_id = p.id AND pi.angle = 'BACK' 
+                 LIMIT 1),
+                p.image_url
+              ) as second_image_url
+       FROM products p
+       LEFT JOIN skus s ON p.id = s.product_id
+       WHERE p.is_active = true AND p.category_id = 'cat_racket'
+       GROUP BY p.id
+       ORDER BY p.name ASC`
+    );
+  } catch (err) {
+    console.error('[RacketCatalogPage] queryDb error:', err);
+  }
+
+  // Resilient fallback: nếu queryDb trả về rỗng trên Cloudflare Workers Edge, gọi REST API từ Backend
+  if (!rows || rows.length === 0) {
+    try {
+      const apiRes = await getCatalogProducts({ category: 'cat_racket', size: 50 });
+      const items = apiRes?.data?.content || apiRes?.data || [];
+      rows = items.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        brand: p.brand?.id || p.brand?.name || p.brand || 'yonex',
+        player_type: p.playerType || p.playStyle || 'Công thủ toàn diện',
+        play_style: p.playStyle || null,
+        balance_category: p.balanceCategory || null,
+        shaft_stiffness: p.shaftStiffness || 'Cứng',
+        weight_classes: p.weightClasses || '3U, 4U',
+        max_tension_lbs: p.maxTensionLbs || 28,
+        image_url: p.imageUrl || '/images/products/yonex-astrox-99-pro.jpg',
+        second_image_url: null,
+        price_from: p.basePrice || 0,
+        balance_point: 305,
+        sku_stiffness: p.shaftStiffness || 'Cứng',
+        sku_weights: p.weightClasses || '3U, 4U',
+        sku_max_tension: p.maxTensionLbs || 28,
+      }));
+    } catch (e) {
+      console.error('[RacketCatalogPage] Fallback API error:', e);
+    }
+  }
 
   let categoryCounts: Record<string, number> = {};
   try {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
+import { getProductDetailUrl } from '@/lib/productUrl';
 
 interface ChatProduct {
   id: string;
@@ -375,7 +376,7 @@ export async function POST(request: NextRequest) {
             (p) =>
               `- ${p.name} (${p.brand}): Giá ${Number(p.sale_price || p.original_price).toLocaleString('vi-VN')}đ | Lối chơi: ${
                 p.play_style || 'Đa năng'
-              } | Điểm cân bằng: ${p.balance_category || 'Cân bằng'} | Link: /vot-cau-long/${p.slug}`
+              } | Điểm cân bằng: ${p.balance_category || 'Cân bằng'} | Link: ${getProductDetailUrl({ slug: p.slug, category_id: p.category_id })}`
           )
           .join('\n');
 

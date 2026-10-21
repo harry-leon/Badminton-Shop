@@ -360,6 +360,7 @@ function SearchContent() {
                     rating={4.8}
                     salesCount={35}
                     specSummary={p.player_type}
+                    category={p.category_id || p.category}
                   />
                 ))}
               </div>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SafeImage } from '@/components/ui/SafeImage';
 import { Container } from '@/components/ui/Container';
 import { queryDb } from '@/lib/db';
+import { getPublicSecondhandUnits } from '@/lib/api';
 import { Badge } from '@/components/ui/Badge';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -23,8 +24,10 @@ const branchNames: Record<string, { name: string; city: string }> = {
 };
 
 function maskSerialNumber(serial?: string | null): string {
-  if (!serial) return 'Khớp hồ sơ';
-  const parts = serial.trim().split('-');
+  if (!serial || !serial.trim()) return 'Khớp hồ sơ';
+  const trimmed = serial.trim();
+  if (trimmed.includes('***')) return trimmed;
+  const parts = trimmed.split('-');
   if (parts.length >= 4) {
     const prefix = parts.slice(0, parts.length - 2).join('-');
     const suffix = parts[parts.length - 1];
@@ -33,20 +36,54 @@ function maskSerialNumber(serial?: string | null): string {
   if (parts.length === 3) {
     return `${parts[0]}-***-${parts[2]}`;
   }
-  if (serial.length > 8) {
-    return serial.slice(0, 4) + '-***-' + serial.slice(-3);
+  if (parts.length === 2) {
+    return `${parts[0]}-***`;
   }
-  return serial;
+  if (trimmed.length >= 7) {
+    return `${trimmed.slice(0, 3)}-***-${trimmed.slice(-2)}`;
+  }
+  if (trimmed.length >= 4) {
+    return `${trimmed.slice(0, 2)}-***-${trimmed.slice(-1)}`;
+  }
+  return '***';
 }
 
 export default async function SecondHandPage() {
   // R7: Chỉ hiển thị vợt có status = 'APPROVED_FOR_SALE'
-  const rawUnits = await queryDb<any>(
-    'secondhand_db',
-    `SELECT * FROM secondhand_units 
-     WHERE status = 'APPROVED_FOR_SALE' 
-     ORDER BY created_at DESC`
-  );
+  let rawUnits: any[] = [];
+  try {
+    rawUnits = await queryDb<any>(
+      'secondhand_db',
+      `SELECT * FROM secondhand_units 
+       WHERE status = 'APPROVED_FOR_SALE' 
+       ORDER BY created_at DESC`
+    );
+  } catch (err) {
+    console.error('[SecondHandPage] queryDb error:', err);
+  }
+
+  // Resilient fallback: nếu queryDb trả về rỗng hoặc lỗi kết nối trên Cloudflare Workers Edge, gọi REST API từ Backend
+  if (!rawUnits || rawUnits.length === 0) {
+    try {
+      const apiRes = await getPublicSecondhandUnits();
+      const content = apiRes?.data?.content || apiRes?.data || [];
+      rawUnits = content.map((u: any) => ({
+        id: u.id,
+        model_name: u.modelName || u.model_name,
+        grade: u.grade,
+        branch_id: u.branchId || u.branch_id,
+        resale_price: u.resalePrice || u.resale_price,
+        warranty_days: u.warrantyDays || u.warranty_days || 30,
+        condition_notes: u.conditionNotes || u.condition_notes,
+        serial_number: u.serialNumber || u.serial_number,
+        images_json: u.imagesJson || u.images_json || '["/images/secondhand/sh-nanoflare-800-pro.png"]',
+        status: u.status,
+        created_at: u.createdAt || u.created_at,
+      }));
+    } catch (e) {
+      console.error('[SecondHandPage] Fallback API error:', e);
+    }
+  }
 
   const units = (rawUnits || []).map((u: any) => ({
     ...u,
