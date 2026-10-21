@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Save, Lock, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useAdmin } from '@/lib/admin-context';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface Permission {
   id: string;
@@ -54,18 +55,17 @@ export default function AdminRolesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/roles');
-      const data = await res.json();
-      if (res.ok) {
-        setRoles(data.roles || []);
-        setPermissions(data.permissions || []);
-        const active = (data.roles || []).find((r: RoleItem) => r.id === selectedRole) || data.roles[0];
+      const res = await safeFetchJson<{ roles: RoleItem[]; permissions: Permission[]; error?: string }>('/api/admin/roles');
+      if (res.success && res.data) {
+        setRoles(res.data.roles || []);
+        setPermissions(res.data.permissions || []);
+        const active = (res.data.roles || []).find((r: RoleItem) => r.id === selectedRole) || res.data.roles?.[0];
         if (active) {
           setSelectedRole(active.id);
           setCurrentRolePerms(active.permissions || []);
         }
       } else {
-        setMessage({ type: 'error', text: data.error || 'Lỗi khi tải dữ liệu phân quyền' });
+        setMessage({ type: 'error', text: res.error || 'Lỗi khi tải dữ liệu phân quyền' });
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Lỗi kết nối' });

@@ -56,48 +56,48 @@ export default function ComparePage() {
             actionHref="/vot-cau-long"
           />
         ) : (
-          <div className="overflow-x-auto pb-6">
-            <div className="min-w-[640px]">
+          <div className="overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin">
+            <div className="min-w-[540px] sm:min-w-[640px]">
               {/* Hàng sản phẩm (Header) */}
-              <div className="grid grid-cols-4 gap-4 pb-6 border-b border-line">
-                <div className="text-[14px] text-muted font-normal flex items-end pb-2">
+              <div className="grid grid-cols-4 gap-2.5 sm:gap-4 pb-6 border-b border-line">
+                <div className="text-[13px] sm:text-[14px] text-muted font-normal flex items-end pb-2">
                   <span>Thông số đối chiếu</span>
                 </div>
 
                 {items.map((item) => (
-                  <div key={item.id} className="relative bg-surface rounded-2xl p-4 border border-line flex flex-col justify-between">
+                  <div key={item.id} className="relative bg-surface rounded-2xl p-2.5 sm:p-4 border border-line flex flex-col justify-between">
                     <button
                       onClick={() => removeFromCompare(item.id)}
-                      className="absolute top-2 right-2 text-muted hover:text-ink w-11 h-11 min-w-[44px] min-h-[44px] rounded-full hover:bg-bg transition-colors cursor-pointer touch-target touch-target-hit inline-flex items-center justify-center"
+                      className="absolute top-1.5 right-1.5 text-muted hover:text-ink w-8 h-8 sm:w-11 sm:h-11 min-w-[32px] min-h-[32px] sm:min-w-[44px] sm:min-h-[44px] rounded-full hover:bg-bg transition-colors cursor-pointer touch-target touch-target-hit inline-flex items-center justify-center"
                       title="Bỏ so sánh"
                       aria-label={`Bỏ so sánh ${item.name}`}
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
 
                     <div>
-                      <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-3">
+                      <div className="relative w-full aspect-square bg-[#EFECE6] dark:bg-[#18201C] rounded-xl overflow-hidden mb-2 sm:mb-3">
                         <SafeImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill
-                          className="object-contain mix-blend-multiply dark:mix-blend-normal p-3"
+                          className="object-contain mix-blend-multiply dark:mix-blend-normal p-2 sm:p-3"
                         />
                       </div>
-                      <div className="text-[13px] text-muted">{item.brand}</div>
-                      <h3 className="text-[15px] font-medium text-ink line-clamp-2 leading-snug mt-0.5">
+                      <div className="text-[11px] sm:text-[13px] text-muted font-medium uppercase tracking-wide text-brand">{item.brand}</div>
+                      <h3 className="text-[13px] sm:text-[15px] font-medium text-ink line-clamp-2 leading-snug mt-0.5">
                         {item.name}
                       </h3>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-line flex flex-col gap-2">
-                      <PriceTag amount={item.priceFrom} size="md" />
+                    <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-line flex flex-col gap-2">
+                      <PriceTag amount={item.priceFrom} size="sm" />
                       <Link
                         href={getProductDetailUrl({ slug: item.slug })}
-                        className="inline-flex items-center justify-center gap-1.5 bg-ink text-bg text-[13px] font-medium min-h-[44px] py-2 px-3 rounded-full hover:opacity-90 transition-opacity touch-target"
+                        className="inline-flex items-center justify-center gap-1 bg-ink text-bg text-[11px] sm:text-[13px] font-medium min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-full hover:opacity-90 transition-opacity touch-target"
                       >
-                        <span>Xem chi tiết</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <span>Chi tiết</span>
+                        <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </Link>
                     </div>
                   </div>

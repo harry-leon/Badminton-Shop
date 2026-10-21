@@ -29,6 +29,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface JobItem {
   id: string;
@@ -129,18 +130,29 @@ function AdminRecruitmentPageContent() {
   const isManager = user?.role === 'BRANCH_MANAGER';
   const managerBranch = user?.branch_id || 'BR_HN_01';
 
-  const fetchData = async () => {
+  // In-memory cache
+  const loadedTabs = React.useRef<{
+    JOBS?: boolean;
+    APPLICATIONS?: boolean;
+  }>({});
+
+  const fetchData = async (force = false) => {
+    if (!force && loadedTabs.current[activeTab]) return;
     setLoading(true);
     try {
       const branchParam = selectedBranch && selectedBranch !== 'ALL' ? `?branch_id=${selectedBranch}` : '';
-      const res = await fetch(`/api/admin/recruitment${branchParam}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Lỗi tải dữ liệu');
-      setJobs(data.jobs || []);
-      setApplications(data.applications || []);
-      setBranches(data.branches || []);
+      const res = await safeFetchJson<{ jobs: JobItem[]; applications: ApplicationItem[]; branches: any[] }>(`/api/admin/recruitment${branchParam}`);
+      if (!res.success) {
+        toast.error(res.error || 'Lỗi tải dữ liệu');
+        return;
+      }
+      setJobs(res.data?.jobs || []);
+      setApplications(res.data?.applications || []);
+      setBranches(res.data?.branches || []);
+      loadedTabs.current.JOBS = true;
+      loadedTabs.current.APPLICATIONS = true;
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || 'Lỗi kết nối');
     } finally {
       setLoading(false);
     }
@@ -148,10 +160,16 @@ function AdminRecruitmentPageContent() {
 
   useEffect(() => {
     fetchData();
-    const handleRefresh = () => fetchData();
+  }, [activeTab, selectedBranch]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadedTabs.current = {};
+      fetchData(true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, [selectedBranch]);
+  }, [activeTab, selectedBranch]);
 
   const handleOpenCreateModal = () => {
     setEditingJob(null);

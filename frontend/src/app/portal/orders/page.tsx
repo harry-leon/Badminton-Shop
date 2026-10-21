@@ -28,6 +28,7 @@ import {
   Printer
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface OrderLine {
   id: string;
@@ -129,19 +130,27 @@ function AdminOrdersPageContent() {
   // Modal In Hóa đơn / Phiếu xuất kho
   const [printModalOpen, setPrintModalOpen] = useState(false);
 
-  const loadOrders = async () => {
+  // In-memory tab caching
+  const loadedTabs = React.useRef<{
+    ORDERS?: boolean;
+    REFUNDS?: boolean;
+  }>({});
+
+  const loadOrders = async (force = false) => {
+    if (!force && loadedTabs.current[activeTab]) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/orders');
-      const data = await res.json();
-      if (res.ok) {
-        setOrders(data.orders || []);
-        setRefunds(data.refunds || []);
+      const res = await safeFetchJson<{ orders: Order[]; refunds: RefundItem[] }>('/api/admin/orders');
+      if (res.success && res.data) {
+        setOrders(res.data.orders || []);
+        setRefunds(res.data.refunds || []);
+        loadedTabs.current.ORDERS = true;
+        loadedTabs.current.REFUNDS = true;
       } else {
-        toast.error(data.error || 'Lỗi khi tải dữ liệu đơn hàng');
+        toast.error(res.error || 'Lỗi khi tải dữ liệu đơn hàng');
       }
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || 'Lỗi kết nối đơn hàng');
     } finally {
       setLoading(false);
     }
@@ -149,10 +158,16 @@ function AdminOrdersPageContent() {
 
   useEffect(() => {
     loadOrders();
-    const handleRefresh = () => loadOrders();
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadedTabs.current = {};
+      loadOrders(true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     if (selectedOrder) {

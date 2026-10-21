@@ -79,10 +79,10 @@ export function ProductSpecsTable({ product, skus }: ProductSpecsTableProps) {
   return (
     <div className="space-y-6">
       {/* 2 thanh SpecBar trực quan */}
-      <div className="bg-surface p-5 sm:p-6 rounded-2xl border border-line space-y-5">
-        <div className="text-[15px] font-medium text-ink pb-3 border-b border-line flex items-center justify-between">
+      <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-line space-y-4 sm:space-y-5">
+        <div className="text-[14px] sm:text-[15px] font-medium text-ink pb-2.5 sm:pb-3 border-b border-line flex items-center justify-between">
           <span>Thông số thi đấu then chốt</span>
-          <span className="text-[13px] text-muted font-normal">{product.playStyle || product.playerType}</span>
+          <span className="text-[12px] sm:text-[13px] text-muted font-normal">{product.playStyle || product.playerType}</span>
         </div>
 
         <SpecBar
@@ -104,14 +104,14 @@ export function ProductSpecsTable({ product, skus }: ProductSpecsTableProps) {
 
       {/* Bảng 8 thông số chi tiết */}
       <div className="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div className="px-5 py-4 border-b border-line">
-          <h3 className="text-[15px] font-medium text-ink">Bảng thông số kỹ thuật tiêu chuẩn BWF</h3>
+        <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-line">
+          <h3 className="text-[14px] sm:text-[15px] font-medium text-ink">Bảng thông số kỹ thuật tiêu chuẩn BWF</h3>
         </div>
         <div className="divide-y divide-line text-[13px] sm:text-[14px]">
           {specRows.map((row, idx) => (
-            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3 hover:bg-bg/50 transition-colors">
-              <span className="text-muted font-normal sm:w-1/3">{row.label}</span>
-              <span className="text-ink font-medium sm:w-2/3 sm:text-right mt-0.5 sm:mt-0">{row.value}</span>
+            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2.5 sm:px-5 sm:py-3 hover:bg-bg/50 transition-colors">
+              <span className="text-muted font-normal sm:w-1/3 text-[12px] sm:text-[13px]">{row.label}</span>
+              <span className="text-ink font-medium sm:w-2/3 sm:text-right mt-0.5 sm:mt-0 text-[13px] sm:text-[14px]">{row.value}</span>
             </div>
           ))}
         </div>

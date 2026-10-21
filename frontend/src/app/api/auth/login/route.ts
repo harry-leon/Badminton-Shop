@@ -32,16 +32,17 @@ export async function POST(request: NextRequest) {
 
       if (backendRes.ok) {
         const backendData = await backendRes.json();
-        const userInfo = backendData.data?.userInfo || {
-          id: backendData.data?.userId || 'usr-' + Date.now(),
-          username: identifier,
-          email: identifier.includes('@') ? identifier : '',
-          full_name: identifier,
-          phone: '',
-          role: 'CUSTOMER',
-          branch_id: null,
+        const bUser = backendData.data?.user || backendData.data?.userInfo;
+        const userInfo = {
+          id: bUser?.id || backendData.data?.userId || 'usr-' + Date.now(),
+          username: bUser?.username || identifier,
+          email: bUser?.email || (identifier.includes('@') ? identifier : ''),
+          full_name: bUser?.fullName || bUser?.full_name || identifier,
+          phone: bUser?.phone || '',
+          role: bUser?.role || 'CUSTOMER',
+          branch_id: bUser?.branchId || bUser?.branch_id || null,
         };
-        const token = backendData.data?.token || signSessionToken(userInfo);
+        const token = signSessionToken(userInfo);
 
         const response = NextResponse.json({
           success: true,

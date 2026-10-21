@@ -16,6 +16,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface BranchItem {
   id: string;
@@ -49,12 +50,14 @@ export default function AdminBranchesPage() {
   const fetchBranches = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/branches');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Lỗi tải danh sách chi nhánh');
-      setBranches(data.branches || []);
+      const res = await safeFetchJson<{ branches: BranchItem[]; error?: string }>('/api/admin/branches');
+      if (!res.success) {
+        toast.error(res.error || 'Lỗi tải danh sách chi nhánh');
+        return;
+      }
+      setBranches(res.data?.branches || []);
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || 'Lỗi không xác định');
     } finally {
       setLoading(false);
     }

@@ -721,14 +721,14 @@ export default function ProductCatalogGrid({
       <main className="flex-1 min-w-0 space-y-6">
 
         {/* Mobile Toolbar: Filter Trigger Button & Match Counter */}
-        <div className="lg:hidden flex items-center justify-between pb-4 border-b border-line">
+        <div className="lg:hidden flex items-center justify-between gap-2 pb-4 border-b border-line">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-full border border-line bg-surface hover:bg-bg text-[14px] font-medium text-ink transition-colors cursor-pointer shadow-xs active:scale-95 touch-target"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-full border border-line bg-surface hover:bg-bg text-[13px] font-medium text-ink transition-colors cursor-pointer shadow-xs active:scale-95 touch-target"
             aria-label="Mở bộ lọc"
           >
-            <SlidersHorizontal className="w-4 h-4 text-muted" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-muted" />
             <span>Bộ lọc</span>
             {hasActiveFilters && (
               <span className="w-2 h-2 rounded-full bg-brand inline-block" />
@@ -736,15 +736,18 @@ export default function ProductCatalogGrid({
           </button>
 
           <div className="flex items-center gap-2">
+            <span className="text-[12px] text-muted hidden xs:inline">
+              <span className="font-medium text-ink">{filteredProducts.length}</span> sp
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-bg border border-line rounded-lg px-2.5 py-2 min-h-[44px] text-[13px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer touch-target"
+              className="bg-bg border border-line rounded-lg px-2 py-1.5 min-h-[40px] text-[12px] font-normal text-ink focus:outline-none focus:border-ink cursor-pointer touch-target"
             >
               <option value="NAME_ASC">Tên A → Z</option>
               <option value="BEST_SELLERS">Bán chạy nhất</option>
-              <option value="PRICE_ASC">Giá tăng</option>
-              <option value="PRICE_DESC">Giá giảm</option>
+              <option value="PRICE_ASC">Giá tăng dần</option>
+              <option value="PRICE_DESC">Giá giảm dần</option>
             </select>
           </div>
         </div>
@@ -790,7 +793,7 @@ export default function ProductCatalogGrid({
           </div>
         </div>
 
-        {/* Product Grid / Empty State */}
+        {/* Product Grid / Empty State: 2 cols on mobile, 2 on sm, 3 on md, 4 on xl */}
         {filteredProducts.length === 0 ? (
           <EmptyState
             title="Không tìm thấy sản phẩm phù hợp"
@@ -799,7 +802,7 @@ export default function ProductCatalogGrid({
             onAction={resetAllFilters}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}

@@ -29,6 +29,7 @@ export interface BannerData {
 
 const DEFAULT_HERO_BANNERS = [
   {
+    id: 'hero-1',
     title: 'GOSEN RYZONIC 62 — CƯỚC CẦU LÔNG CAO CẤP',
     image_url: '/images/banners/banner-1-gosen-ryzonic.png',
     mobile_image_url: '/images/banners/banner-1-gosen-ryzonic.png',
@@ -47,6 +48,7 @@ const DEFAULT_HERO_BANNERS = [
     features: JSON.stringify(['Sức mạnh bộc phát 10/10', 'Âm thanh nổ vang rền 10/10', 'Độ kiểm soát tối thượng 9.5/10']),
   },
   {
+    id: 'hero-2',
     title: 'BỘ SƯU TẬP BỨT PHÁ TRÊN SÂN CẦU 2026',
     image_url: '/images/banners/banner-3-but-pha-san-cau.png',
     mobile_image_url: '/images/banners/banner-3-but-pha-san-cau.png',
@@ -65,6 +67,7 @@ const DEFAULT_HERO_BANNERS = [
     features: JSON.stringify(['Áo đấu co giãn 4 chiều', 'Giày đệm chống chấn', 'Balo đựng vợt cách nhiệt']),
   },
   {
+    id: 'hero-3',
     title: 'RISE. SMASH. REPEAT. — BỨT PHÁ GIỚI HẠN CỦA BẠN',
     image_url: '/images/banners/banner-4-rise-smash-repeat.png',
     mobile_image_url: '/images/banners/banner-4-rise-smash-repeat.png',
@@ -82,6 +85,76 @@ const DEFAULT_HERO_BANNERS = [
     product_price: 'Phiên bản thi đấu',
     features: JSON.stringify(['Vợt đầu nhẹ trợ lực phản tạt', 'Giày đế gai bám sân tuyệt đối', 'Trang phục thấm hút mồ hôi siêu tốc']),
   },
+  {
+    id: 'popup-1',
+    title: 'SIÊU HỘI SMASH COURT 2026 — VOUCHER 100K MỞ ĐẦU',
+    image_url: 'https://ik.imagekit.io/htqhun/Badminton-shop/banners/popup-uu-dai-mua-he.png',
+    mobile_image_url: 'https://ik.imagekit.io/htqhun/Badminton-shop/banners/popup-uu-dai-mua-he.png',
+    link_url: '/vot-cau-long?sale=true',
+    position: 'PROMO_POPUP',
+    sort_order: 1,
+    is_active: true,
+    badge: 'QUÀ TẶNG THÀNH VIÊN',
+    description: 'Nhập mã SMASH100 giảm ngay 100.000đ cho đơn hàng đầu tiên từ 1.000.000đ khi mua vợt và giày cầu lông chính hãng.',
+    primary_cta_text: 'Nhận ưu đãi ngay',
+    primary_cta_link: '/vot-cau-long',
+    secondary_cta_text: 'Xem chi tiết',
+    secondary_cta_link: '/gioi-thieu',
+    product_tag: 'Ưu đãi chào sân',
+    product_price: 'Giảm 100.000đ',
+    features: JSON.stringify(['Áp dụng toàn hệ thống', 'Tặng quấn cán Yonex AC102']),
+  },
+  {
+    id: 'mid-1',
+    title: 'DỊCH VỤ CĂNG VỢT ĐIỆN TỬ 4 NÚT TIÊU CHUẨN BWF',
+    image_url: '/images/banners/banner-2-yonex-nanoflare.png',
+    mobile_image_url: '/images/banners/banner-2-yonex-nanoflare.png',
+    link_url: '/chi-nhanh',
+    position: 'MID_PAGE',
+    sort_order: 1,
+    is_active: true,
+    badge: 'DỊCH VỤ CHUYÊN NGHIỆP',
+    description: 'Máy đan vợt điện tử Yonex Precision 9.0 chuẩn xác từng lbs. Bảo hành đứt cước 3 ngày đầu tiên.',
+    primary_cta_text: 'Đặt lịch căng cước',
+    primary_cta_link: '/chi-nhanh',
+    secondary_cta_text: 'Bảng giá cước',
+    secondary_cta_link: '/day-cuoc',
+    product_tag: 'Căng vợt lấy ngay 20 phút',
+    product_price: 'Từ 30.000đ',
+    features: JSON.stringify(['Đan 4 nút BWF chuẩn thi đấu', 'Đo tần số độ căng qua app']),
+  },
+  {
+    id: 'promo-1',
+    title: 'COMBO TẬP LUYỆN PRO',
+    image_url: '/images/categories/cat-vot-cau-long-v2.png',
+    link_url: '/vot-cau-long',
+    position: 'HOME_PROMO_3',
+    sort_order: 1,
+    is_active: true,
+    badge: 'GIẢM ĐẾN 20%',
+    description: 'Mua vợt tặng bao đựng cao cấp và cuốn cán',
+    primary_cta_text: 'Mua ngay',
+    primary_cta_link: '/vot-cau-long',
+    product_tag: 'Combo tiết kiệm',
+    product_price: 'Tiết kiệm 20%',
+    features: JSON.stringify([]),
+  },
+  {
+    id: 'usp-1',
+    title: '100% CHÍNH HÃNG — ĐỀN GẤP 10 NẾU HÀNG GIẢ',
+    image_url: '',
+    link_url: '/gioi-thieu',
+    position: 'USP_BAR',
+    sort_order: 1,
+    is_active: true,
+    badge: 'CAM KẾT UY TÍN',
+    description: 'Nhập khẩu chính ngạch đầy đủ hóa đơn VAT và tem chống giả Sunrise / Hải Long',
+    primary_cta_text: 'Tìm hiểu thêm',
+    primary_cta_link: '/gioi-thieu',
+    product_tag: 'Chính hãng',
+    product_price: '',
+    features: JSON.stringify([]),
+  }
 ];
 
 let columnsEnsured = false;
@@ -207,25 +280,15 @@ export async function GET(request: NextRequest) {
 
     let rows = await queryDb('catalog_db', query, params);
 
-    // Tự động seed HERO nếu rỗng
-    if (rows.length === 0 && (!position || position === 'HERO' || position === 'HERO_SLIDER' || position === 'HOME_MAIN')) {
-      for (const b of DEFAULT_HERO_BANNERS) {
-        await queryDb(
-          'catalog_db',
-          `INSERT INTO banners (
-             title, image_url, mobile_image_url, link_url, primary_cta_link, position, sort_order, is_active,
-             badge, description, primary_cta_text, secondary_cta_text, secondary_cta_link,
-             product_tag, product_price, features
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-           ON CONFLICT (id) DO NOTHING`,
-          [
-            b.title, b.image_url, b.mobile_image_url, b.link_url, b.primary_cta_link, b.position, b.sort_order, b.is_active,
-            b.badge, b.description, b.primary_cta_text, b.secondary_cta_text, b.secondary_cta_link,
-            b.product_tag, b.product_price, b.features,
-          ]
-        );
+    // Resilient Fallback nếu database rỗng hoặc socket Edge không truy vấn được
+    if (!rows || rows.length === 0) {
+      if (!position || position === 'ALL') {
+        rows = DEFAULT_HERO_BANNERS;
+      } else if (position === 'HERO' || position === 'HERO_SLIDER' || position === 'HOME_MAIN') {
+        rows = DEFAULT_HERO_BANNERS.filter(b => b.position === 'HERO');
+      } else {
+        rows = DEFAULT_HERO_BANNERS.filter(b => b.position === position);
       }
-      rows = await queryDb('catalog_db', query, params);
     }
 
     const banners = rows.map(mapRowToBanner);

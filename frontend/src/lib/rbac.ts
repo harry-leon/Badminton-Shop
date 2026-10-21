@@ -60,6 +60,32 @@ export async function getRolePermissions(roleId: string): Promise<string[]> {
       if (r.id) permSet.add(normalizePermissionCode(r.id));
     }
 
+    // Default Fallback nếu DB trống
+    if (permSet.size === 0) {
+      const DEFAULT_ROLE_PERMS: Record<string, string[]> = {
+        ADMIN: [
+          'dashboard:view', 'products:view', 'products:manage', 'inventory:view', 'inventory:manage',
+          'orders:view', 'orders:process', 'orders:manage', 'customers:view', 'customers:manage',
+          'staff:view', 'staff:manage', 'roles:view', 'roles:manage', 'branches:view', 'branches:manage',
+          'banners:view', 'banners:manage', 'secondhand:view', 'secondhand:manage', 'warranty:view',
+          'warranty:manage', 'recruitment:view', 'recruitment:manage', 'logs:view', 'settings:manage'
+        ],
+        BRANCH_MANAGER: [
+          'dashboard:view', 'products:view', 'inventory:view', 'inventory:manage', 'orders:view',
+          'orders:process', 'customers:view', 'staff:view', 'secondhand:view', 'secondhand:manage',
+          'warranty:view', 'warranty:manage', 'recruitment:view', 'recruitment:manage', 'logs:view'
+        ],
+        STAFF: [
+          'dashboard:view', 'products:view', 'inventory:view', 'orders:view', 'orders:process',
+          'secondhand:view', 'warranty:view'
+        ],
+        CUSTOMER: [],
+      };
+
+      const defaults = DEFAULT_ROLE_PERMS[roleId] || [];
+      defaults.forEach(p => permSet.add(normalizePermissionCode(p)));
+    }
+
     cache.set(roleId, {
       permissions: permSet,
       expiresAt: now + 30000, // 30 giây TTL
@@ -68,7 +94,25 @@ export async function getRolePermissions(roleId: string): Promise<string[]> {
     return Array.from(permSet);
   } catch (error) {
     console.error(`Lỗi khi lấy quyền cho vai trò ${roleId}:`, error);
-    return [];
+    const FALLBACK_DEFAULTS: Record<string, string[]> = {
+      ADMIN: [
+        'dashboard:view', 'products:view', 'products:manage', 'inventory:view', 'inventory:manage',
+        'orders:view', 'orders:process', 'orders:manage', 'customers:view', 'customers:manage',
+        'staff:view', 'staff:manage', 'roles:view', 'roles:manage', 'branches:view', 'branches:manage',
+        'banners:view', 'banners:manage', 'secondhand:view', 'secondhand:manage', 'warranty:view',
+        'warranty:manage', 'recruitment:view', 'recruitment:manage', 'logs:view', 'settings:manage'
+      ],
+      BRANCH_MANAGER: [
+        'dashboard:view', 'products:view', 'inventory:view', 'inventory:manage', 'orders:view',
+        'orders:process', 'customers:view', 'staff:view', 'secondhand:view', 'secondhand:manage',
+        'warranty:view', 'warranty:manage', 'recruitment:view', 'recruitment:manage', 'logs:view'
+      ],
+      STAFF: [
+        'dashboard:view', 'products:view', 'inventory:view', 'orders:view', 'orders:process',
+        'secondhand:view', 'warranty:view'
+      ],
+    };
+    return (FALLBACK_DEFAULTS[roleId] || []).map(normalizePermissionCode);
   }
 }
 

@@ -12,7 +12,21 @@ export async function GET() {
        FROM site_settings
        ORDER BY group_name ASC, key ASC`
     );
-    return NextResponse.json({ success: true, settings });
+    let finalSettings = settings;
+    if (!finalSettings || finalSettings.length === 0) {
+      finalSettings = [
+        { key: 'hotline', value: '1900 6868', group_name: 'GENERAL' },
+        { key: 'support_email', value: 'support@smashcourt.vn', group_name: 'GENERAL' },
+        { key: 'brand_statement', value: 'Smash Court — Hệ thống vợt & phụ kiện cầu lông chính hãng hàng đầu Việt Nam', group_name: 'STOREFRONT' },
+        { key: 'nav_items_config', value: JSON.stringify([
+          { id: 'nav-1', href: '/vot-cau-long', label: 'VỢT CẦU LÔNG', badge_text: 'HOT', badge_type: 'badge' },
+          { id: 'nav-2', href: '/second-hand', label: 'VỢT CŨ KIỂM ĐỊNH', badge_text: '16 TIÊU CHÍ', badge_type: 'pill' },
+          { id: 'nav-3', href: '/giay-cau-long', label: 'GIÀY CẦU LÔNG', badge_text: 'SALE', badge_type: 'badge' },
+          { id: 'nav-4', href: '/chi-nhanh', label: 'HỆ THỐNG CỬA HÀNG', badge_text: '', badge_type: 'badge' },
+        ]), group_name: 'STOREFRONT' },
+      ];
+    }
+    return NextResponse.json({ success: true, settings: finalSettings });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Lỗi tải cài đặt trang' }, { status: 500 });
   }

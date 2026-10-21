@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
 import { SafeImage } from '@/components/ui/SafeImage';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 export interface BannerItem {
   id: string;
@@ -209,31 +210,49 @@ function AdminBannersPageContent() {
   const [activeModalTab, setActiveModalTab] = useState<'form' | 'preview'>('form');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Load all data
-  const fetchData = async () => {
+  // Cache markers to avoid re-fetching on tab switch
+  const loadedTabs = React.useRef<{
+    banners?: boolean;
+    categories?: boolean;
+    settings?: boolean;
+  }>({});
+
+  const fetchBannersData = async (force = false) => {
+    if (!force && loadedTabs.current.banners) return;
     try {
-      setLoading(true);
-      const [bannersRes, catsRes, settingsRes] = await Promise.all([
-        fetch('/api/admin/banners?position=ALL'),
-        fetch('/api/admin/categories'),
-        fetch('/api/admin/site-settings'),
-      ]);
+      const res = await safeFetchJson<{ banners: BannerItem[] }>('/api/admin/banners?position=ALL');
+      if (res.success && res.data?.banners) {
+        setAllBanners(res.data.banners);
+        loadedTabs.current.banners = true;
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Không thể tải danh sách banner' });
+    }
+  };
 
-      const [bannersData, catsData, settingsData] = await Promise.all([
-        bannersRes.json(),
-        catsRes.json(),
-        settingsRes.json(),
-      ]);
+  const fetchCategoriesData = async (force = false) => {
+    if (!force && loadedTabs.current.categories) return;
+    try {
+      const res = await safeFetchJson<{ categories: CategoryItem[] }>('/api/admin/categories');
+      if (res.success && res.data?.categories) {
+        setCategories(res.data.categories);
+        loadedTabs.current.categories = true;
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Không thể tải danh mục sản phẩm' });
+    }
+  };
 
-      if (bannersData.banners) setAllBanners(bannersData.banners);
-      if (catsData.categories) setCategories(catsData.categories);
-      if (settingsData.settings) {
+  const fetchSettingsData = async (force = false) => {
+    if (!force && loadedTabs.current.settings) return;
+    try {
+      const res = await safeFetchJson<{ settings: SiteSetting[] }>('/api/admin/site-settings');
+      if (res.success && res.data?.settings) {
         const map: Record<string, string> = {};
-        for (const s of settingsData.settings) {
+        for (const s of res.data.settings) {
           map[s.key] = s.value;
         }
         setSettings(map);
-
         if (map['nav_items_config']) {
           try {
             const parsed = JSON.parse(map['nav_items_config']);
@@ -244,20 +263,38 @@ function AdminBannersPageContent() {
             console.error('Lỗi parse nav_items_config', e);
           }
         }
+        loadedTabs.current.settings = true;
       }
     } catch {
-      setMessage({ type: 'error', text: 'Không thể tải toàn bộ dữ liệu CMS' });
-    } finally {
-      setLoading(false);
+      setMessage({ type: 'error', text: 'Không thể tải cấu hình storefront' });
     }
   };
 
+  // On-demand load based on activeTab
+  const loadActiveTabData = async (tab: BannerTab, force = false) => {
+    setLoading(true);
+    if (tab === 'categories') {
+      await fetchCategoriesData(force);
+    } else if (tab === 'settings' || tab === 'navtags') {
+      await fetchSettingsData(force);
+    } else {
+      await fetchBannersData(force);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    fetchData();
-    const handleRefresh = () => fetchData();
+    loadActiveTabData(activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadedTabs.current = {};
+      loadActiveTabData(activeTab, true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, []);
+  }, [activeTab]);
 
   // Filter banners by position
   const heroBanners = allBanners.filter(b => b.position === 'HERO' || b.position === 'HERO_SLIDER' || b.position === 'HOME_MAIN');
@@ -284,11 +321,11 @@ function AdminBannersPageContent() {
         setAllBanners(data.banners);
         setMessage({ type: 'success', text: 'Cập nhật trạng thái hiển thị thành công' });
       } else {
-        fetchData();
+        fetchBannersData(true);
         setMessage({ type: 'error', text: data.error || 'Có lỗi xảy ra khi cập nhật' });
       }
     } catch {
-      fetchData();
+      fetchBannersData(true);
       setMessage({ type: 'error', text: 'Lỗi mạng khi cập nhật trạng thái' });
     }
   };

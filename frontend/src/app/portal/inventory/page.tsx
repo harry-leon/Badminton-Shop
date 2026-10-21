@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   History
 } from 'lucide-react';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface StockLevel {
   id: string;
@@ -127,32 +128,55 @@ function AdminInventoryPageContent() {
   const [poNotes, setPoNotes] = useState('');
   const [submittingPo, setSubmittingPo] = useState(false);
 
-  const loadData = async () => {
+  // In-memory tab caching
+  const loadedTabs = React.useRef<{
+    STOCK?: boolean;
+    TRANSFERS?: boolean;
+    MOVEMENTS?: boolean;
+    PURCHASE_ORDERS?: boolean;
+    branchId?: string;
+  }>({});
+
+  const loadData = async (force = false) => {
+    if (!force && loadedTabs.current.branchId === selectedBranch && loadedTabs.current[activeTab]) {
+      return;
+    }
+
     setLoading(true);
     try {
-      const url = selectedBranch === 'ALL' 
-        ? '/api/admin/inventory' 
-        : `/api/admin/inventory?branchId=${selectedBranch}`;
-      const [res, poRes] = await Promise.all([
-        fetch(url),
-        fetch(`/api/admin/purchase-orders?branchId=${selectedBranch}`).catch(() => null)
-      ]);
-      const data = await res.json();
-      if (res.ok) {
-        setStockLevels(data.stockLevels || []);
-        setTransfers(data.transfers || []);
-        setMovements(data.movements || []);
-        if (data.audit) {
-          setAudit({
-            total_on_hand: parseInt(data.audit.total_on_hand, 10) || 0,
-            total_movements: parseInt(data.audit.total_movements, 10) || 0,
-          });
+      if (activeTab === 'PURCHASE_ORDERS') {
+        const poRes = await safeFetchJson<{ purchaseOrders: PurchaseOrder[] }>(
+          `/api/admin/purchase-orders?branchId=${selectedBranch}`
+        );
+        if (poRes.success && poRes.data?.purchaseOrders) {
+          setPurchaseOrders(poRes.data.purchaseOrders);
+        }
+      } else {
+        const url = selectedBranch === 'ALL' 
+          ? '/api/admin/inventory' 
+          : `/api/admin/inventory?branchId=${selectedBranch}`;
+        const res = await safeFetchJson<{
+          stockLevels: StockLevel[];
+          transfers: StockTransfer[];
+          movements: StockMovement[];
+          audit?: { total_on_hand: string | number; total_movements: string | number };
+        }>(url);
+
+        if (res.success && res.data) {
+          setStockLevels(res.data.stockLevels || []);
+          setTransfers(res.data.transfers || []);
+          setMovements(res.data.movements || []);
+          if (res.data.audit) {
+            setAudit({
+              total_on_hand: parseInt(String(res.data.audit.total_on_hand), 10) || 0,
+              total_movements: parseInt(String(res.data.audit.total_movements), 10) || 0,
+            });
+          }
         }
       }
-      if (poRes && poRes.ok) {
-        const poData = await poRes.json();
-        setPurchaseOrders(poData.purchaseOrders || []);
-      }
+
+      loadedTabs.current.branchId = selectedBranch;
+      loadedTabs.current[activeTab] = true;
     } catch (err) {
       console.error('Lỗi tải dữ liệu kho:', err);
     } finally {
@@ -163,10 +187,16 @@ function AdminInventoryPageContent() {
   useEffect(() => {
     loadData();
     setFromBranch(selectedBranch);
-    const handleRefresh = () => loadData();
+  }, [activeTab, selectedBranch]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadedTabs.current = {};
+      loadData(true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, [selectedBranch]);
+  }, [activeTab, selectedBranch]);
 
   const handleCreateTransfer = async (e: React.FormEvent) => {
     e.preventDefault();

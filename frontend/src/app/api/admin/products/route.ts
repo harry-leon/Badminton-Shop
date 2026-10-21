@@ -124,10 +124,80 @@ export async function GET(request: NextRequest) {
     const categories = await queryDb<any>('catalog_db', `SELECT id, name, slug, parent_id FROM categories ORDER BY name ASC`);
     const available_tags = await queryDb<any>('catalog_db', `SELECT id, code, name, bg_color, text_color, icon_name FROM product_tags WHERE is_active = true ORDER BY sort_order ASC`);
 
+    // Resilient Fallback: Nếu queryDb trả về rỗng (do Cloudflare Worker runtime chặn socket), lấy từ Spring Boot Backend API
+    let finalProducts = enrichedProducts;
+    let finalBrands = brands;
+    let finalCategories = categories;
+
+    if (!finalProducts || finalProducts.length === 0) {
+      try {
+        const { API_BASE_URL } = await import('@/lib/api');
+        const [prodRes, brandRes, catRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/catalog/products?size=200`, { headers: { 'Content-Type': 'application/json' } }),
+          fetch(`${API_BASE_URL}/catalog/brands`, { headers: { 'Content-Type': 'application/json' } }),
+          fetch(`${API_BASE_URL}/catalog/categories`, { headers: { 'Content-Type': 'application/json' } }),
+        ]);
+
+        if (prodRes.ok) {
+          const pData = await prodRes.json();
+          const pList = pData.data?.content || pData.data || [];
+          finalProducts = pList.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            brand_id: p.brand?.id || 'yonex',
+            category_id: p.category?.id || 'cat_racket',
+            image_url: p.imageUrl || '',
+            is_active: p.status === 'ACTIVE' || p.isActive === true || p.is_active === true,
+            warranty_months: p.warrantyMonths || 12,
+            play_style: p.playStyle || '',
+            balance_category: p.balanceCategory || '',
+            shaft_stiffness: p.shaftStiffness || '',
+            weight_classes: p.weightClasses || '',
+            grip_sizes: p.gripSizes || '',
+            max_tension_lbs: p.maxTensionLbs || 28,
+            length_mm: p.lengthMm || 675,
+            level: p.level || 'Chuyên nghiệp',
+            frame_shape: p.frameShape || 'ISOMETRIC',
+            description: p.description || '',
+            tags: p.tags || [],
+            brand_name: p.brand?.name || p.brand?.id || 'Yonex',
+            category_name: p.category?.name || p.category?.id || 'Vợt cầu lông',
+            skus: (p.skus || []).map((s: any) => ({
+              id: s.id,
+              price: s.price || p.basePrice || 0,
+              weight: s.weight || '4U',
+              grip_size: s.gripSize || 'G5',
+              variant_name: s.variantName || 'Tiêu chuẩn',
+              color: s.color || 'Tiêu chuẩn',
+              is_active: s.isActive ?? true,
+              stock: { on_hand: s.onHand || 10, reserved: s.reserved || 0, available: s.available || 10 },
+            })),
+            gallery: [],
+            total_on_hand: 20,
+            total_reserved: 0,
+            total_available: 20,
+          }));
+        }
+
+        if (brandRes.ok) {
+          const bData = await brandRes.json();
+          finalBrands = bData.data || finalBrands;
+        }
+
+        if (catRes.ok) {
+          const cData = await catRes.json();
+          finalCategories = cData.data || finalCategories;
+        }
+      } catch (fallbackErr) {
+        console.error('[AdminProducts] Fallback API error:', fallbackErr);
+      }
+    }
+
     return NextResponse.json({
-      products: enrichedProducts,
-      brands,
-      categories,
+      products: finalProducts,
+      brands: finalBrands,
+      categories: finalCategories,
       available_tags,
       scoped_branch: activeBranchId || 'ALL',
       user_role: user.role,

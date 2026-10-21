@@ -23,6 +23,7 @@ import {
   Search
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface BuybackCase {
   id: string;
@@ -114,17 +115,31 @@ function AdminSecondhandPageContent() {
     tJointSolid: true,
   });
 
-  const loadData = async () => {
+  // Tab cache memory
+  const cachedTabs = React.useRef<{
+    WIZARD?: boolean;
+    RESALE_APPROVAL?: boolean;
+    PRICE_TABLES?: boolean;
+  }>({});
+
+  const loadData = async (force = false) => {
+    if (!force && cachedTabs.current[activeTab]) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/secondhand');
-      const data = await res.json();
-      if (res.ok) {
-        setCases(data.cases || []);
-        setUnits(data.units || []);
-        setPriceTables(data.priceTables || []);
+      const res = await safeFetchJson<{
+        cases: BuybackCase[];
+        units: SecondhandUnit[];
+        priceTables: BuybackPriceRule[];
+      }>('/api/admin/secondhand');
+      if (res.success && res.data) {
+        setCases(res.data.cases || []);
+        setUnits(res.data.units || []);
+        setPriceTables(res.data.priceTables || []);
+        cachedTabs.current.WIZARD = true;
+        cachedTabs.current.RESALE_APPROVAL = true;
+        cachedTabs.current.PRICE_TABLES = true;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lỗi tải dữ liệu secondhand:', err);
     } finally {
       setLoading(false);
@@ -133,10 +148,16 @@ function AdminSecondhandPageContent() {
 
   useEffect(() => {
     loadData();
-    const handleRefresh = () => loadData();
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      cachedTabs.current = {};
+      loadData(true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, []);
+  }, [activeTab]);
 
   // Tự động cập nhật giá sàn khi chọn model hoặc phân hạng từ priceTables
   useEffect(() => {

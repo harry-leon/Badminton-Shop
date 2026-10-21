@@ -102,7 +102,8 @@ export async function queryDb<T = any>(databaseName: string, text: string, param
       password: config.password,
       database: targetDb,
       ssl: config.ssl,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 3000,
+      stream: getCloudflareStream(config.ssl),
     };
     const client = new Client(clientConfig);
     try {

@@ -25,6 +25,26 @@
   }
 }
 
+/* Scroll indicator and touch smoothness for responsive mobile tables */
+@utility table-responsive-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  position: relative;
+  max-width: 100%;
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--line);
+    border-radius: 9999px;
+  }
+}
+
 @layer base {
   html, body {
     max-width: 100%;

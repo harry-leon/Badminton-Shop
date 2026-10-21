@@ -33,8 +33,25 @@ export async function GET(request: NextRequest) {
         (SELECT COALESCE(SUM(quantity), 0) FROM stock_movements) as total_movements
     `);
 
+    let finalStockLevels = stockLevels;
+    if (!finalStockLevels || finalStockLevels.length === 0) {
+      try {
+        const { API_BASE_URL } = await import('@/lib/api');
+        const bParam = branchId && branchId !== 'ALL' ? `?branchId=${branchId}` : '';
+        const invRes = await fetch(`${API_BASE_URL}/inventory/stocks${bParam}`, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (invRes.ok) {
+          const invData = await invRes.json();
+          finalStockLevels = invData.data || [];
+        }
+      } catch (fallbackErr) {
+        console.error('[AdminInventory] Fallback API error:', fallbackErr);
+      }
+    }
+
     return NextResponse.json({
-      stockLevels,
+      stockLevels: finalStockLevels,
       transfers,
       movements,
       audit: auditStats[0] || { total_on_hand: 0, total_movements: 0 },

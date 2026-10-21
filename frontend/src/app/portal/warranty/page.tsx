@@ -25,6 +25,7 @@ import {
   Check
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeFetchJson } from '@/lib/portal-fetch';
 
 interface Claim {
   id: string;
@@ -107,20 +108,32 @@ function AdminWarrantyPageContent() {
   const [editingPolicy, setEditingPolicy] = useState<WarrantyPolicy | null>(null);
   const [submittingPolicy, setSubmittingPolicy] = useState(false);
 
-  const loadData = async () => {
+  // Cache memory for warranty tabs
+  const loadedTabs = React.useRef<{
+    CLAIMS?: boolean;
+    POLICIES?: boolean;
+  }>({});
+
+  const loadData = async (force = false) => {
+    if (!force && loadedTabs.current[activeTab]) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/warranty');
-      const data = await res.json();
-      if (res.ok) {
-        setClaims(data.claims || []);
-        setEvents(data.events || []);
-        setPolicies(data.policies || []);
+      const res = await safeFetchJson<{
+        claims: Claim[];
+        events: ClaimEvent[];
+        policies: WarrantyPolicy[];
+      }>('/api/admin/warranty');
+      if (res.success && res.data) {
+        setClaims(res.data.claims || []);
+        setEvents(res.data.events || []);
+        setPolicies(res.data.policies || []);
+        loadedTabs.current.CLAIMS = true;
+        loadedTabs.current.POLICIES = true;
       } else {
-        toast.error(data.error || 'Lỗi khi tải dữ liệu bảo hành');
+        toast.error(res.error || 'Lỗi khi tải dữ liệu bảo hành');
       }
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || 'Lỗi kết nối bảo hành');
     } finally {
       setLoading(false);
     }
@@ -128,10 +141,16 @@ function AdminWarrantyPageContent() {
 
   useEffect(() => {
     loadData();
-    const handleRefresh = () => loadData();
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadedTabs.current = {};
+      loadData(true);
+    };
     window.addEventListener('portal-refresh', handleRefresh);
     return () => window.removeEventListener('portal-refresh', handleRefresh);
-  }, []);
+  }, [activeTab]);
 
   const handleUpdateStatus = async (
     claimId: string, 

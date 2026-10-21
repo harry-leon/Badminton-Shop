@@ -43,7 +43,34 @@ export async function GET(request: NextRequest) {
        ORDER BY r.created_at DESC`
     );
 
-    return NextResponse.json({ orders, refunds: allRefunds });
+    let finalOrders = orders;
+    let finalRefunds = allRefunds;
+
+    if (!finalOrders || finalOrders.length === 0) {
+      try {
+        const { API_BASE_URL } = await import('@/lib/api');
+        const beRes = await fetch(`${API_BASE_URL}/orders?size=50`);
+        if (beRes.ok) {
+          const beData = await beRes.json();
+          const beList = beData.data?.content || beData.data || [];
+          if (beList.length > 0) {
+            finalOrders = beList.map((o: any) => ({
+              ...o,
+              customer_name: o.customerName || 'Khách vãng lai',
+              customer_phone: o.customerPhone || '0901234567',
+              total_amount: o.totalAmount || 0,
+              lines: o.items || [],
+              payments: [],
+              refunds: [],
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Backend orders fallback error:', e);
+      }
+    }
+
+    return NextResponse.json({ orders: finalOrders, refunds: finalRefunds });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

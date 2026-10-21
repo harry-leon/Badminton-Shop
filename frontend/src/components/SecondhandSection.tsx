@@ -215,55 +215,55 @@ export function SecondhandSection({ initialItems }: { initialItems?: SecondhandC
             </p>
           </div>
 
-          {/* 4 Cam Kết Thẳng Hàng Cùng Đường Kẻ Phân Cách Dọc */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-[#E2DDD2] dark:lg:divide-line/60">
+          {/* 4 Cam Kết Thẳng Hàng: 1 Cột trên mobile, 2 cột trên sm, 4 trên lg */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 lg:gap-0 lg:divide-x lg:divide-[#E2DDD2] dark:lg:divide-line/60">
             {/* Box 1 */}
-            <div className="flex items-center gap-4 lg:px-6 first:pl-0">
-              <div className="w-12 h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
-                <ShieldCheck className="w-6 h-6 text-[#4EBA86]" />
+            <div className="flex items-center gap-3.5 sm:gap-4 p-3 sm:p-0 bg-white/60 dark:bg-surface/60 sm:bg-transparent rounded-xl sm:rounded-none border sm:border-0 border-line/60 lg:px-6 first:pl-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-[#4EBA86]" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Kiểm định 5 bước</h4>
-                <p className="text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Kiểm định 5 bước</h4>
+                <p className="text-[11px] sm:text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
                   Kiểm tra khung, dây, cán, trọng lượng, độ cân bằng
                 </p>
               </div>
             </div>
 
             {/* Box 2 */}
-            <div className="flex items-center gap-4 lg:px-6">
-              <div className="w-12 h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Clock className="w-6 h-6 text-[#4EBA86]" />
+            <div className="flex items-center gap-3.5 sm:gap-4 p-3 sm:p-0 bg-white/60 dark:bg-surface/60 sm:bg-transparent rounded-xl sm:rounded-none border sm:border-0 border-line/60 lg:px-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#4EBA86]" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Bảo hành 1-3 tháng</h4>
-                <p className="text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Bảo hành 1-3 tháng</h4>
+                <p className="text-[11px] sm:text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
                   Yên tâm sử dụng với chính sách rõ ràng
                 </p>
               </div>
             </div>
 
             {/* Box 3 */}
-            <div className="flex items-center gap-4 lg:px-6">
-              <div className="w-12 h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
-                <RotateCcw className="w-6 h-6 text-[#4EBA86]" />
+            <div className="flex items-center gap-3.5 sm:gap-4 p-3 sm:p-0 bg-white/60 dark:bg-surface/60 sm:bg-transparent rounded-xl sm:rounded-none border sm:border-0 border-line/60 lg:px-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 text-[#4EBA86]" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Đổi trả linh hoạt</h4>
-                <p className="text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Đổi trả linh hoạt</h4>
+                <p className="text-[11px] sm:text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
                   7 ngày nếu có lỗi kỹ thuật
                 </p>
               </div>
             </div>
 
             {/* Box 4 */}
-            <div className="flex items-center gap-4 lg:px-6 last:pr-0">
-              <div className="w-12 h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Store className="w-6 h-6 text-[#4EBA86]" />
+            <div className="flex items-center gap-3.5 sm:gap-4 p-3 sm:p-0 bg-white/60 dark:bg-surface/60 sm:bg-transparent rounded-xl sm:rounded-none border sm:border-0 border-line/60 lg:px-6 last:pr-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#11382B] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Store className="w-5 h-5 sm:w-6 sm:h-6 text-[#4EBA86]" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Trực tiếp tại cửa hàng</h4>
-                <p className="text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-[#112F25] dark:text-zinc-100">Trực tiếp tại cửa hàng</h4>
+                <p className="text-[11px] sm:text-[12px] text-[#556960] dark:text-zinc-400 leading-snug">
                   Kiểm tra & thử vợt trước khi mua
                 </p>
               </div>
@@ -339,24 +339,24 @@ export function SecondhandSection({ initialItems }: { initialItems?: SecondhandC
           </div>
 
           {/* ========================================================= */}
-          {/* LƯỚI 8 SẢN PHẨM (CARD STYLE EXACT THEO ẢNH CHỤP) */}
+          {/* LƯỚI 8 SẢN PHẨM: 2 CỘT TRÊN MOBILE, 2 TRÊN SM, 4 TRÊN LG */}
           {/* ========================================================= */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
             {sortedItems.map((item) => {
               return (
                 <div
                   key={item.id}
-                  className="group relative rounded-2xl bg-white dark:bg-surface border border-[#EBE8E1] dark:border-line/70 hover:border-[#11382B]/40 hover:shadow-lg transition-all duration-200 flex flex-col justify-between p-4"
+                  className="group relative rounded-2xl bg-white dark:bg-surface border border-[#EBE8E1] dark:border-line/70 hover:border-[#11382B]/40 hover:shadow-lg transition-all duration-200 flex flex-col justify-between p-2.5 sm:p-4"
                 >
                   {/* Top card row: Tag "Đã kiểm định" */}
                   <div className="flex items-center justify-between z-10">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#E6F4EA] text-[#1E7E34] dark:bg-emerald-950/80 dark:text-emerald-400">
+                    <span className="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-bold bg-[#E6F4EA] text-[#1E7E34] dark:bg-emerald-950/80 dark:text-emerald-400">
                       Đã kiểm định
                     </span>
                   </div>
 
                   {/* Product Image — Nền trắng sạch sẽ, căn giữa hoàn hảo */}
-                  <div className="relative w-full aspect-square my-3 overflow-hidden flex items-center justify-center p-3">
+                  <div className="relative w-full aspect-square my-2 sm:my-3 overflow-hidden flex items-center justify-center p-1.5 sm:p-3">
                     <SafeImage
                       src={item.imageUrl}
                       alt={item.name}
@@ -366,39 +366,36 @@ export function SecondhandSection({ initialItems }: { initialItems?: SecondhandC
                   </div>
 
                   {/* Product Info */}
-                  <div className="space-y-2 pt-1">
+                  <div className="space-y-1.5 sm:space-y-2 pt-1">
                     {/* Tên sản phẩm */}
-                    <h3 className="font-bold text-[14px] text-[#112F25] dark:text-ink leading-snug line-clamp-1 group-hover:text-brand transition-colors">
+                    <h3 className="font-bold text-[12px] sm:text-[14px] text-[#112F25] dark:text-ink leading-snug line-clamp-2 h-[2rem] sm:h-[2.5rem] group-hover:text-brand transition-colors">
                       {item.name}
                     </h3>
 
                     {/* Tình trạng & Bảo hành */}
-                    <div className="text-[12px] text-[#6B7280] dark:text-muted flex items-center gap-1.5 font-normal">
-                      <span>Tình trạng: <strong className="font-medium text-[#374151] dark:text-zinc-200">{item.condition}</strong></span>
-                      <span className="text-[#D1D5DB]">|</span>
-                      <span>Bảo hành: <strong className="font-medium text-[#374151] dark:text-zinc-200">{item.warranty}</strong></span>
+                    <div className="text-[11px] sm:text-[12px] text-[#6B7280] dark:text-muted flex items-center gap-1 font-normal flex-wrap">
+                      <span>Độ mới: <strong className="font-medium text-[#374151] dark:text-zinc-200">{item.condition}</strong></span>
+                      <span className="text-[#D1D5DB] hidden xs:inline">|</span>
+                      <span>BH: <strong className="font-medium text-[#374151] dark:text-zinc-200">{item.warranty}</strong></span>
                     </div>
 
                     {/* Specs Badges (Bo tròn kiểu pill, viền mảnh nhẹ nhàng) */}
-                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border border-[#E5E7EB] dark:border-line bg-transparent text-[#6B7280] dark:text-zinc-300">
+                    <div className="hidden xs:flex items-center gap-1 flex-wrap pt-0.5">
+                      <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] font-medium border border-[#E5E7EB] dark:border-line bg-transparent text-[#6B7280] dark:text-zinc-300">
                         {item.weight}
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border border-[#E5E7EB] dark:border-line bg-transparent text-[#6B7280] dark:text-zinc-300">
+                      <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] font-medium border border-[#E5E7EB] dark:border-line bg-transparent text-[#6B7280] dark:text-zinc-300">
                         {item.grip}
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border border-[#E5E7EB] dark:border-line bg-transparent text-[#6B7280] dark:text-zinc-300">
-                        {item.balance}
                       </span>
                     </div>
 
                     {/* Giá bán và giá gạch */}
-                    <div className="pt-1 flex items-baseline gap-2">
-                      <span className="text-[16px] font-bold text-[#112F25] dark:text-ink">
+                    <div className="pt-0.5 sm:pt-1 flex items-baseline gap-1.5 flex-wrap">
+                      <span className="text-[13px] sm:text-[16px] font-bold text-[#112F25] dark:text-ink">
                         {formatVND(item.resalePrice)}
                       </span>
                       {item.originalPrice > item.resalePrice && (
-                        <span className="text-[12px] text-[#9CA3AF] line-through">
+                        <span className="text-[10px] sm:text-[12px] text-[#9CA3AF] line-through">
                           {formatVND(item.originalPrice)}
                         </span>
                       )}
@@ -408,15 +405,16 @@ export function SecondhandSection({ initialItems }: { initialItems?: SecondhandC
                     <button
                       type="button"
                       onClick={() => handleAddToCart(item)}
-                      className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-[#11382B] hover:bg-[#184E3D] text-white text-[13px] font-semibold transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+                      className="w-full mt-1.5 sm:mt-2 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 px-2 sm:px-4 rounded-full bg-[#11382B] hover:bg-[#184E3D] text-white text-[11px] sm:text-[13px] font-semibold transition-all cursor-pointer shadow-xs active:scale-[0.98] min-h-[36px] sm:min-h-[42px] touch-target"
                     >
                       {/* Icon xe đẩy giỏ hàng chuẩn theo ảnh */}
-                      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="8" cy="21" r="1" />
                         <circle cx="19" cy="21" r="1" />
                         <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
                       </svg>
-                      <span>Thêm vào giỏ</span>
+                      <span className="hidden xs:inline">Thêm vào giỏ</span>
+                      <span className="xs:hidden">Thêm giỏ</span>
                     </button>
                   </div>
                 </div>

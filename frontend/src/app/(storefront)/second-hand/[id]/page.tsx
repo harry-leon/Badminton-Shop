@@ -469,32 +469,32 @@ export default async function SecondHandDetailPage({ params }: PageProps) {
                   </span>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[580px] text-left text-[13px]">
+                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin">
+                  <table className="w-full min-w-[500px] sm:min-w-[580px] text-left text-[12px] sm:text-[13px]">
                     <thead>
                       <tr className="border-b border-line text-muted font-normal">
-                        <th className="pb-2.5 font-normal">#</th>
-                        <th className="pb-2.5 font-normal">Hạng mục kiểm định</th>
-                        <th className="pb-2.5 font-normal hidden sm:table-cell">Phương pháp kiểm tra</th>
-                        <th className="pb-2.5 font-normal text-center">Điểm số</th>
-                        <th className="pb-2.5 font-normal text-center">Kết quả</th>
-                        <th className="pb-2.5 font-normal">Ghi chú chuyên viên</th>
+                        <th className="pb-2 font-normal w-8">#</th>
+                        <th className="pb-2 font-normal">Hạng mục kiểm định</th>
+                        <th className="pb-2 font-normal hidden sm:table-cell">Phương pháp kiểm tra</th>
+                        <th className="pb-2 font-normal text-center w-14">Điểm</th>
+                        <th className="pb-2 font-normal text-center w-24">Kết quả</th>
+                        <th className="pb-2 font-normal">Ghi chú chuyên viên</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-line">
                       {group.items.map((item) => (
                         <tr key={item.id} className="hover:bg-bg/50 transition-colors">
-                          <td className="py-3 text-muted">{item.id}</td>
-                          <td className="py-3 font-medium text-ink">{item.name}</td>
-                          <td className="py-3 text-muted hidden sm:table-cell">{item.method}</td>
-                          <td className="py-3 text-center font-mono font-medium text-brand">{item.score}</td>
-                          <td className="py-3 text-center">
-                            <span className="inline-flex items-center gap-1 text-[13px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                          <td className="py-2.5 text-muted">{item.id}</td>
+                          <td className="py-2.5 font-medium text-ink">{item.name}</td>
+                          <td className="py-2.5 text-muted hidden sm:table-cell">{item.method}</td>
+                          <td className="py-2.5 text-center font-mono font-medium text-brand">{item.score}</td>
+                          <td className="py-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-[13px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               <span>{item.status}</span>
                             </span>
                           </td>
-                          <td className="py-3 text-muted leading-relaxed font-normal">{item.notes}</td>
+                          <td className="py-2.5 text-muted leading-relaxed font-normal text-[11px] sm:text-[13px]">{item.notes}</td>
                         </tr>
                       ))}
                     </tbody>

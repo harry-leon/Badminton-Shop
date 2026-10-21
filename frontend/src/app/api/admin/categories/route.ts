@@ -11,7 +11,20 @@ export async function GET() {
        FROM categories
        ORDER BY sort_order ASC, name ASC`
     );
-    return NextResponse.json({ success: true, categories });
+    let finalCategories = categories;
+    if (!finalCategories || finalCategories.length === 0) {
+      try {
+        const { API_BASE_URL } = await import('@/lib/api');
+        const beRes = await fetch(`${API_BASE_URL}/catalog/categories`);
+        if (beRes.ok) {
+          const beData = await beRes.json();
+          finalCategories = beData.data || [];
+        }
+      } catch (e) {
+        console.warn('Backend categories fallback error:', e);
+      }
+    }
+    return NextResponse.json({ success: true, categories: finalCategories });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Lỗi tải danh mục' }, { status: 500 });
   }

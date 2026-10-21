@@ -612,8 +612,8 @@ export default async function HomePage() {
             <div className="w-14 h-1 bg-[#11382B] dark:bg-emerald-500 rounded-full mt-0.5" />
           </div>
 
-          {/* 3 Thẻ Sale Off hiển thị động từ activePromoBanners */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 3 Thẻ Sale Off hiển thị động từ activePromoBanners: tối ưu padding & bố cục trên mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-6">
             {activePromoBanners.slice(0, 3).map((promo: any, index: number) => {
               const badgeText = promo.badge || (index === 0 ? 'Ưu đãi tuần này' : index === 1 ? 'Bộ sưu tập mới' : 'Độc quyền SmashCourt');
               const titleText = promo.title || 'Ưu đãi đặc biệt';
@@ -625,36 +625,36 @@ export default async function HomePage() {
               return (
                 <div
                   key={promo.id || `promo-${index}`}
-                  className="bg-white dark:bg-surface border border-[#ECE8DE] dark:border-line rounded-3xl p-6 sm:p-7 flex items-center justify-between shadow-2xs hover:shadow-md transition-all group overflow-hidden"
+                  className="bg-white dark:bg-surface border border-[#ECE8DE] dark:border-line rounded-2xl sm:rounded-3xl p-4 sm:p-7 flex items-center justify-between shadow-2xs hover:shadow-md transition-all group overflow-hidden"
                 >
-                  <div className="space-y-2.5 z-10 max-w-[62%]">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#11382B] text-white text-[13px] font-medium">
+                  <div className="space-y-2 sm:space-y-2.5 z-10 max-w-[64%]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#11382B] text-white text-[11px] sm:text-[13px] font-medium">
                       {index === 0 ? (
-                        <Flame className="w-3.5 h-3.5 text-[#4EBA86] fill-[#4EBA86]" />
+                        <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#4EBA86] fill-[#4EBA86]" />
                       ) : index === 1 ? (
-                        <Gift className="w-3.5 h-3.5 text-[#4EBA86]" />
+                        <Gift className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#4EBA86]" />
                       ) : (
-                        <Sparkles className="w-3.5 h-3.5 text-[#4EBA86]" />
+                        <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#4EBA86]" />
                       )}
                       <span>{badgeText}</span>
                     </span>
-                    <h3 className="text-[18px] sm:text-[19px] font-medium tracking-tight text-[#112F25] dark:text-zinc-100 leading-snug">
+                    <h3 className="text-[16px] sm:text-[19px] font-bold sm:font-medium tracking-tight text-[#112F25] dark:text-zinc-100 leading-snug">
                       {titleText}
                     </h3>
-                    <p className="text-[13px] text-[#556960] dark:text-zinc-400 leading-relaxed font-normal">
+                    <p className="text-[12px] sm:text-[13px] text-[#556960] dark:text-zinc-400 leading-relaxed font-normal line-clamp-2">
                       {descText}
                     </p>
-                    <div className="pt-2">
+                    <div className="pt-1.5 sm:pt-2">
                       <Link
                         href={ctaLink}
-                        className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#11382B] hover:bg-[#184E3D] text-white text-[13px] font-medium transition-all shadow-xs cursor-pointer group-hover:gap-2.5"
+                        className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 min-h-[38px] sm:min-h-[42px] rounded-full bg-[#11382B] hover:bg-[#184E3D] text-white text-[12px] sm:text-[13px] font-medium transition-all shadow-xs cursor-pointer group-hover:gap-2.5 touch-target"
                       >
                         <span>{ctaText}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
-                  <div className="w-28 sm:w-32 h-44 sm:h-48 relative shrink-0 group-hover:scale-105 transition-transform duration-300 select-none flex items-center justify-center">
+                  <div className="w-24 sm:w-32 h-36 sm:h-48 relative shrink-0 group-hover:scale-105 transition-transform duration-300 select-none flex items-center justify-center">
                     <SafeImage
                       src={imgSrc}
                       alt={titleText}
@@ -741,21 +741,21 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-6">
             <Link
               href="/vot-cau-long?playstyle=THIÊN+CÔNG"
-              className="group p-6 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-8"
+              className="group p-4 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-4 sm:space-y-8"
             >
-              <div className="space-y-2">
-                <span className="text-[13px] text-muted font-normal">Head Heavy · Đũa cứng</span>
-                <h3 className="text-xl font-medium text-ink group-hover:text-brand transition-colors">
+              <div className="space-y-1.5 sm:space-y-2">
+                <span className="text-[12px] sm:text-[13px] text-muted font-normal">Head Heavy · Đũa cứng</span>
+                <h3 className="text-lg sm:text-xl font-medium text-ink group-hover:text-brand transition-colors">
                   Thiên công uy lực
                 </h3>
-                <p className="text-[14px] text-muted leading-relaxed font-normal">
+                <p className="text-[13px] sm:text-[14px] text-muted leading-relaxed font-normal">
                   Đầu vợt đầm, thân cứng trợ lực cho các cú đập cầu cắm sân và tấn công dồn ép từ cuối sân.
                 </p>
               </div>
-              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-4 border-t border-line">
+              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-3 sm:pt-4 border-t border-line">
                 <span>Khám phá dòng thiên công</span>
                 <ChevronRight className="w-4 h-4 text-muted group-hover:translate-x-1 transition-transform" />
               </div>
@@ -763,18 +763,18 @@ export default async function HomePage() {
 
             <Link
               href="/vot-cau-long?playstyle=CÂN+BẰNG"
-              className="group p-6 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-8"
+              className="group p-4 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-4 sm:space-y-8"
             >
-              <div className="space-y-2">
-                <span className="text-[13px] text-muted font-normal">Even Balance · Linh hoạt</span>
-                <h3 className="text-xl font-medium text-ink group-hover:text-brand transition-colors">
+              <div className="space-y-1.5 sm:space-y-2">
+                <span className="text-[12px] sm:text-[13px] text-muted font-normal">Even Balance · Linh hoạt</span>
+                <h3 className="text-lg sm:text-xl font-medium text-ink group-hover:text-brand transition-colors">
                   Công thủ toàn diện
                 </h3>
-                <p className="text-[14px] text-muted leading-relaxed font-normal">
+                <p className="text-[13px] sm:text-[14px] text-muted leading-relaxed font-normal">
                   Cân bằng trọng lượng hoàn hảo, dễ thuần, linh hoạt chuyển đổi giữa gài lưới và ve cầu thoát hiểm.
                 </p>
               </div>
-              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-4 border-t border-line">
+              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-3 sm:pt-4 border-t border-line">
                 <span>Khám phá dòng cân bằng</span>
                 <ChevronRight className="w-4 h-4 text-muted group-hover:translate-x-1 transition-transform" />
               </div>
@@ -782,18 +782,18 @@ export default async function HomePage() {
 
             <Link
               href="/vot-cau-long?playstyle=THIÊN+THỦ"
-              className="group p-6 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-8"
+              className="group p-4 sm:p-8 rounded-2xl bg-surface border border-line hover:border-ink/30 transition-all flex flex-col justify-between space-y-4 sm:space-y-8"
             >
-              <div className="space-y-2">
-                <span className="text-[13px] text-muted font-normal">Head Light · Tốc độ cao</span>
-                <h3 className="text-xl font-medium text-ink group-hover:text-brand transition-colors">
+              <div className="space-y-1.5 sm:space-y-2">
+                <span className="text-[12px] sm:text-[13px] text-muted font-normal">Head Light · Tốc độ cao</span>
+                <h3 className="text-lg sm:text-xl font-medium text-ink group-hover:text-brand transition-colors">
                   Phản tạt tốc độ
                 </h3>
-                <p className="text-[14px] text-muted leading-relaxed font-normal">
+                <p className="text-[13px] sm:text-[14px] text-muted leading-relaxed font-normal">
                   Đầu nhẹ, thân đũa siêu đàn hồi, tối ưu tốc độ vung vợt trong các pha đôi công chớp nhoáng trên lưới.
                 </p>
               </div>
-              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-4 border-t border-line">
+              <div className="flex items-center justify-between text-[13px] text-ink font-medium pt-3 sm:pt-4 border-t border-line">
                 <span>Khám phá dòng thiên thủ</span>
                 <ChevronRight className="w-4 h-4 text-muted group-hover:translate-x-1 transition-transform" />
               </div>
@@ -924,42 +924,42 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-bg border border-line space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-6">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg border border-line space-y-2.5 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-medium text-ink">Chi nhánh Quận 1</h4>
+                <h4 className="text-[15px] sm:text-[16px] font-medium text-ink">Chi nhánh Quận 1</h4>
                 <Badge variant="brand">TP. Hồ Chí Minh</Badge>
               </div>
-              <p className="text-[14px] text-muted font-normal leading-relaxed">
+              <p className="text-[13px] sm:text-[14px] text-muted font-normal leading-relaxed">
                 {siteSettings.address_hcm || '123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1'}
               </p>
-              <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
+              <div className="text-[12px] sm:text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: {siteSettings.business_hours || '08:30 – 21:30 hàng ngày'}
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-bg border border-line space-y-3">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg border border-line space-y-2.5 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-medium text-ink">Chi nhánh Cầu Giấy</h4>
+                <h4 className="text-[15px] sm:text-[16px] font-medium text-ink">Chi nhánh Cầu Giấy</h4>
                 <Badge variant="brand">Hà Nội</Badge>
               </div>
-              <p className="text-[14px] text-muted font-normal leading-relaxed">
+              <p className="text-[13px] sm:text-[14px] text-muted font-normal leading-relaxed">
                 {siteSettings.address_hn || '45 Xuân Thủy, Phường Dịch Vọng Hậu, Quận Cầu Giấy'}
               </p>
-              <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
+              <div className="text-[12px] sm:text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: {siteSettings.business_hours || '08:30 – 21:30 hàng ngày'}
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-bg border border-line space-y-3">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg border border-line space-y-2.5 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-medium text-ink">Chi nhánh Hải Châu</h4>
+                <h4 className="text-[15px] sm:text-[16px] font-medium text-ink">Chi nhánh Hải Châu</h4>
                 <Badge variant="brand">Đà Nẵng</Badge>
               </div>
-              <p className="text-[14px] text-muted font-normal leading-relaxed">
+              <p className="text-[13px] sm:text-[14px] text-muted font-normal leading-relaxed">
                 {siteSettings.address_dn || '78 Nguyễn Văn Linh, Phường Nam Dương, Quận Hải Châu'}
               </p>
-              <div className="text-[13px] text-muted font-normal pt-2 border-t border-line">
+              <div className="text-[12px] sm:text-[13px] text-muted font-normal pt-2 border-t border-line">
                 Mở cửa: {siteSettings.business_hours || '08:30 – 21:30 hàng ngày'}
               </div>
             </div>

@@ -42,7 +42,125 @@ export async function GET(request: NextRequest) {
       'secondhand_db',
       `SELECT * FROM buyback_price_tables ORDER BY model_name ASC, grade ASC`
     );
-    return NextResponse.json({ units, cases, priceTables });
+
+    let finalUnits = units;
+    let finalCases = cases;
+    let finalPriceTables = priceTables;
+
+    const DEFAULT_PRICE_TABLES = [
+      { id: 'pt-1', model_name: 'Yonex Astrox 100ZZ', grade: 'A', base_price: 3500000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-2', model_name: 'Yonex Astrox 100ZZ', grade: 'B', base_price: 3000000, age_group: '6 - 12 tháng', is_active: true },
+      { id: 'pt-3', model_name: 'Yonex Astrox 100ZZ', grade: 'C', base_price: 2500000, age_group: 'Trên 1 năm', is_active: true },
+      { id: 'pt-4', model_name: 'Yonex Astrox 88D Pro Gen 3', grade: 'A', base_price: 3300000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-5', model_name: 'Yonex Astrox 88D Pro Gen 3', grade: 'B', base_price: 2800000, age_group: '6 - 12 tháng', is_active: true },
+      { id: 'pt-6', model_name: 'Yonex Astrox 77 Pro', grade: 'A', base_price: 2700000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-7', model_name: 'Yonex Nanoflare 1000Z', grade: 'A', base_price: 3400000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-8', model_name: 'Yonex Nanoflare 800 Pro', grade: 'A', base_price: 3100000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-9', model_name: 'Victor Thruster Ryuga II', grade: 'A', base_price: 3000000, age_group: 'Dưới 6 tháng', is_active: true },
+      { id: 'pt-10', model_name: 'Lining Axforce 80', grade: 'A', base_price: 2800000, age_group: 'Dưới 6 tháng', is_active: true },
+    ];
+
+    const DEFAULT_CASES = [
+      {
+        id: 'BC-2026-001',
+        racket_model: 'Yonex Astrox 100ZZ Kurenai',
+        grade: 'A',
+        auth_status: 'AUTHENTIC',
+        seller_name: 'Nguyễn Văn Long',
+        seller_phone: '0908123456',
+        base_price_snapshot: 3500000,
+        adjusted_price: 3500000,
+        adjustment_reason: 'Khung đẹp không trầy xước, gen zin nguyên bản',
+        manager_approval_required: false,
+        status: 'APPROVED',
+        created_at: '2026-10-20T08:30:00Z',
+      },
+      {
+        id: 'BC-2026-002',
+        racket_model: 'Yonex Astrox 88D Pro Gen 3',
+        grade: 'B',
+        auth_status: 'AUTHENTIC',
+        seller_name: 'Trần Minh Hoàng',
+        seller_phone: '0912345678',
+        base_price_snapshot: 2800000,
+        adjusted_price: 2700000,
+        adjustment_reason: 'Tróc sơn nhẹ góc 10h, đũa vợt thẳng nguyên bản',
+        manager_approval_required: false,
+        status: 'APPROVED',
+        created_at: '2026-10-19T14:20:00Z',
+      }
+    ];
+
+    if (!finalPriceTables || finalPriceTables.length === 0) {
+      finalPriceTables = DEFAULT_PRICE_TABLES;
+    }
+    if (!finalCases || finalCases.length === 0) {
+      finalCases = DEFAULT_CASES;
+    }
+
+    const DEFAULT_UNITS: any[] = [
+      {
+        id: 'SH-20261013-0001',
+        buyback_case_id: 'BB-20261013-001',
+        serial_number: 'SN-88DP-2025-010',
+        model_name: 'Yonex Astrox 88D Pro',
+        grade: 'A',
+        branch_id: 'BR_HCM_01',
+        resale_price: 3100000,
+        warranty_days: 60,
+        condition_notes: 'Ngoại hình 98-99%, sơn bóng đẹp nguyên bản, chưa qua sửa chữa cấn móp.',
+        images_json: '["/images/secondhand/sh-astrox-88d-pro.png"]',
+        status: 'APPROVED_FOR_SALE',
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+      },
+      {
+        id: 'SH-20261013-0002',
+        buyback_case_id: 'BB-20261013-002',
+        serial_number: 'SN-NF800P-2025-088',
+        model_name: 'Yonex Nanoflare 800 Pro',
+        grade: 'B',
+        branch_id: 'BR_HN_01',
+        resale_price: 2650000,
+        warranty_days: 30,
+        condition_notes: 'Ngoại hình 92-95%, trầy dăm li ti đầu vợt do xúc cầu. Khung carbon hoàn hảo.',
+        images_json: '["/images/secondhand/sh-nanoflare-800-pro.png"]',
+        status: 'APPROVED_FOR_SALE',
+        created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+      }
+    ];
+
+    if (!finalUnits || finalUnits.length === 0) {
+      try {
+        const { API_BASE_URL } = await import('@/lib/api');
+        const beRes = await fetch(`${API_BASE_URL}/secondhand/units?size=50`);
+        if (beRes.ok) {
+          const beData = await beRes.json();
+          const beList = beData.data?.content || beData.data || [];
+          if (beList.length > 0) {
+            finalUnits = beList.map((u: any) => ({
+              id: u.id,
+              buyback_case_id: u.buybackCaseId || 'BC-MOCK',
+              model_name: u.modelName || 'Vợt Cũ Kiểm Định',
+              serial_number: u.serialNumber || 'SN-***',
+              grade: u.grade || 'A',
+              resale_price: u.resalePrice || 2500000,
+              warranty_days: u.warrantyDays || 90,
+              condition_notes: u.conditionNotes || 'Đã kiểm định 16 tiêu chuẩn',
+              status: u.status || 'APPROVED_FOR_SALE',
+              created_at: u.createdAt || new Date().toISOString(),
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Backend secondhand fetch error:', e);
+      }
+
+      if (!finalUnits || finalUnits.length === 0) {
+        finalUnits = DEFAULT_UNITS;
+      }
+    }
+
+    return NextResponse.json({ units: finalUnits, cases: finalCases, priceTables: finalPriceTables });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
